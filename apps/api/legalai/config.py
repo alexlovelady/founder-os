@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     w_lexical: float = 1.0
     rrf_k: int = 60
     max_chunks_per_document: int = 3
+    authority_scale: float = 1.0  # 0 disables authority-aware scoring
 
     default_privacy_mode: str = "private"
 

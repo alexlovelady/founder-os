@@ -9,7 +9,13 @@ export type Matter = {
 }
 export type Version = { id: string; version_number: number; filename: string; content_type: string; size_bytes: number; sha256: string; status: string; created_at: string
   parse_status: string; parse_error: string | null; page_count: number | null; embed_status: string; embedding_model: string | null }
-export type Doc = { id: string; matter_id: string; title: string; doc_type: string; current_version: Version | null; job_id?: string }
+export type Authority = {
+  authority_type: string; jurisdiction: string; court: string; court_level: string; citation: string
+  document_date: string | null; effective_from: string | null; effective_to: string | null; precedential_status: string
+  source_url: string; official_source: boolean; superseded: boolean; metadata_source: 'detected' | 'user'
+}
+export const AUTHORITY_TYPES = ['user_document', 'constitution', 'statute', 'regulation', 'administrative_guidance', 'court_opinion', 'court_rule', 'agency_material', 'official_form', 'treatise', 'template']
+export type Doc = { id: string; matter_id: string; title: string; doc_type: string; authority: Authority; current_version: Version | null; job_id?: string }
 export type Job = {
   id: string; job_type: string; state: string; status_message: string; matter_id: string | null; attempts: number
   needs_fallback_approval: boolean; provider_used: string | null; model_used: string | null

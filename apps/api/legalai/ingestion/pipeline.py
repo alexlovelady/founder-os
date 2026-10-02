@@ -12,6 +12,7 @@ from ..privacy import (assert_embedding_budget, assert_external_embedding_allowe
 from ..providers.embeddings import build_embedding_provider
 from ..storage import get_storage, sha256_hex
 from .chunking import Chunk, chunk_document
+from .detect import AUTHORITY_FOR_CLASS, classify, detect_date, detect_jurisdiction
 from .parsers import NeedsOcr, ParseError, parse_document
 
 
@@ -58,6 +59,11 @@ def ingest_version(version_id: uuid.UUID, settings: Settings) -> dict:
         db.execute(delete(DocumentChunk).where(DocumentChunk.version_id == v.id))
         v.extracted_text, v.page_count = parsed.text, parsed.page_count
         v.parse_status, v.parse_error, v.embed_status, v.embedding_model = "parsed", None, "pending", None
+        if doc.metadata_source == "detected":  # never overwrite what the user entered
+            doc.doc_type = classify(parsed.text)
+            doc.authority_type = AUTHORITY_FOR_CLASS[doc.doc_type]
+            doc.jurisdiction = detect_jurisdiction(parsed.text)
+            doc.document_date = detect_date(parsed.text)
         if chunks:
             db.execute(insert(DocumentChunk), [
                 dict(id=uuid.uuid4(), matter_id=matter.id, document_id=doc.id, version_id=v.id, chunk_index=c.index,

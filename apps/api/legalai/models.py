@@ -96,6 +96,20 @@ class Document(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(500))
     doc_type: Mapped[str] = mapped_column(String(50), default="user_document")
     current_version_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    # Authority metadata (spec section 12). 'detected' values are heuristic suggestions; user edits win.
+    authority_type: Mapped[str] = mapped_column(String(40), default="user_document")
+    jurisdiction: Mapped[str] = mapped_column(String(100), default="")
+    court: Mapped[str] = mapped_column(String(200), default="")
+    court_level: Mapped[str] = mapped_column(String(30), default="")  # supreme | appellate | trial | agency
+    citation_text: Mapped[str] = mapped_column(String(300), default="")
+    document_date: Mapped[date | None] = mapped_column(Date)
+    effective_from: Mapped[date | None] = mapped_column(Date)
+    effective_to: Mapped[date | None] = mapped_column(Date)
+    precedential_status: Mapped[str] = mapped_column(String(30), default="")
+    source_url: Mapped[str] = mapped_column(String(1000), default="")
+    official_source: Mapped[bool] = mapped_column(Boolean, default=False)
+    superseded: Mapped[bool] = mapped_column(Boolean, default=False)
+    metadata_source: Mapped[str] = mapped_column(String(20), default="detected")  # detected | user
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
@@ -221,3 +235,28 @@ class ChunkEmbedding(Base):
     text_hash: Mapped[str] = mapped_column(String(64))
     embedding = mapped_column(Vector(EMBEDDING_DIM))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ResearchRun(Base):
+    """Auditable record of one research answer (spec section 24)."""
+    __tablename__ = "research_runs"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    question: Mapped[str] = mapped_column(Text)
+    jurisdiction: Mapped[str] = mapped_column(String(100), default="")
+    as_of: Mapped[date | None] = mapped_column(Date)
+    depth: Mapped[str] = mapped_column(String(10), default="auto")
+    status: Mapped[str] = mapped_column(String(20), default="queued")  # queued | complete | failed
+    privacy_mode: Mapped[str] = mapped_column(String(20), default="")
+    provider: Mapped[str | None] = mapped_column(String(60))
+    model: Mapped[str | None] = mapped_column(String(200))
+    prompt_version: Mapped[str] = mapped_column(String(40), default="")
+    answer: Mapped[str | None] = mapped_column(Text)
+    result: Mapped[dict | None] = mapped_column(JSONB)
+    retrieval: Mapped[dict | None] = mapped_column(JSONB)
+    validation: Mapped[dict | None] = mapped_column(JSONB)
+    output_hash: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

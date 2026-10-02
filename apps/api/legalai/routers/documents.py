@@ -1,7 +1,10 @@
 import uuid
+from datetime import date
+from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DbSession
 
@@ -16,6 +19,15 @@ from .. import storage
 router = APIRouter(prefix="/api", tags=["documents"])
 
 
+def authority_out(d: Document) -> dict:
+    iso = lambda x: x.isoformat() if x else None
+    return {"authority_type": d.authority_type, "jurisdiction": d.jurisdiction, "court": d.court,
+            "court_level": d.court_level, "citation": d.citation_text, "document_date": iso(d.document_date),
+            "effective_from": iso(d.effective_from), "effective_to": iso(d.effective_to),
+            "precedential_status": d.precedential_status, "source_url": d.source_url,
+            "official_source": d.official_source, "superseded": d.superseded, "metadata_source": d.metadata_source}
+
+
 def _ver_out(v: DocumentVersion) -> dict:
     return {"id": str(v.id), "version_number": v.version_number, "filename": v.original_filename,
             "content_type": v.content_type, "size_bytes": v.size_bytes, "sha256": v.sha256, "status": v.status,
@@ -26,6 +38,7 @@ def _ver_out(v: DocumentVersion) -> dict:
 
 def _doc_out(d: Document, v: DocumentVersion | None) -> dict:
     return {"id": str(d.id), "matter_id": str(d.matter_id), "title": d.title, "doc_type": d.doc_type,
+            "authority": authority_out(d),
             "current_version": _ver_out(v) if v else None}
 
 
@@ -132,3 +145,42 @@ def reindex(document_id: uuid.UUID, user: User = Depends(current_user), db: DbSe
           object_id=d.id)
     db.commit()
     return {"job_id": str(job.id)}
+
+
+AUTHORITY_TYPES = ("user_document", "constitution", "statute", "regulation", "administrative_guidance", "court_opinion",
+                   "court_rule", "agency_material", "official_form", "treatise", "template")
+
+
+class AuthorityPatch(BaseModel):
+    title: str | None = Field(None, max_length=500)
+    doc_type: str | None = Field(None, max_length=50)
+    authority_type: Literal[AUTHORITY_TYPES] | None = None
+    jurisdiction: str | None = Field(None, max_length=100)
+    court: str | None = Field(None, max_length=200)
+    court_level: Literal["", "supreme", "appellate", "trial", "agency"] | None = None
+    citation: str | None = Field(None, max_length=300)
+    document_date: date | None = None
+    effective_from: date | None = None
+    effective_to: date | None = None
+    precedential_status: Literal["", "precedential", "non_precedential"] | None = None
+    source_url: str | None = Field(None, max_length=1000)
+    official_source: bool | None = None
+    superseded: bool | None = None
+
+
+@router.patch("/documents/{document_id}/authority")
+def patch_authority(document_id: uuid.UUID, body: AuthorityPatch, user: User = Depends(current_user),
+                    db: DbSession = Depends(get_db)):
+    d = _load_doc(db, user, document_id, "editor")
+    changes = body.model_dump(exclude_unset=True)
+    for k, v in changes.items():
+        if v is None:
+            if k in ("official_source", "superseded"):
+                continue
+            v = None if k in ("document_date", "effective_from", "effective_to") else ""
+        setattr(d, "citation_text" if k == "citation" else k, v)
+    d.metadata_source = "user"
+    audit(db, "document.authority_updated", user_id=user.id, matter_id=d.matter_id, object_type="document",
+          object_id=d.id, fields=sorted(changes))
+    db.commit()
+    return _doc_out(d, db.get(DocumentVersion, d.current_version_id) if d.current_version_id else None)

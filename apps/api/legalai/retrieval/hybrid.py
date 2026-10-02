@@ -5,6 +5,7 @@ Authority metadata (jurisdiction, court level, superseded) joins the score in Ph
 `authority_weight` is the hook. All weights come from Settings and are meant to be benchmarked."""
 import re
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Protocol
 
 from sqlalchemy import and_, func, literal, or_, select
@@ -15,6 +16,7 @@ from ..models import ChunkEmbedding, Document, DocumentChunk, DocumentVersion, M
 from ..privacy import embedding_model_id, embedding_route
 from ..providers.base import ProviderError, ProviderUnavailable
 from ..providers.embeddings import build_embedding_provider
+from .authority import AuthorityAssessment, assess
 
 CANDIDATES = 50
 WORD = re.compile(r"[A-Za-z0-9]{2,}")
@@ -25,12 +27,17 @@ STOP = {"the", "and", "for", "are", "was", "what", "which", "that", "this", "wit
 @dataclass
 class Hit:
     chunk: DocumentChunk
-    document_title: str
+    doc: Document
     version_number: int
     score: float = 0.0
     sem_rank: int | None = None
     lex_rank: int | None = None
     cite_id: str = ""
+    authority: AuthorityAssessment = field(default_factory=AuthorityAssessment)
+
+    @property
+    def document_title(self) -> str:
+        return self.doc.title
 
 
 @dataclass
@@ -52,8 +59,8 @@ class NoopReranker:
         return hits
 
 
-def authority_weight(hit: Hit) -> float:
-    return 0.0  # Phase 4: jurisdiction match, court hierarchy, effective dates, superseded penalty
+def authority_weight(hit: Hit, settings: Settings) -> float:
+    return hit.authority.bonus_units * settings.authority_scale / (settings.rrf_k + 1)
 
 
 def _or_query(q: str) -> str:
@@ -68,7 +75,7 @@ def _scope(matter_id):
                 DocumentVersion.id == DocumentChunk.version_id)
 
 
-def lexical_search(db: DbSession, matter_id, query: str, n: int = CANDIDATES) -> list[tuple[DocumentChunk, str, int]]:
+def lexical_search(db: DbSession, matter_id, query: str, n: int = CANDIDATES) -> list[tuple[DocumentChunk, Document, int]]:
     expr = _or_query(query)
     if not expr:
         return []
@@ -76,20 +83,20 @@ def lexical_search(db: DbSession, matter_id, query: str, n: int = CANDIDATES) ->
     q_si = func.to_tsquery("simple", expr)
     rank = func.greatest(func.ts_rank_cd(DocumentChunk.fts, q_en), func.ts_rank_cd(DocumentChunk.fts_simple, q_si))
     rows = db.execute(
-        select(DocumentChunk, Document.title, DocumentVersion.version_number)
+        select(DocumentChunk, Document, DocumentVersion.version_number)
         .where(_scope(matter_id), or_(DocumentChunk.fts.op("@@")(q_en), DocumentChunk.fts_simple.op("@@")(q_si)))
         .order_by(rank.desc()).limit(n)).all()
-    return [(c, t, v) for c, t, v in rows]
+    return [(c, d, v) for c, d, v in rows]
 
 
 def semantic_search(db: DbSession, matter_id, vector: list[float], model_id: str, n: int = CANDIDATES):
     dist = ChunkEmbedding.embedding.cosine_distance(vector)
     rows = db.execute(
-        select(DocumentChunk, Document.title, DocumentVersion.version_number)
+        select(DocumentChunk, Document, DocumentVersion.version_number)
         .join(ChunkEmbedding, ChunkEmbedding.chunk_id == DocumentChunk.id)
         .where(_scope(matter_id), ChunkEmbedding.model == model_id)
         .order_by(dist).limit(n)).all()
-    return [(c, t, v) for c, t, v in rows]
+    return [(c, d, v) for c, d, v in rows]
 
 
 def unembedded_count(db: DbSession, matter_id, model_id: str) -> int:
@@ -116,12 +123,13 @@ def diversify(hits: list[Hit], k: int, per_doc: int) -> list[Hit]:
 
 async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Settings, *, k: int = 8,
                         mode: str = "hybrid", variants: list[str] | None = None, provider=None,
-                        reranker: Reranker | None = None) -> SearchResult:
+                        reranker: Reranker | None = None, jurisdictions: list[str] | None = None,
+                        as_of: date | None = None, require_current: bool = False) -> SearchResult:
     queries = [query] + [v for v in (variants or []) if v.strip() and v != query]
     warnings: list[str] = []
     model_id = embedding_model_id(matter, settings)
     res = SearchResult([], warnings, model_id, mode)
-    lists: list[tuple[str, list[tuple[DocumentChunk, str, int]]]] = []
+    lists: list[tuple[str, list[tuple[DocumentChunk, Document, int]]]] = []
 
     if mode in ("hybrid", "lexical"):
         for q in queries:
@@ -148,14 +156,21 @@ async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Set
     fused: dict = {}
     for kind, rows in lists:
         w = settings.w_semantic if kind == "sem" else settings.w_lexical
-        for rank, (c, title, ver) in enumerate(rows, start=1):
-            h = fused.setdefault(c.id, Hit(c, title, ver))
+        for rank, (c, doc, ver) in enumerate(rows, start=1):
+            h = fused.setdefault(c.id, Hit(c, doc, ver))
             h.score += w / (settings.rrf_k + rank)
             if kind == "sem":
                 h.sem_rank = min(h.sem_rank or rank, rank)
             else:
                 h.lex_rank = min(h.lex_rank or rank, rank)
-    hits = sorted(fused.values(), key=lambda h: h.score + authority_weight(h), reverse=True)
+    for h in fused.values():
+        h.authority = assess(h.doc, matter.jurisdiction, as_of, jurisdictions)
+    candidates = list(fused.values())
+    if require_current:  # hard filter: only authority in force on the date, never superseded
+        candidates = [h for h in candidates if not ({"superseded", "not_in_effect_on_date"} & set(h.authority.flags))]
+    if jurisdictions:    # hard filter: drop known mismatches; unknown jurisdiction stays, flagged
+        candidates = [h for h in candidates if "jurisdiction_mismatch" not in h.authority.flags]
+    hits = sorted(candidates, key=lambda h: h.score + authority_weight(h, settings), reverse=True)
     hits = (reranker or NoopReranker()).rerank(query, hits)
     hits = diversify(hits, k, settings.max_chunks_per_document)
     for i, h in enumerate(hits, start=1):

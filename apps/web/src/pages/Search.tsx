@@ -6,6 +6,7 @@ export type Hit = {
   cite_id: string; chunk_id: string; document_id: string; document_title: string; version_number: number
   page: number | null; page_end: number | null; heading_path: string[]; section_number: string
   text: string; score: number; semantic_rank: number | null; lexical_rank: number | null
+  authority_type?: string; jurisdiction?: string; flags?: string[]
 }
 type SearchResp = { hits: Hit[]; warnings: string[]; embedding_model: string; mode: string }
 type ChunkCtx = Hit & { char_start: number; char_end: number; before: string; after: string; is_current_version: boolean }
@@ -66,7 +67,7 @@ export default function Search({ m }: { m: Matter }) {
             style={{ textAlign: 'left', font: 'inherit', color: 'inherit', cursor: 'pointer' }} aria-label={`Open ${h.cite_id}`}>
             <div className="row between wrap"><div className="row"><span className="badge accent mono">{h.cite_id}</span><strong>{h.document_title}</strong>
               <span className="muted small">v{h.version_number}</span></div>
-              <div className="row">{h.semantic_rank && <span className="badge">semantic #{h.semantic_rank}</span>}{h.lexical_rank && <span className="badge">keyword #{h.lexical_rank}</span>}</div></div>
+              <div className="row wrap" style={{ gap: 4 }}>{h.flags?.map(f => <span key={f} className="badge warn">{f.replace(/_/g, ' ')}</span>)}{h.semantic_rank && <span className="badge">semantic #{h.semantic_rank}</span>}{h.lexical_rank && <span className="badge">keyword #{h.lexical_rank}</span>}</div></div>
             <div className="muted small" style={{ margin: '4px 0 8px' }}>{where(h) || 'No location info'}</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{h.text.length > 420 ? h.text.slice(0, 420) + '…' : h.text}</div>
           </button>))}</div>)}

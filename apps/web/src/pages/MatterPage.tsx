@@ -1,10 +1,11 @@
 import { Fragment, useRef, useState, type FormEvent } from 'react'
 import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom'
-import { api, fmtBytes, fmtTime, PRIVACY_HELP, useQuery, type AuditEv, type Doc, type Job, type Matter, type Version } from '../api'
+import { api, AUTHORITY_TYPES, fmtBytes, fmtTime, PRIVACY_HELP, useQuery, type AuditEv, type Authority, type Doc, type Job, type Matter, type Version } from '../api'
 import { Empty, Err, JobBadge, Loading, Md, PrivacyBadge, icons } from '../ui'
 import { JobTable } from './JobsPage'
 import { PrivacyPicker } from './Matters'
 import Search from './Search'
+import Research from './Research'
 
 export default function MatterPage() {
   const { id } = useParams()
@@ -29,7 +30,8 @@ export default function MatterPage() {
         <NavLink to={base} end className={tab}>Overview</NavLink>
         <NavLink to={`${base}/documents`} className={tab}>Documents</NavLink>
         <NavLink to={`${base}/search`} className={tab}>Search</NavLink>
-        <NavLink to={`${base}/research`} className={tab}>Ask the model</NavLink>
+        <NavLink to={`${base}/research`} className={tab}>Research</NavLink>
+        <NavLink to={`${base}/chat`} className={tab}>Chat (no sources)</NavLink>
         <NavLink to={`${base}/jobs`} className={tab}>Jobs</NavLink>
         <NavLink to={`${base}/audit`} className={tab}>Audit</NavLink>
       </nav>
@@ -38,6 +40,7 @@ export default function MatterPage() {
         <Route path="documents" element={<Documents m={m} />} />
         <Route path="search" element={<Search m={m} />} />
         <Route path="research" element={<Research m={m} />} />
+        <Route path="chat" element={<Chat m={m} />} />
         <Route path="jobs" element={<MatterJobs m={m} />} />
         <Route path="audit" element={<Audit m={m} />} />
       </Routes>
@@ -96,6 +99,7 @@ function Documents({ m }: { m: Matter }) {
   const [busy, setBusy] = useState(false)
   const [over, setOver] = useState(false)
   const [open, setOpen] = useState<string>()
+  const [edit, setEdit] = useState<string>()
   const input = useRef<HTMLInputElement>(null)
   const versionFor = useRef<string | undefined>(undefined)
   const canEdit = m.my_role !== 'viewer'
@@ -129,7 +133,13 @@ function Documents({ m }: { m: Matter }) {
             const v = d.current_version
             return (<Fragment key={d.id}>
               <tr>
-                <td><strong>{d.title}</strong><div className="muted small mono" title="SHA-256">{v?.sha256.slice(0, 16)}…</div></td>
+                <td><strong>{d.title}</strong>
+                  <div className="row wrap" style={{ gap: 4, marginTop: 4 }}>
+                    <span className="badge">{d.authority.authority_type.replace(/_/g, ' ')}</span>
+                    {d.authority.jurisdiction && <span className="badge">{d.authority.jurisdiction}</span>}
+                    {d.authority.superseded && <span className="badge warn">Superseded</span>}
+                    {d.authority.metadata_source === 'detected' && d.authority.jurisdiction && <span className="badge" title="Detected automatically; edit to confirm">auto-detected</span>}</div>
+                  <div className="muted small mono" title="SHA-256">{v?.sha256.slice(0, 16)}…</div></td>
                 <td>v{v?.version_number}</td><td>{v && fmtBytes(v.size_bytes)}</td>
                 <td>{v && <div className="row wrap" style={{ gap: 4 }}>
                   <span className={`badge ${v.status === 'verified' ? 'ok' : v.status === 'rejected' ? 'bad' : 'warn'}`}>{v.status === 'verified' ? 'SHA-256 verified' : v.status}</span>
@@ -137,14 +147,49 @@ function Documents({ m }: { m: Matter }) {
                 <td><div className="row" style={{ justifyContent: 'flex-end' }}>
                   {canEdit && <button className="btn sm" title="Re-run parsing, chunking and embedding" onClick={async () => { await api(`/api/documents/${d.id}/reindex`, { method: 'POST' }); reload() }}>Reindex</button>}
                   {canEdit && <button className="btn sm" onClick={() => { versionFor.current = d.id; input.current?.click() }}>New version</button>}
+                  {canEdit && <button className="btn sm" onClick={() => setEdit(edit === d.id ? undefined : d.id)}>Details</button>}
                   <button className="btn sm" onClick={() => setOpen(open === d.id ? undefined : d.id)}>History</button>
                   {v && <a className="btn sm" href={`/api/documents/${d.id}/versions/${v.id}/download`}>Download</a>}</div></td>
               </tr>
+              {edit === d.id && <tr><td colSpan={5} style={{ background: 'var(--soft)' }}><AuthorityEditor d={d} onSaved={() => { setEdit(undefined); reload() }} /></td></tr>}
               {open === d.id && <tr><td colSpan={5} style={{ background: 'var(--soft)' }}><Versions docId={d.id} /></td></tr>}
             </Fragment>)
           })}</tbody></table></div>}
     </div>
   )
+}
+
+function AuthorityEditor({ d, onSaved }: { d: Doc; onSaved: () => void }) {
+  const [f, setF] = useState<Authority>(d.authority)
+  const [err, setErr] = useState<string>()
+  const set = <K extends keyof Authority>(k: K, v: Authority[K]) => setF({ ...f, [k]: v })
+  async function save(e: FormEvent) {
+    e.preventDefault(); setErr(undefined)
+    try {
+      await api(`/api/documents/${d.id}/authority`, { method: 'PATCH', json: {
+        authority_type: f.authority_type, jurisdiction: f.jurisdiction, court: f.court, court_level: f.court_level, citation: f.citation,
+        document_date: f.document_date || null, effective_from: f.effective_from || null, effective_to: f.effective_to || null,
+        precedential_status: f.precedential_status, source_url: f.source_url, official_source: f.official_source, superseded: f.superseded } })
+      onSaved()
+    } catch (e) { setErr((e as Error).message) }
+  }
+  return (
+    <form className="stack" onSubmit={save}>
+      <div className="muted small">How this document is weighed in research. Jurisdiction and dates are auto-detected on upload; confirm or correct them here.</div>
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+        <label>Authority type<select value={f.authority_type} onChange={e => set('authority_type', e.target.value)}>{AUTHORITY_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}</select></label>
+        <label>Jurisdiction<input value={f.jurisdiction} onChange={e => set('jurisdiction', e.target.value)} placeholder="e.g. Delaware, US-FED" /></label>
+        <label>Document date<input type="date" value={f.document_date ?? ''} onChange={e => set('document_date', e.target.value || null)} /></label>
+        <label>Effective from<input type="date" value={f.effective_from ?? ''} onChange={e => set('effective_from', e.target.value || null)} /></label>
+        <label>Effective to<input type="date" value={f.effective_to ?? ''} onChange={e => set('effective_to', e.target.value || null)} /></label>
+        <label>Court level<select value={f.court_level} onChange={e => set('court_level', e.target.value)}><option value="">—</option><option>supreme</option><option>appellate</option><option>trial</option><option>agency</option></select></label>
+        <label>Formal citation<input value={f.citation} onChange={e => set('citation', e.target.value)} /></label>
+        <label>Source URL<input value={f.source_url} onChange={e => set('source_url', e.target.value)} /></label>
+      </div>
+      <div className="row wrap"><label className="inline"><input type="checkbox" checked={f.superseded} onChange={e => set('superseded', e.target.checked)} />Superseded or no longer current</label>
+        <label className="inline"><input type="checkbox" checked={f.official_source} onChange={e => set('official_source', e.target.checked)} />Official source</label></div>
+      <Err msg={err} /><div><button className="btn primary sm">Save details</button></div>
+    </form>)
 }
 
 function ProcBadges({ v }: { v: Version }) {
@@ -165,7 +210,7 @@ function Versions({ docId }: { docId: string }) {
       <span className="row"><span className="mono muted">{v.sha256.slice(0, 20)}…</span><a href={`/api/documents/${docId}/versions/${v.id}/download`}>Download</a></span></div>))}</div>
 }
 
-function Research({ m }: { m: Matter }) {
+function Chat({ m }: { m: Matter }) {
   const { data, reload } = useQuery(() => api<Job[]>(`/api/jobs?matter_id=${m.id}&limit=50`).then(js => js.filter(j => j.job_type === 'llm_complete').reverse()), [m.id], 3000)
   const [text, setText] = useState('')
   const [role, setRole] = useState<'auto' | 'fast' | 'deep'>('auto')

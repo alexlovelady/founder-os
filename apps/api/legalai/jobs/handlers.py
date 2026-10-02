@@ -6,6 +6,7 @@ import uuid
 from ..config import Settings
 from ..ingestion.pipeline import embed_version, ingest_version
 from ..models import Job
+from ..research.pipeline import run_research
 from ..providers.base import LLMProvider
 from .queue import AUTO_ROLE
 
@@ -41,4 +42,8 @@ async def embed_document(job: Job, provider, settings: Settings) -> dict:
     return await embed_version(uuid.UUID(job.payload["version_id"]), settings)
 
 
-HANDLERS = {"llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}
+async def research(job: Job, provider: LLMProvider, settings: Settings) -> dict:
+    return await run_research(uuid.UUID(job.payload["run_id"]), provider, settings)
+
+
+HANDLERS = {"research": research, "llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}

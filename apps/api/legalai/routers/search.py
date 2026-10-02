@@ -38,7 +38,9 @@ async def search(matter_id: uuid.UUID, body: SearchRequest, user: User = Depends
           chunk_ids=[str(h.chunk.id) for h in r.hits])
     db.commit()
     return {"hits": [{**chunk_out(h.chunk, h.document_title, h.version_number), "cite_id": h.cite_id,
-                      "score": round(h.score, 5), "semantic_rank": h.sem_rank, "lexical_rank": h.lex_rank}
+                      "score": round(h.score, 5), "semantic_rank": h.sem_rank, "lexical_rank": h.lex_rank,
+                      "authority_type": h.doc.authority_type, "jurisdiction": h.doc.jurisdiction,
+                      "authority_label": h.authority.label, "flags": h.authority.flags}
                      for h in r.hits],
             "warnings": r.warnings, "embedding_model": r.embedding_model, "mode": r.mode_used}
 

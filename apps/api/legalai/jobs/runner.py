@@ -14,7 +14,7 @@ from .queue import claim_next, now, reap_stale, transition
 from ..audit import audit
 
 log = logging.getLogger("legalai.worker")
-LLM_JOB_TYPES = {"llm_complete"}
+LLM_JOB_TYPES = {"llm_complete", "research"}
 
 
 async def _primary_online(provider: LLMProvider | None) -> bool:

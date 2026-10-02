@@ -1,7 +1,7 @@
 # Legal AI Platform
 
-Implements `Legal_AI_Railway_Hybrid_Build_Spec.md`. **Status: Phases 1–3 built** (foundation, home GPU path, RAG).
-Phases 4–8 (cited research, contract review, critic, corpus, hardening) are not started.
+Implements `Legal_AI_Railway_Hybrid_Build_Spec.md`. **Status: Phases 1–4 built** (foundation, home GPU path, RAG, cited research).
+Phases 5–8 (contract review, critic, corpus automation, hardening) are not started.
 
 ```
 apps/api            FastAPI app, Postgres models/migrations, auth, matters, documents, jobs, embedded worker
@@ -32,8 +32,16 @@ docs/               Deployment guides
   full-text search fused with weighted reciprocal-rank fusion; citation IDs (`CITE-001`) and a source viewer.
   Local-only and default-private matters never touch the external embedding API.
 
-Not yet: OCR (scans are flagged `needs_ocr`), jurisdiction/date detection and authority ranking (Phase 4),
-citation/quote validation (Phase 4), contract review, backups.
+- Phase 4: heuristic classification and jurisdiction/date detection on upload (user edits always win); authority
+  metadata per document (type, jurisdiction, court level, effective dates, superseded) feeding authority-aware ranking;
+  research workflow (query variants -> hybrid retrieval -> grounded generation) with a fixed prompt that treats
+  documents as untrusted data; citation validation (fake IDs removed and reported, support checks, optional LLM
+  entailment, superseded flags), verbatim quote verification with exact offsets, one automatic correction pass,
+  coverage labels instead of fake confidence scores, and a full audit record per run (`research_runs`).
+  If nothing relevant is retrieved the model is not called at all.
+
+Not yet: OCR (scans are flagged `needs_ocr`), external authority corpora (statutes/cases — Phase 7), contract review,
+second-pass critic, defined-term checks, backups. Relevance weights and validator thresholds are unbenchmarked.
 
 ## Local development
 ```bash

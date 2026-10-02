@@ -38,7 +38,7 @@ def _database():
 @pytest.fixture(autouse=True)
 def _clean():
     with dbmod.engine().begin() as c:
-        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks CASCADE"))
+        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks, research_runs CASCADE"))
     login_limiter.reset()
     get_settings.cache_clear()
     yield
