@@ -106,10 +106,19 @@ def require_admin(user: User = Depends(current_user)) -> User:
     return user
 
 
-def get_matter_access(db: DbSession, user: User, matter_id: uuid.UUID, min_role: str = "viewer") -> tuple[Matter, str]:
+def get_matter_access(db: DbSession, user: User, matter_id: uuid.UUID, min_role: str = "viewer",
+                      allow_library: bool = False) -> tuple[Matter, str]:
     """Matter-level authorization. Admins get NO implicit access to matter content.
     Returns 404 (not 403) for matters the user cannot see, to avoid leaking existence."""
     m = db.get(Matter, matter_id)
+    if m and m.kind == "library" and not m.deleted_at:
+        if not allow_library:
+            raise HTTPException(404, "Matter not found")  # the shared library is reachable only via library/citation/document endpoints
+        if min_role == "viewer":
+            return m, "viewer"
+        if user.role == "admin":
+            return m, "owner"
+        raise HTTPException(403, "Only administrators can change the shared library")
     mem = None
     if m and not m.deleted_at:
         mem = db.scalar(select(MatterMember).where(MatterMember.matter_id == matter_id, MatterMember.user_id == user.id))

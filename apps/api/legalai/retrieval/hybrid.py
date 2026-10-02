@@ -5,7 +5,7 @@ Authority metadata (jurisdiction, court level, superseded) joins the score in Ph
 `authority_weight` is the hook. All weights come from Settings and are meant to be benchmarked."""
 import re
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 from typing import Protocol
 
 from sqlalchemy import and_, func, literal, or_, select
@@ -34,6 +34,8 @@ class Hit:
     lex_rank: int | None = None
     cite_id: str = ""
     authority: AuthorityAssessment = field(default_factory=AuthorityAssessment)
+    retrieved_at: datetime | None = None
+    effective_from: date | None = None
 
     @property
     def document_title(self) -> str:
@@ -68,14 +70,27 @@ def _or_query(q: str) -> str:
     return " | ".join(dict.fromkeys(terms))
 
 
-def _scope(matter_id):
-    """Only chunks of current versions of non-deleted documents in this matter (matter isolation)."""
-    return and_(DocumentChunk.matter_id == matter_id, Document.id == DocumentChunk.document_id,
-                Document.deleted_at.is_(None), Document.current_version_id == DocumentChunk.version_id,
-                DocumentVersion.id == DocumentChunk.version_id)
+def library_ids(db: DbSession) -> list:
+    return list(db.scalars(select(Matter.id).where(Matter.kind == "library", Matter.deleted_at.is_(None))))
 
 
-def lexical_search(db: DbSession, matter_id, query: str, n: int = CANDIDATES) -> list[tuple[DocumentChunk, Document, int]]:
+def _scope(matter_ids: list, as_of: date | None = None):
+    """Chunks of this matter plus the shared public library. User documents: current version only. Library
+    versions carry effective dates, so with `as_of` the version in force on that date is used (historical questions)."""
+    current = Document.current_version_id == DocumentChunk.version_id
+    if as_of is None:
+        version_ok = current
+    else:
+        dated = and_(DocumentVersion.effective_from.isnot(None), DocumentVersion.effective_from <= as_of,
+                     or_(DocumentVersion.effective_to.is_(None), DocumentVersion.effective_to >= as_of))
+        version_ok = or_(dated, and_(current, DocumentVersion.effective_from.is_(None)))
+    return and_(DocumentChunk.matter_id.in_(matter_ids), Document.id == DocumentChunk.document_id,
+                Document.deleted_at.is_(None), version_ok, DocumentVersion.id == DocumentChunk.version_id)
+
+
+def lexical_search(db: DbSession, matter_ids, query: str, n: int = CANDIDATES, as_of: date | None = None
+                   ) -> list[tuple[DocumentChunk, Document, int]]:
+    ids = matter_ids if isinstance(matter_ids, list) else [matter_ids]
     expr = _or_query(query)
     if not expr:
         return []
@@ -84,26 +99,29 @@ def lexical_search(db: DbSession, matter_id, query: str, n: int = CANDIDATES) ->
     rank = func.greatest(func.ts_rank_cd(DocumentChunk.fts, q_en), func.ts_rank_cd(DocumentChunk.fts_simple, q_si))
     rows = db.execute(
         select(DocumentChunk, Document, DocumentVersion.version_number)
-        .where(_scope(matter_id), or_(DocumentChunk.fts.op("@@")(q_en), DocumentChunk.fts_simple.op("@@")(q_si)))
+        .where(_scope(ids, as_of), or_(DocumentChunk.fts.op("@@")(q_en), DocumentChunk.fts_simple.op("@@")(q_si)))
         .order_by(rank.desc()).limit(n)).all()
     return [(c, d, v) for c, d, v in rows]
 
 
-def semantic_search(db: DbSession, matter_id, vector: list[float], model_id: str, n: int = CANDIDATES):
+def semantic_search(db: DbSession, matter_ids, vector: list[float], model_id: str, n: int = CANDIDATES,
+                    as_of: date | None = None):
+    ids = matter_ids if isinstance(matter_ids, list) else [matter_ids]
     dist = ChunkEmbedding.embedding.cosine_distance(vector)
     rows = db.execute(
         select(DocumentChunk, Document, DocumentVersion.version_number)
         .join(ChunkEmbedding, ChunkEmbedding.chunk_id == DocumentChunk.id)
-        .where(_scope(matter_id), ChunkEmbedding.model == model_id)
+        .where(_scope(ids, as_of), ChunkEmbedding.model == model_id)
         .order_by(dist).limit(n)).all()
     return [(c, d, v) for c, d, v in rows]
 
 
-def unembedded_count(db: DbSession, matter_id, model_id: str) -> int:
+def unembedded_count(db: DbSession, matter_ids, model_id: str, as_of: date | None = None) -> int:
+    ids = matter_ids if isinstance(matter_ids, list) else [matter_ids]
     return db.scalar(
         select(func.count()).select_from(DocumentChunk).join(Document, Document.id == DocumentChunk.document_id)
-        .where(DocumentChunk.matter_id == matter_id, Document.deleted_at.is_(None),
-               Document.current_version_id == DocumentChunk.version_id,
+        .join(DocumentVersion, DocumentVersion.id == DocumentChunk.version_id)
+        .where(_scope(ids, as_of),
                ~select(literal(1)).where(ChunkEmbedding.chunk_id == DocumentChunk.id,
                                          ChunkEmbedding.model == model_id).exists())) or 0
 
@@ -130,20 +148,21 @@ async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Set
     model_id = embedding_model_id(matter, settings)
     res = SearchResult([], warnings, model_id, mode)
     lists: list[tuple[str, list[tuple[DocumentChunk, Document, int]]]] = []
+    scope_ids = [matter.id] + [i for i in library_ids(db) if i != matter.id]
 
     if mode in ("hybrid", "lexical"):
         for q in queries:
-            lists.append(("lex", lexical_search(db, matter.id, q)))
+            lists.append(("lex", lexical_search(db, scope_ids, q, as_of=as_of)))
 
     if mode in ("hybrid", "semantic"):
-        missing = unembedded_count(db, matter.id, model_id)
+        missing = unembedded_count(db, scope_ids, model_id, as_of)
         if missing:
             warnings.append(f"{missing} passage(s) are not embedded yet for this matter; semantic coverage is partial.")
         try:
             prov = provider or build_embedding_provider(settings, external=(embedding_route(matter, settings) == "external"))
             for q in queries:
                 vec = await prov.embed_query(q)
-                lists.append(("sem", semantic_search(db, matter.id, vec, model_id)))
+                lists.append(("sem", semantic_search(db, scope_ids, vec, model_id, as_of=as_of)))
             toks = getattr(prov, "tokens_used", 0)
             if prov.external and toks:
                 db.add(ProviderUsage(matter_id=matter.id, provider=prov.name, kind="embedding",
@@ -163,11 +182,16 @@ async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Set
                 h.sem_rank = min(h.sem_rank or rank, rank)
             else:
                 h.lex_rank = min(h.lex_rank or rank, rank)
+    vers = {v.id: v for v in db.scalars(select(DocumentVersion).where(
+        DocumentVersion.id.in_({h.chunk.version_id for h in fused.values()})))} if fused else {}
     for h in fused.values():
         h.authority = assess(h.doc, matter.jurisdiction, as_of, jurisdictions)
+        v = vers.get(h.chunk.version_id)
+        h.retrieved_at = v.source_retrieved_at if v else None
+        h.effective_from = v.effective_from if v else None
     candidates = list(fused.values())
     if require_current:  # hard filter: only authority in force on the date, never superseded
-        candidates = [h for h in candidates if not ({"superseded", "not_in_effect_on_date"} & set(h.authority.flags))]
+        candidates = [h for h in candidates if not ({"superseded", "not_in_effect_on_date", "negative_treatment"} & set(h.authority.flags))]
     if jurisdictions:    # hard filter: drop known mismatches; unknown jurisdiction stays, flagged
         candidates = [h for h in candidates if "jurisdiction_mismatch" not in h.authority.flags]
     hits = sorted(candidates, key=lambda h: h.score + authority_weight(h, settings), reverse=True)

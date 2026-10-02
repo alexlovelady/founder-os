@@ -11,6 +11,8 @@ TYPE_WEIGHT = {"constitution": 4.0, "statute": 3.5, "regulation": 3.0, "court_ru
                "administrative_guidance": 2.0, "agency_material": 2.0, "user_document": 2.0, "official_form": 1.5,
                "treatise": 1.0, "template": 0.5}
 COURT_WEIGHT = {"supreme": 1.5, "appellate": 1.0, "trial": 0.5, "agency": 0.5, "": 0.0}
+NEGATIVE_TREATMENT = {"overruled", "reversed", "vacated", "abrogated", "superseded_by", "repealed"}
+QUESTIONED_TREATMENT = {"questioned", "criticized", "limited", "distinguished_adversely"}
 PRIMARY = {"constitution", "statute", "regulation", "court_rule", "court_opinion"}
 
 
@@ -43,6 +45,13 @@ def assess(doc: Document, matter_jurisdiction: str, as_of: date | None, jurisdic
     if as_of and ((doc.effective_from and doc.effective_from > as_of) or (doc.effective_to and doc.effective_to < as_of)):
         b -= 3.0
         a.flags.append("not_in_effect_on_date")
+    kinds = {t.get("type") for t in (doc.treatment or []) if isinstance(t, dict)}
+    if kinds & NEGATIVE_TREATMENT:
+        b -= 2.5
+        a.flags.append("negative_treatment")
+    elif kinds & QUESTIONED_TREATMENT:
+        b -= 1.0
+        a.flags.append("questioned_treatment")
     if doc.official_source:
         b += 0.25
     a.bonus_units = b

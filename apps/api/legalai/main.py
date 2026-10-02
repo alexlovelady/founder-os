@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 
 from .config import get_settings
 from .worker import start_in_thread
-from .routers import auth, documents, drafting, gpu, jobs, matters, research, review, search
+from .routers import auth, documents, drafting, gpu, jobs, library, matters, research, review, search
 
 
 def create_app() -> FastAPI:
@@ -24,7 +24,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="Legal AI", version="0.1.0", lifespan=lifespan)
     for r in (auth.router, matters.router, documents.router, jobs.router, gpu.router, search.router, research.router,
-              review.router, drafting.router):
+              review.router, drafting.router, library.router):
         app.include_router(r)
 
     @app.get("/healthz")

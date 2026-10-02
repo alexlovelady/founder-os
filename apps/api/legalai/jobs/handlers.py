@@ -4,6 +4,7 @@ Parsing/chunking/embedding handlers arrive in Phase 3."""
 import uuid
 
 from ..config import Settings
+from ..corpus.refresh import refresh_source
 from ..ingestion.pipeline import embed_version, ingest_version
 from ..models import Job
 from ..drafting.pipeline import run_draft, run_redline_generation
@@ -42,11 +43,15 @@ async def ingest_document(job: Job, provider, settings: Settings) -> dict:
 
 
 async def embed_document(job: Job, provider, settings: Settings) -> dict:
-    return await embed_version(uuid.UUID(job.payload["version_id"]), settings)
+    return await embed_version(uuid.UUID(job.payload["version_id"]), settings, route_override=job.payload.get("route"))
 
 
 async def research(job: Job, provider: LLMProvider, settings: Settings) -> dict:
     return await run_research(uuid.UUID(job.payload["run_id"]), provider, settings)
+
+
+async def corpus_refresh(job: Job, provider, settings: Settings) -> dict:
+    return await refresh_source(uuid.UUID(job.payload["source_id"]), settings)
 
 
 async def contract_review(job: Job, provider: LLMProvider, settings: Settings) -> dict:
@@ -65,5 +70,5 @@ async def compare_summary(job: Job, provider: LLMProvider, settings: Settings) -
     return await run_compare_summary(uuid.UUID(job.payload["comparison_id"]), provider, settings)
 
 
-HANDLERS = {"contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
+HANDLERS = {"corpus_refresh": corpus_refresh, "contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
             "compare_summary": compare_summary, "research": research, "llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}

@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     rrf_k: int = 60
     max_chunks_per_document: int = 3
     authority_scale: float = 1.0  # 0 disables authority-aware scoring
+    currentness_days: int = 30    # external authority older than this is reported as 'currentness not verified'
 
     default_privacy_mode: str = "private"
 

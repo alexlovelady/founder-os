@@ -48,7 +48,8 @@ def neutralize(text: str) -> str:
     return re.sub(r"CITE-(\d)", "CITE‑\\1", text)
 
 
-STATUS_LABEL = {"superseded": "SUPERSEDED", "not_in_effect_on_date": "NOT IN EFFECT ON THE RELEVANT DATE",
+STATUS_LABEL = {"negative_treatment": "NEGATIVE TREATMENT RECORDED (overruled, reversed or repealed)", "questioned_treatment": "treatment questioned",
+                "superseded": "SUPERSEDED", "not_in_effect_on_date": "NOT IN EFFECT ON THE RELEVANT DATE",
                 "jurisdiction_mismatch": "DIFFERENT JURISDICTION", "jurisdiction_unknown": "jurisdiction not recorded"}
 
 

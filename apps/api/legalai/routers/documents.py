@@ -100,7 +100,7 @@ def _load_doc(db: DbSession, user: User, document_id: uuid.UUID, role: str = "vi
     d = db.get(Document, document_id)
     if not d or d.deleted_at:
         raise HTTPException(404, "Document not found")
-    get_matter_access(db, user, d.matter_id, role)  # authorization on every object
+    get_matter_access(db, user, d.matter_id, role, allow_library=True)  # authorization on every object
     return d
 
 

@@ -83,7 +83,7 @@ def _problems(v: ValidatedAnswer) -> list[str]:
     return out
 
 
-def coverage_labels(hits, jurisdiction: str, answer_text: str, summary: dict) -> list[dict]:
+def coverage_labels(hits, jurisdiction: str, answer_text: str, summary: dict, currentness_days: int = 30) -> list[dict]:
     if not hits:
         return [{"label": "Insufficient authority coverage", "reason": "No relevant passages were retrieved."}]
     docs = {h.chunk.document_id for h in hits}
@@ -104,9 +104,17 @@ def coverage_labels(hits, jurisdiction: str, answer_text: str, summary: dict) ->
     if not jurisdiction or flagged & {"jurisdiction_unknown", "jurisdiction_mismatch"}:
         out.append({"label": "Jurisdiction uncertain",
                     "reason": "The matter or some sources have no recorded jurisdiction, or a source is from a different one."})
-    if flagged & {"superseded", "not_in_effect_on_date"}:
+    if flagged & {"superseded", "not_in_effect_on_date", "negative_treatment"}:
         out.append({"label": "Superseded or out-of-date sources retrieved",
                     "reason": "Some retrieved sources are marked superseded or were not in effect on the relevant date."})
+    ext_hits = [h for h in hits if h.doc.authority_type != "user_document"]
+    stale = [h for h in ext_hits if not h.retrieved_at or (datetime.now(timezone.utc) - h.retrieved_at).days > currentness_days]
+    if stale:
+        out.append({"label": "Currentness not verified as of the requested date",
+                    "reason": f"{len(stale)} external authority passage(s) have no recent verified retrieval from the official source."})
+    if any(h.doc.court_level or h.doc.authority_type == "court_opinion" for h in ext_hits) and not any(h.doc.treatment for h in ext_hits):
+        out.append({"label": "No treatment data", "reason": "No subsequent-history or citator information is recorded for the cases cited, so "
+                    "whether they remain good law has not been established."})
     m = re.search(r"##\s*Unresolved Facts[^\n]*\n(.*?)(?=\n##|\Z)", answer_text, re.S | re.I)
     if m and m.group(1).strip() and not re.match(r"\W*none\b", m.group(1).strip(), re.I):
         out.append({"label": "Additional facts required", "reason": "The answer lists open facts or assumptions."})
@@ -188,7 +196,7 @@ async def run_research(run_id: uuid.UUID, provider: LLMProvider, settings: Setti
         warnings.append("Citations to sources that were not retrieved were removed from the answer.")
     if summary["quotes_failed"]:
         warnings.append("Some quotations could not be found verbatim in the sources and are flagged.")
-    coverage = coverage_labels(hits, matter_jur, validated.cleaned, summary)
+    coverage = coverage_labels(hits, matter_jur, validated.cleaned, summary, settings.currentness_days)
     out_hash = hashlib.sha256(validated.cleaned.encode()).hexdigest()
 
     with session_scope() as db:

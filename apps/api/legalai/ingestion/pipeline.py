@@ -17,6 +17,15 @@ from .parsers import NeedsOcr, ParseError, parse_document
 
 
 def _enqueue_embed(db, matter: Matter, version_id: uuid.UUID, settings: Settings, user_id=None):
+    if matter.kind == "library":
+        # Public text is embedded under BOTH models so private/local-only matters (local vectors) can search it too.
+        jobs = []
+        if settings.embedding_provider == "external" and settings.embedding_api_key:
+            jobs.append(enqueue(db, "embed_document", matter_id=matter.id, user_id=user_id,
+                                payload={"version_id": str(version_id), "route": "external"}, requires_gpu=False))
+        jobs.append(enqueue(db, "embed_document", matter_id=matter.id, user_id=user_id,
+                            payload={"version_id": str(version_id), "route": "local"}, requires_gpu=True))
+        return jobs[0]
     route = embedding_route(matter, settings)
     return enqueue(db, "embed_document", matter_id=matter.id, user_id=user_id,
                    payload={"version_id": str(version_id)}, requires_gpu=(route == "local"))
@@ -78,13 +87,15 @@ def ingest_version(version_id: uuid.UUID, settings: Settings) -> dict:
         return {"sha256_verified": True, "parse_status": "parsed", "chunks": len(chunks)}
 
 
-async def embed_version(version_id: uuid.UUID, settings: Settings, provider=None) -> dict:
+async def embed_version(version_id: uuid.UUID, settings: Settings, provider=None, route_override: str | None = None) -> dict:
     # Phase 1: decide route, find chunks that still need vectors, reuse cached vectors for identical inputs.
     with session_scope() as db:
         v = db.get(DocumentVersion, version_id)
         matter = db.get(Matter, db.get(Document, v.document_id).matter_id)
-        route = embedding_route(matter, settings)
-        model_id = embedding_model_id(matter, settings)
+        route = route_override or embedding_route(matter, settings)
+        model_id = (f"voyage:{settings.embedding_model}" if route == "external" else f"local:{settings.local_embedding_model}")
+        if route == "external" and not settings.embedding_api_key:
+            return {"skipped": "no external embedding key configured"}
         if route == "external":
             assert_external_embedding_allowed(matter)  # defense in depth; fails the job rather than leaking
             assert_embedding_budget(db, settings)

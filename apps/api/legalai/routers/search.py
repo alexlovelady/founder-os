@@ -52,7 +52,7 @@ def get_chunk(chunk_id: uuid.UUID, context: int = 700, user: User = Depends(curr
     c = db.get(DocumentChunk, chunk_id)
     if not c:
         raise HTTPException(404, "Passage not found")
-    get_matter_access(db, user, c.matter_id)
+    get_matter_access(db, user, c.matter_id, allow_library=True)
     doc, ver = db.get(Document, c.document_id), db.get(DocumentVersion, c.version_id)
     ctx = min(max(context, 0), 3000)
     full = ver.extracted_text or ""
