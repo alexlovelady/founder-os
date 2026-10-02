@@ -16,6 +16,7 @@ COMMON = {"The", "This", "That", "These", "Those", "Each", "Either", "Any", "All
           "Delaware", "State", "United States", "Customer", "Company", "Service", "Services", "Term", "Notice",
           "Payment", "Fees", "Confidential", "Governing Law", "Entire Agreement", "Miscellaneous", "Termination",
           "Indemnification", "Definitions", "Counterparts", "Assignment", "Severability", "Waiver", "Amendment"}
+DETERMINERS = {"This", "The", "That", "These", "Those", "Each", "Either", "Any", "All", "Such", "Neither", "Both", "In", "If", "For", "Upon"}
 MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
           "November", "December"}
 
@@ -38,7 +39,7 @@ def undefined_terms(text: str, min_uses: int = 2) -> list[dict]:
         sentence_start = start == 0 or re.search(r"(?:[.!?:;]|\n)\s*$", text[max(0, start - 3):start]) is not None
         if sentence_start and " " not in t:
             continue
-        if t in COMMON or t.split()[0] in MONTHS or t in MONTHS or len(t) < 4 or t.split()[0] in COMMON:
+        if t in COMMON or t.split()[0] in MONTHS or t in MONTHS or len(t) < 4 or t.split()[0] in DETERMINERS:
             continue
         counts[t] = counts.get(t, 0) + 1
     out = []
