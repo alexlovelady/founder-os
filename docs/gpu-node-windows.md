@@ -9,6 +9,10 @@ ollama pull qwen3:30b
 ollama pull qwen3-embedding:0.6b   # local embeddings (1024-d), used for private/local-only matters
 ollama list
 ```
+**Set the context window.** Ollama defaults to a 4096-token context on a 16 GB GPU, which silently truncates long prompts
+(research with ten passages, contract review). Set `OLLAMA_CONTEXT_LENGTH=16384` as a user environment variable and restart Ollama
+(`setx OLLAMA_CONTEXT_LENGTH 16384`; confirm with `ollama ps`, the CONTEXT column should read 16384).
+
 Ollama listens on `127.0.0.1:11434` by default — leave it that way. Optionally set `OLLAMA_KEEP_ALIVE=10m` so the deep
 model unloads when idle (spec §27).
 

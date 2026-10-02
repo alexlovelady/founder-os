@@ -8,10 +8,15 @@ from .corpus.refresh import enqueue_due_refreshes
 from .jobs.runner import mark_stale_nodes, process_one
 
 
+LAST_TICK = 0.0  # monotonic time of the last worker loop pass (read by /api/admin/health)
+
+
 async def main(stop: "threading.Event | None" = None) -> None:
     s = get_settings()
+    global LAST_TICK
     last_sched = 0.0
     while not (stop and stop.is_set()):
+        LAST_TICK = time.monotonic()
         try:
             if time.monotonic() - last_sched > 300:  # scheduled corpus refresh check, every 5 minutes
                 last_sched = time.monotonic()

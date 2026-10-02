@@ -6,6 +6,9 @@ import { JobTable } from './JobsPage'
 import { PrivacyPicker } from './Matters'
 import Search from './Search'
 import Research from './Research'
+import Contracts from './Contracts'
+import Draft from './Draft'
+import Timeline from './Timeline'
 
 export default function MatterPage() {
   const { id } = useParams()
@@ -31,6 +34,9 @@ export default function MatterPage() {
         <NavLink to={`${base}/documents`} className={tab}>Documents</NavLink>
         <NavLink to={`${base}/search`} className={tab}>Search</NavLink>
         <NavLink to={`${base}/research`} className={tab}>Research</NavLink>
+        <NavLink to={`${base}/contracts`} className={tab}>Contracts</NavLink>
+        <NavLink to={`${base}/draft`} className={tab}>Drafting</NavLink>
+        <NavLink to={`${base}/timeline`} className={tab}>Timeline</NavLink>
         <NavLink to={`${base}/chat`} className={tab}>Chat (no sources)</NavLink>
         <NavLink to={`${base}/jobs`} className={tab}>Jobs</NavLink>
         <NavLink to={`${base}/audit`} className={tab}>Audit</NavLink>
@@ -40,6 +46,9 @@ export default function MatterPage() {
         <Route path="documents" element={<Documents m={m} />} />
         <Route path="search" element={<Search m={m} />} />
         <Route path="research" element={<Research m={m} />} />
+        <Route path="contracts" element={<Contracts m={m} />} />
+        <Route path="draft" element={<Draft m={m} />} />
+        <Route path="timeline" element={<Timeline m={m} />} />
         <Route path="chat" element={<Chat m={m} />} />
         <Route path="jobs" element={<MatterJobs m={m} />} />
         <Route path="audit" element={<Audit m={m} />} />

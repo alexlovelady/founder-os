@@ -1,7 +1,6 @@
 # Legal AI Platform
 
-Implements `Legal_AI_Railway_Hybrid_Build_Spec.md`. **Status: Phases 1–4 built** (foundation, home GPU path, RAG, cited research).
-Phases 5–8 (contract review, critic, corpus automation, hardening) are not started.
+Implements `Legal_AI_Railway_Hybrid_Build_Spec.md`. **Status: Phases 1–8 built.** Remaining work is operational: real-world benchmarking, OCR, malware scanning and scheduled backups.
 
 ```
 apps/api            FastAPI app, Postgres models/migrations, auth, matters, documents, jobs, embedded worker
@@ -40,8 +39,23 @@ docs/               Deployment guides
   coverage labels instead of fake confidence scores, and a full audit record per run (`research_runs`).
   If nothing relevant is retrieved the model is not called at all.
 
-Not yet: OCR (scans are flagged `needs_ocr`), external authority corpora (statutes/cases — Phase 7), contract review,
-second-pass critic, defined-term checks, backups. Relevance weights and validator thresholds are unbenchmarked.
+- Phase 5: contract review (clause units -> structured extraction -> deterministic checks for missing topics, undefined/unused
+  defined terms and broken cross-references -> issue assessment with verified quotes), playbooks, obligation/deadline extraction
+  (no reminders are created), redlines whose original text is always the stored clause, word-level diffs, clause-aligned version
+  comparison with figure-change detection, and drafting with placeholders, assumptions and a list of every specific the user did
+  not supply.
+- Phase 6: second-pass critic whose findings are verified in code (location must exist, no new law, no unknown IDs) plus
+  deterministic conflict, jurisdiction and currentness detectors.
+- Phase 7: shared authority library (eCFR API and official https URLs, SSRF-safe), scheduled refresh, hashed versions with
+  effective dates so questions tied to an earlier date use the text then in force, recorded treatment (never inferred),
+  "currentness not verified" and "no treatment data" labels.
+- Phase 8: security headers, rate limits, request IDs, admin health/metrics/users, backup + restore verification
+  (`scripts/backup.py`, `docs/backup.md`), benchmark suite with regression baseline (`benchmarks/`), network-guard privacy
+  tests, and a security review (`docs/security.md`).
+
+Not yet / honest limits: OCR (scans are flagged `needs_ocr`), malware scanning, MFA, scheduled backups, citator data, and the
+benchmark sets are small (39 retrieval questions, 197 adversarial validator cases) and use a stand-in embedder by default.
+Relevance weights and validator thresholds are tuned only against those sets.
 
 ## Local development
 ```bash

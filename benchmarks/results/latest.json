@@ -1,0 +1,29 @@
+{
+  "run_at": "2026-10-02T21:35:33.897595+00:00",
+  "metrics": {
+    "retrieval_hybrid_recall_at_1": 0.6923,
+    "retrieval_hybrid_recall_at_5": 1.0,
+    "retrieval_lexical_recall_at_1": 0.7179,
+    "retrieval_lexical_recall_at_5": 0.9487,
+    "retrieval_semantic_recall_at_1": 0.641,
+    "retrieval_semantic_recall_at_5": 0.9231,
+    "retrieval_recall_at_5": 1.0,
+    "retrieval_mrr": 0.8376,
+    "valid_quote_accepted": 1.0,
+    "citation_fabrication_rejected": 1.0,
+    "quote_mutation_detected": 1.0,
+    "wrong_source_flagged": 1.0,
+    "uncited_claim_flagged": 1.0,
+    "adversarial_cases": 197.0
+  },
+  "thresholds": {
+    "retrieval_recall_at_5": 0.85,
+    "retrieval_mrr": 0.6,
+    "citation_fabrication_rejected": 1.0,
+    "quote_mutation_detected": 1.0,
+    "valid_quote_accepted": 0.98,
+    "wrong_source_flagged": 0.85,
+    "uncited_claim_flagged": 1.0
+  },
+  "embedder": "fake"
+}

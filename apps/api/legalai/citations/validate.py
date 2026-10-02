@@ -102,6 +102,21 @@ def _is_substantive(sentence: str) -> bool:
             and not re.match(r"(?i)^none", s))
 
 
+def split_line(line: str) -> list[str]:
+    """Sentence split that never cuts inside a quotation, so a quoted passage spanning several sentences stays whole."""
+    out, start = [], 0
+    for m in SENT.finditer(line):
+        before = line[start:m.start()]
+        straight = before.count('"') % 2 == 1
+        curly = before.count("“") > before.count("”")
+        if straight or curly:
+            continue
+        out.append(line[start:m.start()])
+        start = m.end()
+    out.append(line[start:])
+    return [s for s in out if s.strip()]
+
+
 def split_segments(answer: str) -> list[tuple[str, str, int]]:
     """[(sentence, section, line_no)] preserving order; headings yield ('## Title', title, line_no)."""
     out, section = [], ""
@@ -112,9 +127,8 @@ def split_segments(answer: str) -> list[tuple[str, str, int]]:
             section = line.lstrip("# ").strip().lower()
             out.append((line, section, ln))
             continue
-        for sent in SENT.split(line):
-            if sent.strip():
-                out.append((sent, section, ln))
+        for sent in split_line(line):
+            out.append((sent, section, ln))
     return out
 
 
@@ -216,7 +230,7 @@ def _rebuild(original: str, segs: list[Segment]) -> str:
             next(it).line = ln
             out_lines.append(line)
         else:
-            parts = [s for s in SENT.split(line) if s.strip()]
+            parts = split_line(line)
             group = [next(it) for _ in parts]
             for sg in group:
                 sg.line = ln

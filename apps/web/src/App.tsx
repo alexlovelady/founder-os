@@ -8,6 +8,7 @@ import Matters from './pages/Matters'
 import MatterPage from './pages/MatterPage'
 import JobsPage from './pages/JobsPage'
 import Settings from './pages/Settings'
+import Authorities from './pages/Authorities'
 
 type Auth = { user: User; logout: () => Promise<void> }
 const AuthCtx = createContext<Auth>(null as unknown as Auth)
@@ -36,6 +37,7 @@ function Shell({ children }: { children: ReactNode }) {
         <nav className="nav">
           <NavLink to="/" end>{icons.home}Dashboard</NavLink>
           <NavLink to="/matters">{icons.folder}Matters</NavLink>
+          <NavLink to="/authorities">{icons.folder}Authorities</NavLink>
           <NavLink to="/jobs">{icons.jobs}Jobs</NavLink>
           <NavLink to="/settings">{icons.gear}Settings</NavLink>
         </nav>
@@ -69,6 +71,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/matters" element={<Matters />} />
           <Route path="/matters/:id/*" element={<MatterPage />} />
+          <Route path="/authorities" element={<Authorities />} />
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" />} />

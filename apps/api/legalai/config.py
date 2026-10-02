@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     session_secret: str = ""
     cookie_secure: bool = False
     session_ttl_hours: int = 24 * 7
+    trust_proxy: bool = False  # honour X-Forwarded-For (set true behind Railway's proxy)
 
     run_worker: bool = True  # embed the job worker in the API process
     storage_dir: str = "./data/storage"

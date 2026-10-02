@@ -142,3 +142,12 @@ def test_continuation_sentences_and_quote_only_sentences_are_not_false_alarms():
     assert seg(r, "broad indemnification").status == "uncited"
     assert seg(r, "None identified").status == "n/a"
     assert r.summary()["uncited"] == 1
+
+
+def test_quotes_spanning_several_sentences_are_verified_not_split():
+    ev = [EvidenceItem("CITE-001", "c1", "Initial Term. This Agreement begins on the Effective Date and continues for three years.", "d", "t", 1, 1, 0)]
+    ok = validate_answer('## Analysis\nThe text reads "Initial Term. This Agreement begins on the Effective Date" [CITE-001].', ev)
+    assert [q["status"] for q in ok.quotes] == ["verified"]
+    bad = validate_answer('## Analysis\nThe text reads "Initial Term. This Agreement begins on the Execution Date" [CITE-001].', ev)
+    assert [q["status"] for q in bad.quotes] == ["mismatch"]
+    assert validate_answer('## Analysis\nHe said \u201cFirst part. Second part of the quote.\u201d [CITE-001].', ev).quotes != []

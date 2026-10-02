@@ -20,6 +20,7 @@ which is why the worker runs inside the API process (`RUN_WORKER=true`). No Redi
    DATABASE_URL=postgresql+psycopg://…   (reference the Postgres service variable, change the prefix)
    STORAGE_DIR=/data/storage
    RUN_WORKER=true
+   TRUST_PROXY=true
    GPU_NODE_URL=https://<your tunnel hostname>
    GPU_NODE_TOKEN=<same value as GATEWAY_TOKEN on the PC>
    GPU_NODE_ID=home-5070ti

@@ -2,6 +2,7 @@ import { Fragment, useState, type FormEvent } from 'react'
 import { api, fmtTime, useQuery, type Matter } from '../api'
 import { Empty, Err, Loading } from '../ui'
 import { SourceViewer, where } from './Search'
+import { CriticPanel } from './Contracts'
 
 type Seg = { text: string; section: string; cites: string[]; status: string; issues: string[]; support: number | null; line: number }
 type Quote = { quote: string; status: 'verified' | 'mismatch' | 'user_text'; cite_id?: string; chunk_id?: string; page?: number | null }
@@ -16,13 +17,13 @@ type Run = {
   created_at: string; finished_at: string | null
   validation: { unsupported: number; uncited: number; partial: number; supported: number; fabricated_citations: string[]; quotes_verified: number; quotes_failed: number; superseded_cited: number } | null
   answer?: string; model?: string | null; provider?: string | null; prompt_version?: string; output_hash?: string; privacy_mode?: string
-  result?: { segments: Seg[]; quotes: Quote[]; evidence: Evidence[]; coverage: { label: string; reason: string }[]; warnings: string[]; regenerated: boolean }
+  result?: { segments: Seg[]; quotes: Quote[]; evidence: Evidence[]; coverage: { label: string; reason: string }[]; warnings: string[]; regenerated: boolean; critic?: unknown }
   retrieval?: { embedding_model: string; mode: string; chunk_ids: string[]; as_of: string | null }
 }
 
 const FLAG_TEXT: Record<string, string> = {
   superseded: 'Superseded', not_in_effect_on_date: 'Not in effect on date', jurisdiction_mismatch: 'Different jurisdiction',
-  jurisdiction_unknown: 'Jurisdiction not recorded',
+  jurisdiction_unknown: 'Jurisdiction not recorded', negative_treatment: 'Negative treatment recorded', questioned_treatment: 'Treatment questioned',
 }
 const ISSUE_TEXT: Record<string, string> = {
   claim_without_citation: 'No citation for this statement.', cited_source_does_not_support_claim: 'The cited source does not appear to support this statement.',
@@ -97,6 +98,7 @@ function RunView({ id, evidenceOpen }: { id: string; evidenceOpen: (chunkId: str
           {v.fabricated_citations.length > 0 && <span style={{ color: 'var(--bad)' }}>✗ {v.fabricated_citations.length} fake citation(s) removed</span>}
           <span>Quotes: {v.quotes_verified} verified{v.quotes_failed > 0 && <b style={{ color: 'var(--bad)' }}>, {v.quotes_failed} NOT verbatim</b>}</span>
         </div></div>
+      <CriticPanel critic={r.critic} />
       {r.quotes.length > 0 && <div className="card stack" style={{ gap: 6 }}><h3>Quotations</h3>
         {r.quotes.map((q, i) => (
           <div key={i} className="row small" style={{ alignItems: 'flex-start' }}>
