@@ -69,3 +69,8 @@ def test_topics_missing_and_type_detection():
 def test_key_figures():
     f = key_figures(DOC)
     assert "$50,000" in f.money and any("30" in d for d in f.durations) and "1.5%" in f.percents
+
+
+def test_generic_phrases_starting_with_common_words_are_not_flagged_as_undefined():
+    t = "This Agreement applies. This Agreement ends. The Parties agree. The Parties sign. Each Party acts. Each Party signs."
+    assert undefined_terms(t) == []

@@ -38,7 +38,7 @@ def undefined_terms(text: str, min_uses: int = 2) -> list[dict]:
         sentence_start = start == 0 or re.search(r"(?:[.!?:;]|\n)\s*$", text[max(0, start - 3):start]) is not None
         if sentence_start and " " not in t:
             continue
-        if t in COMMON or t.split()[0] in MONTHS or t in MONTHS or len(t) < 4:
+        if t in COMMON or t.split()[0] in MONTHS or t in MONTHS or len(t) < 4 or t.split()[0] in COMMON:
             continue
         counts[t] = counts.get(t, 0) + 1
     out = []
