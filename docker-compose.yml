@@ -1,0 +1,26 @@
+# Local development stack. Ollama and the GPU gateway run natively on Windows.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: legalai
+      POSTGRES_PASSWORD: legalai-dev
+      POSTGRES_DB: legalai
+    ports: ["5442:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legalai"]
+      interval: 5s
+      retries: 10
+  api:
+    build: ./apps/api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://legalai:legalai-dev@db:5432/legalai
+      STORAGE_DIR: /data/storage
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["8000:8000"]
+    volumes: [storage:/data/storage]
+volumes:
+  pgdata:
+  storage:
