@@ -23,6 +23,7 @@ class ResearchRequest(BaseModel):
     as_of: date | None = None
     require_current: bool = False
     depth: Literal["auto", "fast", "deep"] = "auto"
+    critic: bool = True
 
 
 def run_out(r: ResearchRun, job: Job | None, full: bool = True) -> dict:
@@ -49,7 +50,7 @@ def start_research(body: ResearchRequest, user: User = Depends(current_user), db
     run = ResearchRun(matter_id=matter.id, created_by=user.id, question=body.question.strip(),
                       jurisdiction=body.jurisdiction.strip(), as_of=body.as_of or matter.relevant_date,
                       depth=body.depth, privacy_mode=matter.privacy_mode,
-                      retrieval={"require_current": body.require_current})
+                      retrieval={"require_current": body.require_current, "critic": body.critic})
     db.add(run)
     db.flush()
     job = enqueue(db, "research", matter_id=matter.id, user_id=user.id, requires_gpu=True,

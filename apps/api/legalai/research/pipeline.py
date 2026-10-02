@@ -8,8 +8,10 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 
 from ..audit import audit
+from ..critic.critic import run_critic
 from ..citations.validate import (CITE_ID, EvidenceItem, ValidatedAnswer, split_segments, validate_answer)
 from ..config import Settings
+from ..llm_utils import Usage, _json_array, _model, _strip_think
 from ..db import session_scope
 from ..models import Matter, ResearchRun
 from ..providers.base import LLMProvider
@@ -22,10 +24,6 @@ NO_SOURCES = ("No relevant passages were found in this matter's documents, so no
               "Upload the relevant documents or authorities, or rephrase the question.")
 
 
-def _model(provider: LLMProvider, settings: Settings, role: str) -> str:
-    return settings.llm_fallback_model if provider.external and settings.llm_fallback_model else settings.model_for_role(role)
-
-
 def _location(page, page_end, heading_path, section) -> str:
     bits = []
     if page:
@@ -35,30 +33,6 @@ def _location(page, page_end, heading_path, section) -> str:
     if heading_path:
         bits.append(" > ".join(heading_path))
     return " · ".join(bits)
-
-
-def _json_array(text: str):
-    m = re.search(r"\[.*\]", text, re.S)
-    if not m:
-        return None
-    try:
-        v = json.loads(m.group(0))
-        return v if isinstance(v, list) else None
-    except ValueError:
-        return None
-
-
-def _strip_think(text: str) -> str:
-    return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
-
-
-class Usage:
-    def __init__(self):
-        self.prompt = self.completion = 0
-
-    def add(self, r):
-        self.prompt += r.prompt_tokens
-        self.completion += r.completion_tokens
 
 
 async def _variants(provider, settings, question, usage) -> list[str]:
@@ -151,8 +125,9 @@ async def run_research(run_id: uuid.UUID, provider: LLMProvider, settings: Setti
     with session_scope() as db:
         run = db.get(ResearchRun, run_id)
         matter = db.get(Matter, run.matter_id)
+        retrieval_init = dict(run.retrieval or {})
         question, jur, as_of, require_current = (run.question, run.jurisdiction, run.as_of,
-                                          bool((run.retrieval or {}).get("require_current")))
+                                          bool(retrieval_init.get("require_current")))
         matter_info = {"name": matter.name, "description": matter.description}
         matter_jur = jur or matter.jurisdiction
         privacy_mode = matter.privacy_mode
@@ -201,6 +176,13 @@ async def run_research(run_id: uuid.UUID, provider: LLMProvider, settings: Setti
         if verdicts:
             validated = validate_answer(raw, evidence_items, user_text=question, llm_verdicts=verdicts)
 
+    critic_on = bool((retrieval_init or {}).get("critic", True)) and bool(hits)
+    critic = None
+    if critic_on:
+        cited = {c for s in validated.segments for c in s.cites}
+        critic = await run_critic(provider, settings, usage, kind="legal research answer", output_text=validated.cleaned,
+                                  evidence=evidence_dicts, facts=f"{question}\n{matter_info.get('description', '')}",
+                                  flags_cited=[e for e in evidence_dicts if e["cite_id"] in cited])
     summary = validated.summary()
     if validated.fabricated:
         warnings.append("Citations to sources that were not retrieved were removed from the answer.")
@@ -216,7 +198,7 @@ async def run_research(run_id: uuid.UUID, provider: LLMProvider, settings: Setti
         run.answer, run.output_hash = validated.cleaned, out_hash
         run.result = {"segments": [asdict(s) for s in validated.segments], "quotes": validated.quotes,
                       "evidence": evidence_dicts, "coverage": coverage, "warnings": warnings,
-                      "regenerated": regenerated, "variants": variants, "raw_answer": raw if raw != validated.cleaned else None}
+                      "regenerated": regenerated, "variants": variants, "critic": critic, "raw_answer": raw if raw != validated.cleaned else None}
         run.retrieval = {"chunk_ids": [e["chunk_id"] for e in evidence_dicts],
                          "version_ids": sorted({e["version_id"] for e in evidence_dicts}),
                          "embedding_model": emb_model, "mode": mode_used, "k": EVIDENCE_K,

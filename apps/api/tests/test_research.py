@@ -34,6 +34,8 @@ class ScriptedLLM(LLMProvider):
         sys = messages[0]["content"]
         if "alternative search queries" in sys:
             kind, out = "variants", '["terminate without cause notice period"]'
+        elif "skeptical senior lawyer" in messages[-1]["content"]:
+            kind, out = "critic", getattr(self, "critic_out", "[]")
         elif "decide whether the quoted SOURCE" in sys:
             n = sys.count("CLAIM:")
             kind, out = "entail", json.dumps([{"i": i, "verdict": self.verdict} for i in range(1, n + 1)])

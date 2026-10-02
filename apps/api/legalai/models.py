@@ -77,6 +77,7 @@ class Matter(Base, TimestampMixin):
     # Private mode: external embeddings only if the user explicitly enables them.
     external_embedding_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     llm_fallback_mode: Mapped[str] = mapped_column(String(20), default=FallbackMode.disabled.value)
+    kind: Mapped[str] = mapped_column(String(20), default="matter")  # matter | library (shared public authorities)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
@@ -110,6 +111,7 @@ class Document(Base, TimestampMixin):
     official_source: Mapped[bool] = mapped_column(Boolean, default=False)
     superseded: Mapped[bool] = mapped_column(Boolean, default=False)
     metadata_source: Mapped[str] = mapped_column(String(20), default="detected")  # detected | user
+    treatment: Mapped[list] = mapped_column(JSONB, default=list)  # [{type, citing, note, date, source}]
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
@@ -125,13 +127,16 @@ class DocumentVersion(Base):
     sha256: Mapped[str] = mapped_column(String(64), index=True)
     storage_key: Mapped[str] = mapped_column(String(600))
     status: Mapped[str] = mapped_column(String(30), default="uploaded")  # uploaded | verified | rejected
+    effective_from: Mapped[date | None] = mapped_column(Date)  # library versions: when this text took effect
+    effective_to: Mapped[date | None] = mapped_column(Date)
+    source_retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     parse_status: Mapped[str] = mapped_column(String(20), default="pending")  # pending|parsed|needs_ocr|failed
     parse_error: Mapped[str | None] = mapped_column(Text)
     extracted_text: Mapped[str | None] = mapped_column(Text)
     page_count: Mapped[int | None] = mapped_column(Integer)
     embed_status: Mapped[str] = mapped_column(String(20), default="pending")  # pending|embedded|waiting|failed
     embedding_model: Mapped[str | None] = mapped_column(String(200))
-    uploaded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    uploaded_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -260,3 +265,123 @@ class ResearchRun(Base):
     output_hash: Mapped[str | None] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Playbook(Base, TimestampMixin):
+    """A reviewer's standard positions. Differences from a playbook are flagged for judgment, never called bad."""
+    __tablename__ = "playbooks"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    perspective: Mapped[str] = mapped_column(String(30), default="neutral")  # neutral | customer | vendor | employer | employee
+    rules: Mapped[list] = mapped_column(JSONB, default=list)  # [{topic, preferred, fallback, red_flags, severity}]
+
+
+class ContractReview(Base):
+    __tablename__ = "contract_reviews"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    document_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"))
+    version_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("document_versions.id", ondelete="CASCADE"))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    playbook_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    perspective: Mapped[str] = mapped_column(String(30), default="neutral")
+    status: Mapped[str] = mapped_column(String(20), default="queued")
+    provider: Mapped[str | None] = mapped_column(String(60))
+    model: Mapped[str | None] = mapped_column(String(200))
+    prompt_version: Mapped[str] = mapped_column(String(40), default="")
+    result: Mapped[dict | None] = mapped_column(JSONB)
+    output_hash: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Obligation(Base, TimestampMixin):
+    __tablename__ = "obligations"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    document_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"))
+    version_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True))
+    review_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    party: Mapped[str] = mapped_column(String(300), default="")
+    obligation: Mapped[str] = mapped_column(Text)
+    trigger: Mapped[str] = mapped_column(Text, default="")
+    deadline_text: Mapped[str] = mapped_column(String(300), default="")
+    deadline_date: Mapped[date | None] = mapped_column(Date)
+    recurrence: Mapped[str] = mapped_column(String(200), default="")
+    source_chunk_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    source_clause: Mapped[str] = mapped_column(String(300), default="")
+    confidence: Mapped[str] = mapped_column(String(10), default="medium")  # low | medium | high
+    status: Mapped[str] = mapped_column(String(20), default="open")  # open | done | dismissed
+
+
+class Draft(Base, TimestampMixin):
+    __tablename__ = "drafts"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    mode: Mapped[str] = mapped_column(String(40))
+    doc_type: Mapped[str] = mapped_column(String(100), default="")
+    instructions: Mapped[str] = mapped_column(Text)
+    inputs: Mapped[dict] = mapped_column(JSONB, default=dict)
+    status: Mapped[str] = mapped_column(String(20), default="queued")
+    content: Mapped[str | None] = mapped_column(Text)
+    result: Mapped[dict | None] = mapped_column(JSONB)  # placeholders, assumptions, review notes, unverified specifics
+    provider: Mapped[str | None] = mapped_column(String(60))
+    model: Mapped[str | None] = mapped_column(String(200))
+    prompt_version: Mapped[str] = mapped_column(String(40), default="")
+    output_hash: Mapped[str | None] = mapped_column(String(64))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Redline(Base, TimestampMixin):
+    __tablename__ = "redlines"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    document_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"))
+    version_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True))
+    review_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    chunk_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    clause_label: Mapped[str] = mapped_column(String(300), default="")
+    original: Mapped[str] = mapped_column(Text)  # always the stored source text, never model-supplied
+    proposed: Mapped[str | None] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(Text, default="")
+    risk: Mapped[str] = mapped_column(String(20), default="medium")
+    support: Mapped[dict] = mapped_column(JSONB, default=dict)
+    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending | accepted | rejected
+    created_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
+    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+
+
+class Comparison(Base):
+    __tablename__ = "comparisons"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    version_a: Mapped[uuid.UUID] = mapped_column(ForeignKey("document_versions.id", ondelete="CASCADE"))
+    version_b: Mapped[uuid.UUID] = mapped_column(ForeignKey("document_versions.id", ondelete="CASCADE"))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    result: Mapped[dict] = mapped_column(JSONB, default=dict)
+    summary: Mapped[str | None] = mapped_column(Text)
+    summary_job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CorpusSource(Base, TimestampMixin):
+    """A configured official source for the shared authority library (spec sections 28 and 29)."""
+    __tablename__ = "corpus_sources"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    name: Mapped[str] = mapped_column(String(300))
+    adapter: Mapped[str] = mapped_column(String(40))  # ecfr | url
+    config: Mapped[dict] = mapped_column(JSONB, default=dict)
+    jurisdiction: Mapped[str] = mapped_column(String(100), default="")
+    authority_type: Mapped[str] = mapped_column(String(40), default="regulation")
+    refresh_hours: Mapped[int] = mapped_column(Integer, default=24)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    document_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_status: Mapped[str] = mapped_column(String(300), default="never run")
+    etag: Mapped[str | None] = mapped_column(String(300))

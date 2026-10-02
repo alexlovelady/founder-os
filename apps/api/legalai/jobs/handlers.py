@@ -6,7 +6,10 @@ import uuid
 from ..config import Settings
 from ..ingestion.pipeline import embed_version, ingest_version
 from ..models import Job
+from ..drafting.pipeline import run_draft, run_redline_generation
 from ..research.pipeline import run_research
+from ..review.pipeline import run_review
+from ..review.summary import run_compare_summary
 from ..providers.base import LLMProvider
 from .queue import AUTO_ROLE
 
@@ -46,4 +49,21 @@ async def research(job: Job, provider: LLMProvider, settings: Settings) -> dict:
     return await run_research(uuid.UUID(job.payload["run_id"]), provider, settings)
 
 
-HANDLERS = {"research": research, "llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}
+async def contract_review(job: Job, provider: LLMProvider, settings: Settings) -> dict:
+    return await run_review(uuid.UUID(job.payload["review_id"]), provider, settings)
+
+
+async def draft(job: Job, provider: LLMProvider, settings: Settings) -> dict:
+    return await run_draft(uuid.UUID(job.payload["draft_id"]), provider, settings)
+
+
+async def redline_generation(job: Job, provider: LLMProvider, settings: Settings) -> dict:
+    return await run_redline_generation(uuid.UUID(job.payload["redline_id"]), provider, settings)
+
+
+async def compare_summary(job: Job, provider: LLMProvider, settings: Settings) -> dict:
+    return await run_compare_summary(uuid.UUID(job.payload["comparison_id"]), provider, settings)
+
+
+HANDLERS = {"contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
+            "compare_summary": compare_summary, "research": research, "llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}

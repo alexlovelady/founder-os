@@ -38,7 +38,7 @@ def _database():
 @pytest.fixture(autouse=True)
 def _clean():
     with dbmod.engine().begin() as c:
-        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks, research_runs CASCADE"))
+        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks, research_runs, playbooks, contract_reviews, obligations, drafts, redlines, comparisons, corpus_sources CASCADE"))
     login_limiter.reset()
     get_settings.cache_clear()
     yield
@@ -66,6 +66,9 @@ class Api:
 
     def patch(self, url, **kw):
         return self.c.patch(url, headers=self._h(), **kw)
+
+    def delete(self, url, **kw):
+        return self.c.delete(url, headers=self._h(), **kw)
 
     def get(self, url, **kw):
         return self.c.get(url, **kw)
