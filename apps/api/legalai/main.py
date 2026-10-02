@@ -1,6 +1,9 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 
 from .config import get_settings
 from .worker import start_in_thread
@@ -26,6 +29,19 @@ def create_app() -> FastAPI:
     @app.get("/healthz")
     def healthz():
         return {"ok": True}
+
+    # Single-page UI built from apps/web (copied to ./static in the Docker image).
+    static = Path(__file__).resolve().parent.parent / "static"
+    if static.is_dir():
+        @app.get("/{path:path}", include_in_schema=False)
+        def spa(path: str):
+            if path.startswith("api/"):
+                raise HTTPException(404)
+            f = (static / path).resolve()
+            if path and static in f.parents and f.is_file():
+                return FileResponse(f, headers={"Cache-Control": "public, max-age=31536000, immutable"}
+                                    if path.startswith("assets/") else {})
+            return FileResponse(static / "index.html", headers={"Cache-Control": "no-store"})
 
     return app
 

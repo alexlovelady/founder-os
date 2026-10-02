@@ -16,6 +16,16 @@ import httpx
 sys.path.insert(0, os.path.dirname(__file__))
 from gateway.signing import sign  # noqa: E402
 
+def _load_env_file() -> None:
+    f = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(f):
+        for line in open(f, encoding="utf-8"):
+            k, sep, v = line.strip().partition("=")
+            if sep and k and not k.startswith("#"):
+                os.environ.setdefault(k, v)
+
+
+_load_env_file()
 ES_CONTINUOUS, ES_SYSTEM_REQUIRED = 0x80000000, 0x00000001
 TOKEN = os.environ["GATEWAY_TOKEN"]
 PORT = os.environ.get("GATEWAY_PORT", "8787")

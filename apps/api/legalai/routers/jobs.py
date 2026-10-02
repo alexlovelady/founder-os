@@ -3,12 +3,13 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
 from ..audit import audit
 from ..db import get_db
 from ..jobs.queue import InvalidTransition, cancel, enqueue
-from ..models import Job, User
+from ..models import Job, MatterMember, User
 from ..security import current_user, get_matter_access
 
 router = APIRouter(prefix="/api", tags=["jobs"])
@@ -31,7 +32,9 @@ def job_out(j: Job) -> dict:
     return {"id": str(j.id), "job_type": j.job_type, "state": j.state, "status_message": j.status_message,
             "matter_id": str(j.matter_id) if j.matter_id else None, "attempts": j.attempts,
             "needs_fallback_approval": j.needs_fallback_approval, "provider_used": j.provider_used,
-            "model_used": j.model_used, "result": j.result, "error": j.error,
+            "model_used": j.model_used, "result": j.result,
+            "request": {"messages": j.payload.get("messages"), "role": j.payload.get("role")}
+            if j.job_type == "llm_complete" else None, "error": j.error,
             "created_at": j.created_at.isoformat(),
             "finished_at": j.finished_at.isoformat() if j.finished_at else None}
 
@@ -56,6 +59,20 @@ def submit_inference(body: InferenceRequest, user: User = Depends(current_user),
                            "task": body.task, "params": body.params})
     db.commit()
     return job_out(job)
+
+
+@router.get("/jobs")
+def list_jobs(matter_id: uuid.UUID | None = None, limit: int = 50, user: User = Depends(current_user),
+              db: DbSession = Depends(get_db)):
+    """Jobs in one matter (any member), or all of the caller's own jobs across matters they can still access."""
+    q = select(Job).order_by(Job.created_at.desc()).limit(min(limit, 200))
+    if matter_id:
+        get_matter_access(db, user, matter_id)
+        q = q.where(Job.matter_id == matter_id)
+    else:
+        q = q.where(Job.created_by == user.id, Job.matter_id.in_(
+            select(MatterMember.matter_id).where(MatterMember.user_id == user.id)))
+    return [job_out(j) for j in db.scalars(q).all()]
 
 
 @router.get("/jobs/{job_id}")

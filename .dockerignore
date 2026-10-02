@@ -1,0 +1,11 @@
+.git
+.venv
+data
+**/tests
+**/__pycache__
+services
+docs
+.env
+**/node_modules
+**/dist
+apps/api/static

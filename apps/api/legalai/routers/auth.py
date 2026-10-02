@@ -36,6 +36,11 @@ def _set_cookie(resp: Response, token: str) -> None:
                     max_age=s.session_ttl_hours * 3600, path="/")
 
 
+@router.get("/status")
+def status(db: DbSession = Depends(get_db)):
+    return {"initialized": bool(db.scalar(select(func.count()).select_from(User)))}
+
+
 @router.post("/bootstrap")
 def bootstrap(body: NewUser, response: Response, db: DbSession = Depends(get_db)):
     """Create the first (admin) account. Only works while no users exist."""

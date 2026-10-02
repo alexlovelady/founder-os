@@ -140,3 +140,13 @@ def test_heartbeat_requires_node_token_and_status(make_api):
     assert ok.status_code == 200
     s = a.get("/api/gpu/status").json()
     assert s["online"] is True and s["gpu"] == "RTX 5070 Ti"
+
+
+def test_job_list_scoped_to_matter_membership(make_api):
+    alice, bob = make_api("alice@example.com"), make_api("bob@example.com")
+    m = new_matter(alice)
+    alice.post("/api/inference", json={"matter_id": m["id"], "messages": [{"role": "user", "content": "hi"}]})
+    assert len(alice.get(f"/api/jobs?matter_id={m['id']}").json()) == 1
+    assert alice.get("/api/jobs").json()[0]["request"]["messages"][0]["content"] == "hi"
+    assert bob.get(f"/api/jobs?matter_id={m['id']}").status_code == 404
+    assert bob.get("/api/jobs").json() == []
