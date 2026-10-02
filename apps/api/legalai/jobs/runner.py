@@ -6,7 +6,7 @@ from datetime import timedelta
 from ..config import Settings, get_settings
 from ..db import session_scope
 from ..models import GpuNode, Job, JobState as S, Matter, ProviderUsage
-from ..privacy import decide_fallback
+from ..privacy import BudgetExceeded, FallbackDecision, decide_fallback
 from ..providers.base import LLMProvider, ProviderError, ProviderUnavailable
 from ..providers.registry import build_fallback, build_primary
 from .handlers import HANDLERS
@@ -14,6 +14,7 @@ from .queue import claim_next, now, reap_stale, transition
 from ..audit import audit
 
 log = logging.getLogger("legalai.worker")
+LLM_JOB_TYPES = {"llm_complete"}
 
 
 async def _primary_online(provider: LLMProvider | None) -> bool:
@@ -62,7 +63,10 @@ async def process_one(settings: Settings | None = None, primary: LLMProvider | N
                 provider = primary
             else:
                 matter = db.get(Matter, job.matter_id) if job.matter_id else None
-                d = decide_fallback(db, settings, matter, job.fallback_approved)
+                if job.job_type in LLM_JOB_TYPES:
+                    d = decide_fallback(db, settings, matter, job.fallback_approved)
+                else:  # e.g. local embeddings: there is no external substitute, ever
+                    d = FallbackDecision(False, False, "no external fallback for this job type")
                 if d.allowed and fallback is not None:
                     provider = fallback
                     audit(db, "job.external_fallback_used", matter_id=job.matter_id, object_type="job",
@@ -91,6 +95,8 @@ async def process_one(settings: Settings | None = None, primary: LLMProvider | N
         result = await handler(job, provider, settings)
     except ProviderUnavailable as e:
         outcome, err = "unavailable", str(e)
+    except BudgetExceeded as e:
+        outcome, err = "permanent", str(e)
     except Exception as e:  # noqa: BLE001 - recorded on the job
         outcome, err = "error", f"{type(e).__name__}: {e}"
         log.exception("job %s failed", job_id)
@@ -103,7 +109,7 @@ async def process_one(settings: Settings | None = None, primary: LLMProvider | N
         if outcome == "ok":
             transition(job, S.VALIDATING, "Validating")
             # Phase 4 plugs citation/quote validation in here.
-            if provider is not None:
+            if provider is not None and jtype in LLM_JOB_TYPES:
                 _record_usage(db, job, provider, result, settings)
                 job.model_used = result.get("model", job.model_used)
             job.result, job.error = result, None
@@ -112,10 +118,11 @@ async def process_one(settings: Settings | None = None, primary: LLMProvider | N
                   provider=job.provider_used, model=job.model_used)
         elif outcome == "unavailable":
             job.attempts -= 1  # an outage is not the job's fault
-            _wait(job, settings, "Waiting for private GPU node")
+            _wait(job, settings, "Waiting for private GPU node" if job.requires_gpu
+                  else f"Retrying shortly: {err}")
         else:
             job.error = err
-            if job.attempts >= job.max_attempts:
+            if outcome == "permanent" or job.attempts >= job.max_attempts:
                 transition(job, S.FAILED, "Failed")
             else:
                 transition(job, S.RETRYABLE, "Will retry")

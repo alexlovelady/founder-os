@@ -4,10 +4,9 @@ Parsing/chunking/embedding handlers arrive in Phase 3."""
 import uuid
 
 from ..config import Settings
-from ..db import session_scope
-from ..models import DocumentVersion, Job
+from ..ingestion.pipeline import embed_version, ingest_version
+from ..models import Job
 from ..providers.base import LLMProvider
-from ..storage import get_storage, sha256_hex
 from .queue import AUTO_ROLE
 
 
@@ -35,15 +34,11 @@ async def llm_complete(job: Job, provider: LLMProvider, settings: Settings) -> d
 
 
 async def ingest_document(job: Job, provider, settings: Settings) -> dict:
-    vid = uuid.UUID(job.payload["version_id"])
-    with session_scope() as db:
-        v = db.get(DocumentVersion, vid)
-        data = get_storage().get(v.storage_key)
-        ok = sha256_hex(data) == v.sha256
-        v.status = "verified" if ok else "rejected"
-    if not ok:
-        raise RuntimeError("Stored file hash does not match recorded SHA-256")
-    return {"sha256_verified": True, "note": "parsing/chunking/embedding added in Phase 3"}
+    return ingest_version(uuid.UUID(job.payload["version_id"]), settings)
 
 
-HANDLERS = {"llm_complete": llm_complete, "ingest_document": ingest_document}
+async def embed_document(job: Job, provider, settings: Settings) -> dict:
+    return await embed_version(uuid.UUID(job.payload["version_id"]), settings)
+
+
+HANDLERS = {"llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}

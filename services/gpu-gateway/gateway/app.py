@@ -149,4 +149,32 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
         return StreamingResponse(gen(), media_type="text/event-stream", headers={"X-Request-Id": rid})
 
+    @app.post("/v1/embeddings")
+    async def embeddings(request: Request):
+        body = await authenticate(request)
+        try:
+            req = json.loads(body)
+            model, inp = req["model"], req["input"]
+        except (ValueError, KeyError, TypeError):
+            raise HTTPException(400, "Invalid request body")
+        if model not in cfg.allowlist():
+            raise HTTPException(403, "Model not allowed")
+        if isinstance(inp, str):
+            inp = [inp]
+        if not isinstance(inp, list) or not inp or not all(isinstance(x, str) for x in inp):
+            raise HTTPException(400, "input must be a non-empty list of strings")
+        log.info("req=%s embeddings model=%s items=%d", uuid.uuid4().hex[:12], model, len(inp))
+        state["active"] += 1
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(cfg.request_timeout_s, connect=5)) as c:
+                r = await c.post(cfg.ollama_url + "/v1/embeddings", json={"model": model, "input": inp})
+        except httpx.ConnectError:
+            raise HTTPException(503, "Inference backend unavailable")
+        except httpx.TimeoutException:
+            raise HTTPException(504, "Inference timed out")
+        finally:
+            state["active"] -= 1
+        return JSONResponse(r.json() if r.headers.get("content-type", "").startswith("application/json")
+                            else {"error": "backend error"}, status_code=r.status_code)
+
     return app

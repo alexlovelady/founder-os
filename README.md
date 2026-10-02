@@ -1,7 +1,7 @@
 # Legal AI Platform
 
-Implements `Legal_AI_Railway_Hybrid_Build_Spec.md`. **Status: Phases 1–2 built** (foundation + home GPU path).
-Phases 3–8 (RAG, research, contract review, critic, corpus, hardening) are not started.
+Implements `Legal_AI_Railway_Hybrid_Build_Spec.md`. **Status: Phases 1–3 built** (foundation, home GPU path, RAG).
+Phases 4–8 (cited research, contract review, critic, corpus, hardening) are not started.
 
 ```
 apps/api            FastAPI app, Postgres models/migrations, auth, matters, documents, jobs, embedded worker
@@ -25,7 +25,15 @@ docs/               Deployment guides
   rate limits, streaming, loopback bind. Heartbeat agent keeps Windows awake only while a job is running.
 - Audit events for auth, matters, uploads, downloads, jobs, fallback use.
 
-Not yet: web UI, embeddings/pgvector tables (extension is enabled), parsing/chunking, retrieval, citations, backups.
+- Phase 3: parsers (PDF, DOCX, TXT, MD, HTML, EML) keep page numbers, headings and exact character offsets;
+  structure-aware chunking (articles, numbered provisions, sub-clauses; `text == source[start:end]` is tested);
+  embeddings via Voyage (`voyage-law-2`) **or** the private GPU (`qwen3-embedding:0.6b`, 1024-d), chosen per matter by
+  privacy mode in the backend (`privacy.embedding_route`), cached by input hash + model; pgvector HNSW + Postgres
+  full-text search fused with weighted reciprocal-rank fusion; citation IDs (`CITE-001`) and a source viewer.
+  Local-only and default-private matters never touch the external embedding API.
+
+Not yet: OCR (scans are flagged `needs_ocr`), jurisdiction/date detection and authority ranking (Phase 4),
+citation/quote validation (Phase 4), contract review, backups.
 
 ## Local development
 ```bash

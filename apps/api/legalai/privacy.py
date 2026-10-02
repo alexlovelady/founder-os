@@ -71,3 +71,34 @@ def decide_fallback(db: DbSession, settings: Settings, matter: Matter | None, jo
     if mode == FallbackMode.ask.value and not job_approved:
         return FallbackDecision(False, True, "waiting for user approval to use external fallback")
     return FallbackDecision(True, False, "external fallback permitted")
+
+
+# ---- embeddings -----------------------------------------------------------------------------------------
+class BudgetExceeded(Exception):
+    """Permanent: retrying will not help until the budget is raised or the month rolls over."""
+
+
+def embedding_route(matter: Matter, settings: Settings) -> str:
+    """'external' only when the matter's privacy mode permits it AND an external provider is configured.
+    Everything else is embedded locally on the private GPU (fail closed: never the reverse)."""
+    if (settings.embedding_provider == "external" and settings.embedding_api_key
+            and external_embedding_allowed(matter)):
+        return "external"
+    return "local"
+
+
+def embedding_model_id(matter: Matter, settings: Settings) -> str:
+    return (f"voyage:{settings.embedding_model}" if embedding_route(matter, settings) == "external"
+            else f"local:{settings.local_embedding_model}")
+
+
+def embedding_spend(db: DbSession) -> float:
+    return float(db.scalar(select(func.coalesce(func.sum(ProviderUsage.cost_usd), 0.0)).where(
+        ProviderUsage.kind == "embedding", ProviderUsage.external.is_(True),
+        ProviderUsage.created_at >= month_start())) or 0.0)
+
+
+def assert_embedding_budget(db: DbSession, settings: Settings) -> None:
+    cap = settings.embedding_monthly_budget_usd
+    if cap is not None and embedding_spend(db) >= cap:
+        raise BudgetExceeded("Embedding monthly budget exhausted")

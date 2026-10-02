@@ -5,8 +5,10 @@ export type Matter = {
   id: string; name: string; description: string; jurisdiction: string; relevant_date: string | null
   status: string; privacy_mode: 'standard' | 'private' | 'local_only'; external_embedding_enabled: boolean
   llm_fallback_mode: 'disabled' | 'ask' | 'allowed'; my_role: string; created_at: string
+  embedding_route: 'external' | 'local'; embedding_model: string
 }
-export type Version = { id: string; version_number: number; filename: string; content_type: string; size_bytes: number; sha256: string; status: string; created_at: string }
+export type Version = { id: string; version_number: number; filename: string; content_type: string; size_bytes: number; sha256: string; status: string; created_at: string
+  parse_status: string; parse_error: string | null; page_count: number | null; embed_status: string; embedding_model: string | null }
 export type Doc = { id: string; matter_id: string; title: string; doc_type: string; current_version: Version | null; job_id?: string }
 export type Job = {
   id: string; job_type: string; state: string; status_message: string; matter_id: string | null; attempts: number

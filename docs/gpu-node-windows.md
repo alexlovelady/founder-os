@@ -6,6 +6,7 @@ Ollama and the gateway run natively; no Docker needed. **Never port-forward 1143
 ```powershell
 ollama pull qwen3:14b
 ollama pull qwen3:30b
+ollama pull qwen3-embedding:0.6b   # local embeddings (1024-d), used for private/local-only matters
 ollama list
 ```
 Ollama listens on `127.0.0.1:11434` by default — leave it that way. Optionally set `OLLAMA_KEEP_ALIVE=10m` so the deep
@@ -19,7 +20,7 @@ py -3.12 -m venv .venv ; .\.venv\Scripts\pip install -r requirements.txt
 Create `.env` next to it (never commit it):
 ```
 GATEWAY_TOKEN=<random 32+ chars; identical to GPU_NODE_TOKEN on Railway>
-GATEWAY_ALLOWED_MODELS=qwen3:14b,qwen3:30b
+GATEWAY_ALLOWED_MODELS=qwen3:14b,qwen3:30b,qwen3-embedding:0.6b
 ```
 Run: `.\.venv\Scripts\python -m gateway.main` (binds `127.0.0.1:8787`).
 The gateway refuses to start with a short token and returns 403 for any model not in the allowlist.

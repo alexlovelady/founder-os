@@ -3,7 +3,9 @@ import uuid
 from datetime import datetime, date
 from sqlalchemy import (String, Text, Boolean, Integer, BigInteger, Float, Date, DateTime, ForeignKey,
                         UniqueConstraint, Index, func)
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Computed
+from sqlalchemy.dialects.postgresql import UUID, JSONB, TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column
 from .db import Base
 
@@ -109,6 +111,12 @@ class DocumentVersion(Base):
     sha256: Mapped[str] = mapped_column(String(64), index=True)
     storage_key: Mapped[str] = mapped_column(String(600))
     status: Mapped[str] = mapped_column(String(30), default="uploaded")  # uploaded | verified | rejected
+    parse_status: Mapped[str] = mapped_column(String(20), default="pending")  # pending|parsed|needs_ocr|failed
+    parse_error: Mapped[str | None] = mapped_column(Text)
+    extracted_text: Mapped[str | None] = mapped_column(Text)
+    page_count: Mapped[int | None] = mapped_column(Integer)
+    embed_status: Mapped[str] = mapped_column(String(20), default="pending")  # pending|embedded|waiting|failed
+    embedding_model: Mapped[str | None] = mapped_column(String(200))
     uploaded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -174,3 +182,42 @@ class AuditEvent(Base):
     object_type: Mapped[str] = mapped_column(String(50), default="")
     object_id: Mapped[str] = mapped_column(String(100), default="")
     detail: Mapped[dict] = mapped_column(JSONB, default=dict)
+
+
+EMBEDDING_DIM = 1024
+
+
+class DocumentChunk(Base):
+    """A citable passage. Invariant: version.extracted_text[char_start:char_end] == text."""
+    __tablename__ = "document_chunks"
+    __table_args__ = (UniqueConstraint("version_id", "chunk_index"),
+                      Index("ix_chunks_fts", "fts", postgresql_using="gin"),
+                      Index("ix_chunks_fts_simple", "fts_simple", postgresql_using="gin"))
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    matter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("matters.id", ondelete="CASCADE"), index=True)
+    document_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"), index=True)
+    version_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("document_versions.id", ondelete="CASCADE"), index=True)
+    chunk_index: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    text_hash: Mapped[str] = mapped_column(String(64), index=True)
+    page: Mapped[int | None] = mapped_column(Integer)
+    page_end: Mapped[int | None] = mapped_column(Integer)
+    heading_path: Mapped[list] = mapped_column(JSONB, default=list)
+    section_number: Mapped[str] = mapped_column(String(100), default="")
+    char_start: Mapped[int] = mapped_column(Integer)
+    char_end: Mapped[int] = mapped_column(Integer)
+    fts = mapped_column(TSVECTOR, Computed("to_tsvector('english', text)", persisted=True))
+    fts_simple = mapped_column(TSVECTOR, Computed("to_tsvector('simple', text)", persisted=True))
+
+
+class ChunkEmbedding(Base):
+    """One vector per (chunk, embedding model). Vectors from different models are never compared."""
+    __tablename__ = "chunk_embeddings"
+    __table_args__ = (Index("ix_chunk_emb_hnsw", "embedding", postgresql_using="hnsw",
+                            postgresql_ops={"embedding": "vector_cosine_ops"}),
+                      Index("ix_chunk_emb_cache", "text_hash", "model"))
+    chunk_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("document_chunks.id", ondelete="CASCADE"), primary_key=True)
+    model: Mapped[str] = mapped_column(String(200), primary_key=True)
+    text_hash: Mapped[str] = mapped_column(String(64))
+    embedding = mapped_column(Vector(EMBEDDING_DIM))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

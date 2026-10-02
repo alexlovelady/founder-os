@@ -107,3 +107,16 @@ def test_refuses_to_start_without_strong_token():
 def test_signing_matches_api_vector():
     assert sign("s3cret", "POST", "/v1/chat/completions", b"{}", 1700000000)["X-Signature"] == \
         "2c5ca3b0650dbc45291128d27a37c701d95945dd0c6392ddf5c8b5455e96d82e"
+
+
+def test_embeddings_allowlist_and_validation(client, monkeypatch):
+    async def post(self, url, json=None, **k):
+        FakeOllama.last_json = json
+        return httpx.Response(200, json={"data": [{"index": 0, "embedding": [0.1]}]}, request=httpx.Request("POST", url))
+    monkeypatch.setattr(FakeOllama, "post", post)
+    assert call(client, "POST", "/v1/embeddings", {"model": "evil", "input": ["x"]}).status_code == 403
+    assert call(client, "POST", "/v1/embeddings", {"model": "fast-m", "input": []}).status_code == 400
+    assert call(client, "POST", "/v1/embeddings", {"model": "fast-m", "input": [1]}).status_code == 400
+    r = call(client, "POST", "/v1/embeddings", {"model": "fast-m", "input": "hello", "options": {"x": 1}})
+    assert r.status_code == 200 and FakeOllama.last_json == {"model": "fast-m", "input": ["hello"]}
+    assert client.post("/v1/embeddings", json={}).status_code == 401

@@ -10,7 +10,8 @@ from ..audit import audit
 from ..config import get_settings
 from ..db import get_db
 from ..models import AuditEvent, FallbackMode, Matter, MatterMember, PrivacyMode, User
-from ..privacy import PrivacyViolation, validate_matter_settings
+from ..ingestion.pipeline import enqueue_embeddings_for_matter
+from ..privacy import PrivacyViolation, embedding_model_id, embedding_route, validate_matter_settings
 from ..security import current_user, get_matter_access
 
 router = APIRouter(prefix="/api/matters", tags=["matters"])
@@ -41,7 +42,9 @@ def matter_out(m: Matter, role: str) -> dict:
     return {"id": str(m.id), "name": m.name, "description": m.description, "jurisdiction": m.jurisdiction,
             "relevant_date": m.relevant_date.isoformat() if m.relevant_date else None, "status": m.status,
             "privacy_mode": m.privacy_mode, "external_embedding_enabled": m.external_embedding_enabled,
-            "llm_fallback_mode": m.llm_fallback_mode, "my_role": role, "created_at": m.created_at.isoformat()}
+            "llm_fallback_mode": m.llm_fallback_mode, "my_role": role,
+            "embedding_route": embedding_route(m, get_settings()),
+            "embedding_model": embedding_model_id(m, get_settings()), "created_at": m.created_at.isoformat()}
 
 
 @router.post("", status_code=201)
@@ -93,12 +96,16 @@ def patch_matter(matter_id: uuid.UUID, body: MatterPatch, user: User = Depends(c
         validate_matter_settings(mode, fb, emb)
     except PrivacyViolation as e:
         raise HTTPException(422, str(e))
+    before_model = embedding_model_id(m, get_settings())
     for k, v in changes.items():
         if k in ("privacy_mode", "llm_fallback_mode"):
             v = v.value
         if k not in ("privacy_mode", "llm_fallback_mode", "external_embedding_enabled"):
             setattr(m, k, v)
     m.privacy_mode, m.llm_fallback_mode, m.external_embedding_enabled = mode, fb, emb
+    if embedding_model_id(m, get_settings()) != before_model:
+        # Vectors are model-specific: re-embed current documents under the new route.
+        enqueue_embeddings_for_matter(db, m, get_settings(), user.id)
     audit(db, "matter.updated", user_id=user.id, matter_id=m.id, object_type="matter", object_id=m.id,
           fields=sorted(changes))
     db.commit()

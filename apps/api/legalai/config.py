@@ -42,6 +42,17 @@ class Settings(BaseSettings):
     embedding_model: str = "voyage-law-2"
     embedding_monthly_budget_usd: float | None = None
 
+    local_embedding_model: str = "qwen3-embedding:0.6b"  # must produce 1024-dim vectors
+    voyage_base_url: str = "https://api.voyageai.com/v1"
+    embedding_price_per_1m_tokens_usd: float = 0.12
+    embedding_batch_size: int = 32
+
+    # Hybrid retrieval weights (benchmark and tune; see spec section 13)
+    w_semantic: float = 1.0
+    w_lexical: float = 1.0
+    rrf_k: int = 60
+    max_chunks_per_document: int = 3
+
     default_privacy_mode: str = "private"
 
     def model_for_role(self, role: str) -> str:

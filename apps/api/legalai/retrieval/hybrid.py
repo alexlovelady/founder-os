@@ -1,0 +1,164 @@
+"""Hybrid retrieval (spec section 14): semantic (pgvector) + lexical (Postgres FTS), fused with weighted
+reciprocal-rank fusion, reranked, diversified, and packaged with citation IDs.
+
+Authority metadata (jurisdiction, court level, superseded) joins the score in Phase 4 when authorities exist;
+`authority_weight` is the hook. All weights come from Settings and are meant to be benchmarked."""
+import re
+from dataclasses import dataclass, field
+from typing import Protocol
+
+from sqlalchemy import and_, func, literal, or_, select
+from sqlalchemy.orm import Session as DbSession
+
+from ..config import Settings
+from ..models import ChunkEmbedding, Document, DocumentChunk, DocumentVersion, Matter, ProviderUsage
+from ..privacy import embedding_model_id, embedding_route
+from ..providers.base import ProviderError, ProviderUnavailable
+from ..providers.embeddings import build_embedding_provider
+
+CANDIDATES = 50
+WORD = re.compile(r"[A-Za-z0-9]{2,}")
+STOP = {"the", "and", "for", "are", "was", "what", "which", "that", "this", "with", "from", "have", "has", "does",
+        "how", "can", "may", "any", "not", "but", "its", "their", "there", "when", "who", "whom", "between"}
+
+
+@dataclass
+class Hit:
+    chunk: DocumentChunk
+    document_title: str
+    version_number: int
+    score: float = 0.0
+    sem_rank: int | None = None
+    lex_rank: int | None = None
+    cite_id: str = ""
+
+
+@dataclass
+class SearchResult:
+    hits: list[Hit]
+    warnings: list[str] = field(default_factory=list)
+    embedding_model: str | None = None
+    mode_used: str = "hybrid"
+
+
+class Reranker(Protocol):
+    def rerank(self, query: str, hits: list[Hit]) -> list[Hit]: ...
+
+
+class NoopReranker:
+    """Placeholder for a cross-encoder / API reranker. It must never drop controlling authority (spec section 11)."""
+
+    def rerank(self, query: str, hits: list[Hit]) -> list[Hit]:
+        return hits
+
+
+def authority_weight(hit: Hit) -> float:
+    return 0.0  # Phase 4: jurisdiction match, court hierarchy, effective dates, superseded penalty
+
+
+def _or_query(q: str) -> str:
+    terms = [t.lower() for t in WORD.findall(q) if t.lower() not in STOP]
+    return " | ".join(dict.fromkeys(terms))
+
+
+def _scope(matter_id):
+    """Only chunks of current versions of non-deleted documents in this matter (matter isolation)."""
+    return and_(DocumentChunk.matter_id == matter_id, Document.id == DocumentChunk.document_id,
+                Document.deleted_at.is_(None), Document.current_version_id == DocumentChunk.version_id,
+                DocumentVersion.id == DocumentChunk.version_id)
+
+
+def lexical_search(db: DbSession, matter_id, query: str, n: int = CANDIDATES) -> list[tuple[DocumentChunk, str, int]]:
+    expr = _or_query(query)
+    if not expr:
+        return []
+    q_en = func.to_tsquery("english", expr)
+    q_si = func.to_tsquery("simple", expr)
+    rank = func.greatest(func.ts_rank_cd(DocumentChunk.fts, q_en), func.ts_rank_cd(DocumentChunk.fts_simple, q_si))
+    rows = db.execute(
+        select(DocumentChunk, Document.title, DocumentVersion.version_number)
+        .where(_scope(matter_id), or_(DocumentChunk.fts.op("@@")(q_en), DocumentChunk.fts_simple.op("@@")(q_si)))
+        .order_by(rank.desc()).limit(n)).all()
+    return [(c, t, v) for c, t, v in rows]
+
+
+def semantic_search(db: DbSession, matter_id, vector: list[float], model_id: str, n: int = CANDIDATES):
+    dist = ChunkEmbedding.embedding.cosine_distance(vector)
+    rows = db.execute(
+        select(DocumentChunk, Document.title, DocumentVersion.version_number)
+        .join(ChunkEmbedding, ChunkEmbedding.chunk_id == DocumentChunk.id)
+        .where(_scope(matter_id), ChunkEmbedding.model == model_id)
+        .order_by(dist).limit(n)).all()
+    return [(c, t, v) for c, t, v in rows]
+
+
+def unembedded_count(db: DbSession, matter_id, model_id: str) -> int:
+    return db.scalar(
+        select(func.count()).select_from(DocumentChunk).join(Document, Document.id == DocumentChunk.document_id)
+        .where(DocumentChunk.matter_id == matter_id, Document.deleted_at.is_(None),
+               Document.current_version_id == DocumentChunk.version_id,
+               ~select(literal(1)).where(ChunkEmbedding.chunk_id == DocumentChunk.id,
+                                         ChunkEmbedding.model == model_id).exists())) or 0
+
+
+def diversify(hits: list[Hit], k: int, per_doc: int) -> list[Hit]:
+    out, seen_hash, per = [], set(), {}
+    for h in hits:
+        if h.chunk.text_hash in seen_hash or per.get(h.chunk.document_id, 0) >= per_doc:
+            continue
+        seen_hash.add(h.chunk.text_hash)
+        per[h.chunk.document_id] = per.get(h.chunk.document_id, 0) + 1
+        out.append(h)
+        if len(out) == k:
+            break
+    return out
+
+
+async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Settings, *, k: int = 8,
+                        mode: str = "hybrid", variants: list[str] | None = None, provider=None,
+                        reranker: Reranker | None = None) -> SearchResult:
+    queries = [query] + [v for v in (variants or []) if v.strip() and v != query]
+    warnings: list[str] = []
+    model_id = embedding_model_id(matter, settings)
+    res = SearchResult([], warnings, model_id, mode)
+    lists: list[tuple[str, list[tuple[DocumentChunk, str, int]]]] = []
+
+    if mode in ("hybrid", "lexical"):
+        for q in queries:
+            lists.append(("lex", lexical_search(db, matter.id, q)))
+
+    if mode in ("hybrid", "semantic"):
+        missing = unembedded_count(db, matter.id, model_id)
+        if missing:
+            warnings.append(f"{missing} passage(s) are not embedded yet for this matter; semantic coverage is partial.")
+        try:
+            prov = provider or build_embedding_provider(settings, external=(embedding_route(matter, settings) == "external"))
+            for q in queries:
+                vec = await prov.embed_query(q)
+                lists.append(("sem", semantic_search(db, matter.id, vec, model_id)))
+            toks = getattr(prov, "tokens_used", 0)
+            if prov.external and toks:
+                db.add(ProviderUsage(matter_id=matter.id, provider=prov.name, kind="embedding",
+                                     model=settings.embedding_model, external=True, prompt_tokens=toks,
+                                     cost_usd=toks / 1e6 * settings.embedding_price_per_1m_tokens_usd))
+        except (ProviderUnavailable, ProviderError) as e:
+            warnings.append(f"Semantic search unavailable ({e}); showing keyword results only.")
+            res.mode_used = "lexical"
+
+    fused: dict = {}
+    for kind, rows in lists:
+        w = settings.w_semantic if kind == "sem" else settings.w_lexical
+        for rank, (c, title, ver) in enumerate(rows, start=1):
+            h = fused.setdefault(c.id, Hit(c, title, ver))
+            h.score += w / (settings.rrf_k + rank)
+            if kind == "sem":
+                h.sem_rank = min(h.sem_rank or rank, rank)
+            else:
+                h.lex_rank = min(h.lex_rank or rank, rank)
+    hits = sorted(fused.values(), key=lambda h: h.score + authority_weight(h), reverse=True)
+    hits = (reranker or NoopReranker()).rerank(query, hits)
+    hits = diversify(hits, k, settings.max_chunks_per_document)
+    for i, h in enumerate(hits, start=1):
+        h.cite_id = f"CITE-{i:03d}"
+    res.hits = hits
+    return res

@@ -29,6 +29,8 @@ def _database():
         c.execute(f"CREATE DATABASE {TEST_DB}")
     import legalai.models  # noqa: F401
     dbmod.engine()
+    with dbmod._engine.begin() as c:
+        c.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
     dbmod.Base.metadata.create_all(dbmod._engine)
     yield
 
@@ -36,7 +38,7 @@ def _database():
 @pytest.fixture(autouse=True)
 def _clean():
     with dbmod.engine().begin() as c:
-        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs CASCADE"))
+        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks CASCADE"))
     login_limiter.reset()
     get_settings.cache_clear()
     yield

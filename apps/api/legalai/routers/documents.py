@@ -19,6 +19,8 @@ router = APIRouter(prefix="/api", tags=["documents"])
 def _ver_out(v: DocumentVersion) -> dict:
     return {"id": str(v.id), "version_number": v.version_number, "filename": v.original_filename,
             "content_type": v.content_type, "size_bytes": v.size_bytes, "sha256": v.sha256, "status": v.status,
+            "parse_status": v.parse_status, "parse_error": v.parse_error, "page_count": v.page_count,
+            "embed_status": v.embed_status, "embedding_model": v.embedding_model,
             "created_at": v.created_at.isoformat()}
 
 
@@ -116,3 +118,17 @@ def download(document_id: uuid.UUID, version_id: uuid.UUID, user: User = Depends
     return Response(storage.get_storage().get(v.storage_key), media_type="application/octet-stream",
                     headers={"Content-Disposition": f'attachment; filename="{v.original_filename}"',
                              "X-Content-Type-Options": "nosniff"})
+
+
+@router.post("/documents/{document_id}/reindex", status_code=202)
+def reindex(document_id: uuid.UUID, user: User = Depends(current_user), db: DbSession = Depends(get_db)):
+    """Re-run parse, chunk and embed for the current version (e.g. after a parser improvement)."""
+    d = _load_doc(db, user, document_id, "editor")
+    if not d.current_version_id:
+        raise HTTPException(409, "Document has no version")
+    job = enqueue(db, "ingest_document", matter_id=d.matter_id, user_id=user.id,
+                  payload={"document_id": str(d.id), "version_id": str(d.current_version_id)})
+    audit(db, "document.reindex_requested", user_id=user.id, matter_id=d.matter_id, object_type="document",
+          object_id=d.id)
+    db.commit()
+    return {"job_id": str(job.id)}

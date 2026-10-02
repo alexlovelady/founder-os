@@ -4,6 +4,7 @@ import { api, fmtBytes, fmtTime, PRIVACY_HELP, useQuery, type AuditEv, type Doc,
 import { Empty, Err, JobBadge, Loading, Md, PrivacyBadge, icons } from '../ui'
 import { JobTable } from './JobsPage'
 import { PrivacyPicker } from './Matters'
+import Search from './Search'
 
 export default function MatterPage() {
   const { id } = useParams()
@@ -27,6 +28,7 @@ export default function MatterPage() {
       <nav className="tabs">
         <NavLink to={base} end className={tab}>Overview</NavLink>
         <NavLink to={`${base}/documents`} className={tab}>Documents</NavLink>
+        <NavLink to={`${base}/search`} className={tab}>Search</NavLink>
         <NavLink to={`${base}/research`} className={tab}>Ask the model</NavLink>
         <NavLink to={`${base}/jobs`} className={tab}>Jobs</NavLink>
         <NavLink to={`${base}/audit`} className={tab}>Audit</NavLink>
@@ -34,6 +36,7 @@ export default function MatterPage() {
       <Routes>
         <Route index element={<Overview m={m} onChange={reload} />} />
         <Route path="documents" element={<Documents m={m} />} />
+        <Route path="search" element={<Search m={m} />} />
         <Route path="research" element={<Research m={m} />} />
         <Route path="jobs" element={<MatterJobs m={m} />} />
         <Route path="audit" element={<Audit m={m} />} />
@@ -65,6 +68,7 @@ function Overview({ m, onChange }: { m: Matter; onChange: () => void }) {
           <dt>Description</dt><dd>{m.description || <span className="muted">—</span>}</dd>
           <dt>Jurisdiction</dt><dd>{m.jurisdiction || <span className="muted">—</span>}</dd>
           <dt>Relevant date</dt><dd>{m.relevant_date || <span className="muted">—</span>}</dd>
+          <dt>Embeddings</dt><dd>{m.embedding_route === 'external' ? 'External API (Voyage) — text chunks are sent to the provider' : 'Private GPU — text stays on your hardware'}<div className="muted small mono">{m.embedding_model}</div></dd>
           <dt>Your role</dt><dd>{m.my_role}</dd><dt>Created</dt><dd>{fmtTime(m.created_at)}</dd>
         </dl></div>
       <form className="card stack" onSubmit={save}>
@@ -127,8 +131,11 @@ function Documents({ m }: { m: Matter }) {
               <tr>
                 <td><strong>{d.title}</strong><div className="muted small mono" title="SHA-256">{v?.sha256.slice(0, 16)}…</div></td>
                 <td>v{v?.version_number}</td><td>{v && fmtBytes(v.size_bytes)}</td>
-                <td>{v && <span className={`badge ${v.status === 'verified' ? 'ok' : v.status === 'rejected' ? 'bad' : 'warn'}`}>{v.status === 'verified' ? 'SHA-256 verified' : v.status}</span>}</td>
+                <td>{v && <div className="row wrap" style={{ gap: 4 }}>
+                  <span className={`badge ${v.status === 'verified' ? 'ok' : v.status === 'rejected' ? 'bad' : 'warn'}`}>{v.status === 'verified' ? 'SHA-256 verified' : v.status}</span>
+                  <ProcBadges v={v} /></div>}</td>
                 <td><div className="row" style={{ justifyContent: 'flex-end' }}>
+                  {canEdit && <button className="btn sm" title="Re-run parsing, chunking and embedding" onClick={async () => { await api(`/api/documents/${d.id}/reindex`, { method: 'POST' }); reload() }}>Reindex</button>}
                   {canEdit && <button className="btn sm" onClick={() => { versionFor.current = d.id; input.current?.click() }}>New version</button>}
                   <button className="btn sm" onClick={() => setOpen(open === d.id ? undefined : d.id)}>History</button>
                   {v && <a className="btn sm" href={`/api/documents/${d.id}/versions/${v.id}/download`}>Download</a>}</div></td>
@@ -138,6 +145,16 @@ function Documents({ m }: { m: Matter }) {
           })}</tbody></table></div>}
     </div>
   )
+}
+
+function ProcBadges({ v }: { v: Version }) {
+  const parse = v.parse_status === 'parsed' ? <span className="badge ok">Parsed{v.page_count ? ` · ${v.page_count} pp` : ''}</span>
+    : v.parse_status === 'needs_ocr' ? <span className="badge warn" title={v.parse_error ?? ''}>Needs OCR</span>
+    : v.parse_status === 'failed' ? <span className="badge bad" title={v.parse_error ?? ''}>Parse failed</span>
+    : <span className="badge warn">Parsing…</span>
+  const emb = v.parse_status !== 'parsed' ? null : v.embed_status === 'embedded' ? <span className="badge ok" title={v.embedding_model ?? ''}>Searchable</span>
+    : <span className="badge warn">Embedding…</span>
+  return <>{parse}{emb}</>
 }
 
 function Versions({ docId }: { docId: string }) {
