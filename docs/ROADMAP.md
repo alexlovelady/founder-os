@@ -11,7 +11,12 @@ Phases follow docs/FounderOS_Build_Spec.md section 75. One phase at a time: plan
 
 Open item: LegalAI's landmark case list is partial (CourtListener rate limits); re-run `modules/legal/scripts/resolve_cases.py` later.
 
-Status note (2026-10-03): the shell is deployed as the main Railway service with its own Postgres. Built: sign-in (interim: LegalAI
-accounts), business onboarding and profile (stored in the shell DB), dashboard combining business info with LegalAI's checklist, settings
-(profile edits sync into LegalAI), LegalAI embedded same-origin over Railway's private network. Not built: roles beyond owner, team
-invites, billing, plan-based AI tiers, Firebase/identity swap, other modules, custom domains.
+Status note (2026-10-03): all planned tools are built and deployed: Finance, Compliance, Business Health, Tasks, Document Vault, SOPs and
+business documents, CRM, Marketing, Ask FounderOS (read-only assistant), Product Scan (GitHub/GitLab) and Competitor Research, plus LegalAI.
+They share one business context, cross-tool links and global search (Ctrl+K). 409 tool tests pass against real Postgres.
+
+Not yet verified end to end in a browser: AI-driven features (they run on the private GPU through LegalAI's queue), file upload in the
+Vault, and the GitHub scan from the UI. Known gaps (see each tool's README): assistant cannot act yet (actions contract proposed in
+modules/founderai/README.md), Vault has no text extraction or virus scanning, no email reminders, no team invites or roles beyond owner,
+no billing or plan-based AI tiers, identity is still LegalAI accounts (swap via `IdentityProvider`).
+Environment: set `FOUNDEROS_SECRET_KEY` (done on Railway) for stored repo tokens; `SEARCH_API_KEY` (Brave) is optional for competitor discovery.
