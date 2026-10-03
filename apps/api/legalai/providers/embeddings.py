@@ -109,4 +109,7 @@ def build_embedding_provider(settings: Settings, external: bool) -> EmbeddingPro
     if external:
         return VoyageEmbeddingProvider(settings.embedding_api_key, settings.embedding_model,
                                        settings.voyage_base_url, settings.embedding_batch_size)
+    if settings.gpu_mode == "pull":
+        from .pull_gpu import PulledEmbeddingProvider
+        return PulledEmbeddingProvider(settings, settings.local_embedding_model)
     return LocalEmbeddingProvider(settings.gpu_node_url, settings.gpu_node_token, settings.local_embedding_model)

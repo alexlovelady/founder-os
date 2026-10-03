@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from ..config import get_settings
 from ..db import get_db
-from ..models import GpuNode, Job, JobState as S, User
+from ..models import GpuNode, GpuRequest, Job, JobState as S, User
 from ..security import current_user, node_auth_ok
 
 router = APIRouter(prefix="/api", tags=["gpu"])
@@ -62,3 +63,61 @@ def providers_status(user: User = Depends(current_user)):
             "embedding_provider": s.embedding_provider, "embedding_model": s.embedding_model,
             "models": {"fast": s.fast_model, "deep": s.deep_model, "critic": s.critic_model or s.fast_model,
                        "extraction": s.extraction_model or s.fast_model}}
+
+
+# ---- pull mode: the home node polls these endpoints over an outbound connection ----------------------------------
+CLAIM_WAIT_S = 20
+
+
+def _record_node(db: DbSession, hb: Heartbeat) -> None:
+    n = db.get(GpuNode, hb.node_id) or GpuNode(id=hb.node_id)
+    n.status, n.gpu_name, n.vram_total_mb, n.vram_free_mb = "online", hb.gpu, hb.vram_total_mb, hb.vram_free_mb
+    n.models, n.active_jobs, n.last_heartbeat_at = hb.models, hb.active_jobs, datetime.now(timezone.utc)
+    db.add(n)
+
+
+@router.post("/gpu/claim")
+def claim(hb: Heartbeat, authorization: str | None = Header(None), db: DbSession = Depends(get_db)):
+    """Long-poll (up to ~20 s): the node reports its health and receives at most one pending request."""
+    if not node_auth_ok(authorization):
+        raise HTTPException(401, "Invalid node credentials")
+    deadline = time.monotonic() + CLAIM_WAIT_S
+    while True:
+        _record_node(db, hb)
+        req = db.scalar(select(GpuRequest).where(GpuRequest.status == "pending").order_by(GpuRequest.created_at)
+                        .with_for_update(skip_locked=True).limit(1))
+        if req:
+            req.status, req.node_id, req.claimed_at = "claimed", hb.node_id, datetime.now(timezone.utc)
+            db.commit()
+            return {"request": {"id": str(req.id), "kind": req.kind, "payload": req.payload}}
+        db.commit()
+        if time.monotonic() >= deadline:
+            return {"request": None}
+        time.sleep(1)
+
+
+class NodeResult(BaseModel):
+    node_id: str
+    result: dict | None = None
+    error: str | None = None
+
+
+@router.post("/gpu/requests/{request_id}/result")
+def post_result(request_id: str, body: NodeResult, authorization: str | None = Header(None), db: DbSession = Depends(get_db)):
+    if not node_auth_ok(authorization):
+        raise HTTPException(401, "Invalid node credentials")
+    import uuid
+    try:
+        rid = uuid.UUID(request_id)
+    except ValueError:
+        raise HTTPException(404, "Request not found")
+    req = db.get(GpuRequest, rid, with_for_update=True)
+    if not req or req.status != "claimed" or req.node_id != body.node_id:
+        raise HTTPException(404, "Request not found")
+    if body.error is not None:
+        req.status, req.error = "failed", body.error[:500]
+    else:
+        req.status, req.result = "done", body.result or {}
+    req.finished_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"ok": True}

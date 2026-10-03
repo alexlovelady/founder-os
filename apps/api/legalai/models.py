@@ -52,7 +52,35 @@ class User(Base, TimestampMixin):
     display_name: Mapped[str] = mapped_column(String(200), default="")
     role: Mapped[str] = mapped_column(String(20), default="user")  # user | admin
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    mfa_secret_enc: Mapped[str | None] = mapped_column(Text)  # TOTP secret, encrypted at rest
+    mfa_last_step: Mapped[int | None] = mapped_column(BigInteger)  # last accepted TOTP time-step (blocks code replay)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MfaRecoveryCode(Base):
+    __tablename__ = "mfa_recovery_codes"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    code_hash: Mapped[str] = mapped_column(String(64))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class GpuRequest(Base):
+    """Pull-mode inference: the API queues a request, the home node claims it over an OUTBOUND connection and
+    posts the result. Nothing on the home network is exposed to the internet. Rows are short-lived."""
+    __tablename__ = "gpu_requests"
+    __table_args__ = (Index("ix_gpu_requests_pending", "status", "created_at"),)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    kind: Mapped[str] = mapped_column(String(20))  # chat | embeddings
+    payload: Mapped[dict] = mapped_column(JSONB)
+    status: Mapped[str] = mapped_column(String(12), default="pending")  # pending | claimed | done | failed
+    node_id: Mapped[str | None] = mapped_column(String(100))
+    result: Mapped[dict | None] = mapped_column(JSONB)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Session(Base):
@@ -127,6 +155,8 @@ class DocumentVersion(Base):
     sha256: Mapped[str] = mapped_column(String(64), index=True)
     storage_key: Mapped[str] = mapped_column(String(600))
     status: Mapped[str] = mapped_column(String(30), default="uploaded")  # uploaded | verified | rejected
+    ocr_applied: Mapped[bool] = mapped_column(Boolean, default=False)  # text came from OCR: may contain recognition errors
+    ocr_confidence: Mapped[float | None] = mapped_column(Float)
     effective_from: Mapped[date | None] = mapped_column(Date)  # library versions: when this text took effect
     effective_to: Mapped[date | None] = mapped_column(Date)
     source_retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

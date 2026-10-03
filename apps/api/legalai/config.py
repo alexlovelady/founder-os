@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     run_worker: bool = True  # embed the job worker in the API process
     storage_dir: str = "./data/storage"
     max_upload_mb: int = 50
+    ocr_enabled: bool = True
+    ocr_lang: str = "eng"
+    ocr_dpi: int = 200
+    ocr_max_pages: int = 150
+    tesseract_cmd: str = ""
+    clamav_host: str = ""  # optional clamd service for signature scanning
+    clamav_port: int = 3310
+    clamav_required: bool = False  # true: reject uploads when the scanner is unreachable
 
     vector_store: str = "pgvector"
     llm_primary_provider: str = "local_gpu"
@@ -26,6 +34,8 @@ class Settings(BaseSettings):
     external_llm_monthly_budget_usd: float = 0.0
     external_llm_price_per_1k_tokens_usd: float = 0.0
 
+    gpu_mode: str = "pull"  # pull: home node polls this API (no inbound exposure) | push: API calls a gateway URL
+    gpu_claim_timeout_s: int = 90
     gpu_node_url: str = ""
     gpu_node_token: str = ""
     gpu_node_id: str = "home-gpu"

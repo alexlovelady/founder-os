@@ -12,6 +12,7 @@ from ..privacy import (assert_embedding_budget, assert_external_embedding_allowe
 from ..providers.embeddings import build_embedding_provider
 from ..storage import get_storage, sha256_hex
 from .chunking import Chunk, chunk_document
+from .ocr import ocr_available
 from .detect import AUTHORITY_FOR_CLASS, classify, detect_date, detect_jurisdiction
 from .parsers import NeedsOcr, ParseError, parse_document
 
@@ -44,7 +45,7 @@ def enqueue_embeddings_for_matter(db, matter: Matter, settings: Settings, user_i
     return n
 
 
-def ingest_version(version_id: uuid.UUID, settings: Settings) -> dict:
+def ingest_version(version_id: uuid.UUID, settings: Settings, ocr_result=None) -> dict:
     """Verify -> parse -> chunk -> store chunks with anchors -> queue embedding."""
     with session_scope() as db:
         v = db.get(DocumentVersion, version_id)
@@ -55,19 +56,32 @@ def ingest_version(version_id: uuid.UUID, settings: Settings) -> dict:
             v.status, v.parse_status, v.parse_error = "rejected", "failed", "Stored file hash mismatch"
             raise RuntimeError("Stored file hash does not match recorded SHA-256")
         v.status = "verified"
-        try:
-            parsed = parse_document(v.original_filename, data)
-        except NeedsOcr as e:
-            v.parse_status, v.parse_error = "needs_ocr", str(e)
-            audit(db, "document.needs_ocr", matter_id=matter.id, object_type="document", object_id=doc.id)
-            return {"sha256_verified": True, "parse_status": "needs_ocr"}
-        except ParseError as e:
-            v.parse_status, v.parse_error = "failed", str(e)[:500]
-            return {"sha256_verified": True, "parse_status": "failed", "error": str(e)[:200]}
+        v.ocr_applied, v.ocr_confidence = False, None
+        if ocr_result is not None:
+            parsed = ocr_result.doc
+            v.ocr_applied, v.ocr_confidence = True, round(ocr_result.confidence, 1)
+        else:
+            try:
+                parsed = parse_document(v.original_filename, data)
+            except NeedsOcr as e:
+                if ocr_available(settings):
+                    v.parse_status, v.parse_error = "ocr_pending", "Scanned document: running OCR"
+                    enqueue(db, "ocr_document", matter_id=matter.id, user_id=None, payload={"version_id": str(v.id)})
+                    audit(db, "document.ocr_queued", matter_id=matter.id, object_type="document", object_id=doc.id)
+                    return {"sha256_verified": True, "parse_status": "ocr_pending"}
+                v.parse_status, v.parse_error = "needs_ocr", f"{e}. OCR is not available on this server."
+                audit(db, "document.needs_ocr", matter_id=matter.id, object_type="document", object_id=doc.id)
+                return {"sha256_verified": True, "parse_status": "needs_ocr"}
+            except ParseError as e:
+                v.parse_status, v.parse_error = "failed", str(e)[:500]
+                return {"sha256_verified": True, "parse_status": "failed", "error": str(e)[:200]}
         chunks = chunk_document(parsed)
         db.execute(delete(DocumentChunk).where(DocumentChunk.version_id == v.id))
         v.extracted_text, v.page_count = parsed.text, parsed.page_count
         v.parse_status, v.parse_error, v.embed_status, v.embedding_model = "parsed", None, "pending", None
+        if v.ocr_applied:
+            v.parse_error = (f"Text recognized by OCR ({v.ocr_confidence}% mean confidence); it may contain errors, so check quotes against the original."
+                             + (" Confidence is low." if (v.ocr_confidence or 0) < 70 else ""))
         if doc.metadata_source == "detected":  # never overwrite what the user entered
             doc.doc_type = classify(parsed.text)
             doc.authority_type = AUTHORITY_FOR_CLASS[doc.doc_type]
@@ -83,7 +97,7 @@ def ingest_version(version_id: uuid.UUID, settings: Settings) -> dict:
         else:
             v.embed_status = "embedded"
         audit(db, "document.parsed", matter_id=matter.id, object_type="document", object_id=doc.id,
-              version_id=str(v.id), chunks=len(chunks), pages=parsed.page_count)
+              version_id=str(v.id), chunks=len(chunks), pages=parsed.page_count, ocr=v.ocr_applied)
         return {"sha256_verified": True, "parse_status": "parsed", "chunks": len(chunks)}
 
 
@@ -141,3 +155,22 @@ async def embed_version(version_id: uuid.UUID, settings: Settings, provider=None
         audit(db, "document.embedded", matter_id=matter_id, object_type="document", object_id=v.document_id,
               version_id=str(version_id), model=model_id, embedded=len(fresh), reused=len(todo) - len(fresh))
     return {"model": model_id, "embedded": len(fresh), "reused_from_cache": len(todo) - len(fresh)}
+
+
+async def ocr_version(version_id: uuid.UUID, settings: Settings) -> dict:
+    """OCR_fallback job: rasterize and recognize in a worker thread (CPU heavy), then store like any parsed document."""
+    import asyncio
+    from .ocr import ocr_document
+    from .parsers import NeedsOcr as _NeedsOcr, ParseError as _ParseError
+    with session_scope() as db:
+        v = db.get(DocumentVersion, version_id)
+        name, key = v.original_filename, v.storage_key
+    data = get_storage().get(key)
+    try:
+        res = await asyncio.to_thread(ocr_document, name, data, settings)
+    except (_NeedsOcr, _ParseError) as e:
+        with session_scope() as db:
+            v = db.get(DocumentVersion, version_id)
+            v.parse_status, v.parse_error = "failed", f"OCR failed: {e}"[:500]
+        return {"parse_status": "failed", "error": str(e)[:200]}
+    return ingest_version(version_id, settings, ocr_result=res)

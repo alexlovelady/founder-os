@@ -5,7 +5,7 @@ import uuid
 
 from ..config import Settings
 from ..corpus.refresh import refresh_source
-from ..ingestion.pipeline import embed_version, ingest_version
+from ..ingestion.pipeline import embed_version, ingest_version, ocr_version
 from ..models import Job
 from ..drafting.pipeline import run_draft, run_redline_generation
 from ..research.pipeline import run_research
@@ -42,6 +42,10 @@ async def ingest_document(job: Job, provider, settings: Settings) -> dict:
     return ingest_version(uuid.UUID(job.payload["version_id"]), settings)
 
 
+async def ocr_document(job: Job, provider, settings: Settings) -> dict:
+    return await ocr_version(uuid.UUID(job.payload["version_id"]), settings)
+
+
 async def embed_document(job: Job, provider, settings: Settings) -> dict:
     return await embed_version(uuid.UUID(job.payload["version_id"]), settings, route_override=job.payload.get("route"))
 
@@ -70,5 +74,5 @@ async def compare_summary(job: Job, provider: LLMProvider, settings: Settings) -
     return await run_compare_summary(uuid.UUID(job.payload["comparison_id"]), provider, settings)
 
 
-HANDLERS = {"corpus_refresh": corpus_refresh, "contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
+HANDLERS = {"ocr_document": ocr_document, "corpus_refresh": corpus_refresh, "contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
             "compare_summary": compare_summary, "research": research, "llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}

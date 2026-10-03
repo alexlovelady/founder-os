@@ -36,6 +36,7 @@ class Hit:
     authority: AuthorityAssessment = field(default_factory=AuthorityAssessment)
     retrieved_at: datetime | None = None
     effective_from: date | None = None
+    ocr_applied: bool = False
 
     @property
     def document_title(self) -> str:
@@ -189,6 +190,7 @@ async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Set
         v = vers.get(h.chunk.version_id)
         h.retrieved_at = v.source_retrieved_at if v else None
         h.effective_from = v.effective_from if v else None
+        h.ocr_applied = bool(v and v.ocr_applied)
     candidates = list(fused.values())
     if require_current:  # hard filter: only authority in force on the date, never superseded
         candidates = [h for h in candidates if not ({"superseded", "not_in_effect_on_date", "negative_treatment"} & set(h.authority.flags))]

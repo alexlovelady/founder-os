@@ -38,7 +38,7 @@ def _database():
 @pytest.fixture(autouse=True)
 def _clean():
     with dbmod.engine().begin() as c:
-        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks, research_runs, document_versions, documents, playbooks, contract_reviews, obligations, drafts, redlines, comparisons, corpus_sources CASCADE"))
+        c.execute(text("TRUNCATE users, matters, audit_events, gpu_nodes, provider_usage, jobs, document_chunks, research_runs, document_versions, documents, playbooks, contract_reviews, obligations, drafts, redlines, comparisons, corpus_sources, gpu_requests, mfa_recovery_codes CASCADE"))
     login_limiter.reset()
     from legalai.middleware import general_limiter, heavy_limiter
     general_limiter.reset()

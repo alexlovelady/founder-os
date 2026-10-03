@@ -15,6 +15,7 @@ from ..jobs.queue import enqueue
 from ..models import Document, DocumentVersion, User
 from ..security import current_user, get_matter_access
 from .. import storage
+from ..scanning import scan_upload
 
 router = APIRouter(prefix="/api", tags=["documents"])
 
@@ -32,6 +33,7 @@ def _ver_out(v: DocumentVersion) -> dict:
     return {"id": str(v.id), "version_number": v.version_number, "filename": v.original_filename,
             "content_type": v.content_type, "size_bytes": v.size_bytes, "sha256": v.sha256, "status": v.status,
             "parse_status": v.parse_status, "parse_error": v.parse_error, "page_count": v.page_count,
+            "ocr_applied": v.ocr_applied, "ocr_confidence": v.ocr_confidence,
             "embed_status": v.embed_status, "embedding_model": v.embedding_model,
             "created_at": v.created_at.isoformat()}
 
@@ -55,8 +57,10 @@ async def upload_document(matter_id: uuid.UUID = Form(...), file: UploadFile = F
     fname = storage.sanitize_filename(file.filename or "upload")
     try:
         ctype = storage.validate_upload(fname, data)
-        storage.scanner.scan(data)
+        scan = scan_upload(fname, data)
     except storage.UploadRejected as e:
+        audit(db, "document.upload_rejected", user_id=user.id, matter_id=matter_id, reason=str(e)[:200], filename=fname)
+        db.commit()
         raise HTTPException(422, str(e))
 
     sha = storage.sha256_hex(data)
@@ -82,7 +86,7 @@ async def upload_document(matter_id: uuid.UUID = Form(...), file: UploadFile = F
     job = enqueue(db, "ingest_document", matter_id=matter_id, user_id=user.id,
                   payload={"document_id": str(doc.id), "version_id": str(v.id)})
     audit(db, "document.uploaded", user_id=user.id, matter_id=matter_id, object_type="document",
-          object_id=doc.id, version_id=str(v.id), sha256=sha, size_bytes=len(data), filename=fname)
+          object_id=doc.id, version_id=str(v.id), sha256=sha, size_bytes=len(data), filename=fname, scanned_by=scan.scanner)
     db.commit()
     return {**_doc_out(doc, v), "job_id": str(job.id)}
 

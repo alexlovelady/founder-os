@@ -1,8 +1,11 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DbSession
 
+from .. import mfa
 from ..audit import audit
 from ..config import get_settings
 from ..db import get_db
@@ -27,7 +30,7 @@ class NewUser(BaseModel):
 
 
 def _user_out(u: User) -> dict:
-    return {"id": str(u.id), "email": u.email, "display_name": u.display_name, "role": u.role}
+    return {"id": str(u.id), "email": u.email, "display_name": u.display_name, "role": u.role, "mfa_enabled": u.mfa_enabled}
 
 
 def _set_cookie(resp: Response, token: str) -> None:
@@ -66,11 +69,42 @@ def login(body: Credentials, request: Request, response: Response, db: DbSession
         audit(db, "auth.login_failed", detail_email=body.email.lower())
         db.commit()
         raise HTTPException(401, "Invalid credentials")
+    if u.mfa_enabled:  # password was right; no session until the second factor is proven
+        audit(db, "auth.mfa_challenge", user_id=u.id)
+        db.commit()
+        return {"mfa_required": True, "mfa_token": mfa.sign_token(str(u.id))}
     token, s = create_session(db, u)
     audit(db, "auth.login", user_id=u.id)
     db.commit()
     _set_cookie(response, token)
     return {"user": _user_out(u), "csrf_token": s.csrf_token}
+
+
+class MfaLogin(BaseModel):
+    mfa_token: str
+    code: str = Field(min_length=4, max_length=32)
+
+
+@router.post("/login/mfa")
+def login_mfa(body: MfaLogin, request: Request, response: Response, db: DbSession = Depends(get_db)):
+    uid = mfa.verify_token(body.mfa_token)
+    login_limiter.check(f"mfa:{request.client.host if request.client else 'unknown'}:{uid or 'bad'}")
+    u = db.get(User, uuid.UUID(uid)) if uid else None
+    if not u or not u.is_active or u.deleted_at or not u.mfa_enabled:
+        raise HTTPException(401, "Invalid or expired sign-in. Start again.")
+    used_recovery = False
+    if not mfa.verify_code(u, body.code):
+        used_recovery = mfa.use_recovery_code(db, u, body.code)
+        if not used_recovery:
+            audit(db, "auth.mfa_failed", user_id=u.id)
+            db.commit()
+            raise HTTPException(401, "Invalid code")
+    token, s = create_session(db, u)
+    audit(db, "auth.login", user_id=u.id, mfa=True, recovery_code=used_recovery)
+    left = mfa.recovery_codes_left(db, u)
+    db.commit()
+    _set_cookie(response, token)
+    return {"user": _user_out(u), "csrf_token": s.csrf_token, "recovery_codes_left": left}
 
 
 @router.post("/logout")
@@ -100,3 +134,74 @@ def create_user(body: NewUser, auth: AuthContext = Depends(current_auth), db: Db
     audit(db, "user.created", user_id=auth.user.id, object_type="user", object_id=u.id, role=u.role)
     db.commit()
     return _user_out(u)
+
+
+# ---- multi-factor authentication ------------------------------------------------------------------------------
+class CodeBody(BaseModel):
+    code: str = Field(min_length=4, max_length=32)
+
+
+class DisableBody(BaseModel):
+    password: str = Field(max_length=256)
+    code: str = Field(min_length=4, max_length=32)
+
+
+@router.post("/mfa/setup")
+def mfa_setup(auth: AuthContext = Depends(current_auth), db: DbSession = Depends(get_db)):
+    """Start enrollment: returns the secret and a QR code. MFA is not active until /mfa/enable confirms a code."""
+    u = db.get(User, auth.user.id)
+    if u.mfa_enabled:
+        raise HTTPException(409, "MFA is already enabled; disable it first to re-enroll")
+    secret = mfa.new_secret()
+    u.mfa_secret_enc = mfa.encrypt_secret(secret)
+    u.mfa_last_step = None
+    audit(db, "auth.mfa_setup_started", user_id=u.id)
+    db.commit()
+    return mfa.provisioning(u, secret)
+
+
+@router.post("/mfa/enable")
+def mfa_enable(body: CodeBody, auth: AuthContext = Depends(current_auth), db: DbSession = Depends(get_db)):
+    login_limiter.check(f"mfa-enable:{auth.user.id}")
+    u = db.get(User, auth.user.id)
+    if u.mfa_enabled or not u.mfa_secret_enc:
+        raise HTTPException(409, "Start enrollment first")
+    if not mfa.verify_code(u, body.code):
+        raise HTTPException(401, "That code is not valid. Check your authenticator app's clock and try again.")
+    u.mfa_enabled = True
+    codes = mfa.make_recovery_codes(db, u)
+    audit(db, "auth.mfa_enabled", user_id=u.id)
+    db.commit()
+    return {"enabled": True, "recovery_codes": codes}  # shown once; only hashes are stored
+
+
+@router.post("/mfa/disable")
+def mfa_disable(body: DisableBody, auth: AuthContext = Depends(current_auth), db: DbSession = Depends(get_db)):
+    login_limiter.check(f"mfa-disable:{auth.user.id}")
+    u = db.get(User, auth.user.id)
+    if not u.mfa_enabled:
+        raise HTTPException(409, "MFA is not enabled")
+    if not verify_password(body.password, u.password_hash) or not (mfa.verify_code(u, body.code) or mfa.use_recovery_code(db, u, body.code)):
+        raise HTTPException(401, "Password or code is wrong")
+    u.mfa_enabled, u.mfa_secret_enc, u.mfa_last_step = False, None, None
+    mfa.make_recovery_codes(db, u, 0)
+    audit(db, "auth.mfa_disabled", user_id=u.id)
+    db.commit()
+    return {"enabled": False}
+
+
+@router.get("/mfa/status")
+def mfa_status(auth: AuthContext = Depends(current_auth), db: DbSession = Depends(get_db)):
+    return {"enabled": auth.user.mfa_enabled, "recovery_codes_left": mfa.recovery_codes_left(db, auth.user) if auth.user.mfa_enabled else 0}
+
+
+@router.post("/sessions/revoke-others")
+def revoke_other_sessions(auth: AuthContext = Depends(current_auth), db: DbSession = Depends(get_db)):
+    """'Sign out everywhere else'."""
+    n = 0
+    for s in db.scalars(select(Session).where(Session.user_id == auth.user.id, Session.id != auth.session.id)):
+        db.delete(s)
+        n += 1
+    audit(db, "auth.sessions_revoked", user_id=auth.user.id, count=n)
+    db.commit()
+    return {"revoked": n}

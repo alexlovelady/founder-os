@@ -125,6 +125,7 @@ VEC = [0.01] * 1024
 def netguard(monkeypatch):
     """Route every outbound httpx call to in-test fakes and record the hosts contacted."""
     hosts: list[str] = []
+    monkeypatch.setenv("GPU_MODE", "push")
     monkeypatch.setenv("GPU_NODE_URL", GPU)
     monkeypatch.setenv("GPU_NODE_TOKEN", "t" * 32)
     monkeypatch.setenv("FAST_MODEL", "fast-m")

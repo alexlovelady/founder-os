@@ -107,6 +107,8 @@ def coverage_labels(hits, jurisdiction: str, answer_text: str, summary: dict, cu
     if flagged & {"superseded", "not_in_effect_on_date", "negative_treatment"}:
         out.append({"label": "Superseded or out-of-date sources retrieved",
                     "reason": "Some retrieved sources are marked superseded or were not in effect on the relevant date."})
+    if any(h.ocr_applied for h in hits):
+        out.append({"label": "Some sources are OCR text", "reason": "Verbatim checks passed against OCR-recognized text, which may differ from the original image where recognition erred."})
     ext_hits = [h for h in hits if h.doc.authority_type != "user_document"]
     stale = [h for h in ext_hits if not h.retrieved_at or (datetime.now(timezone.utc) - h.retrieved_at).days > currentness_days]
     if stale:
@@ -156,7 +158,7 @@ async def run_research(run_id: uuid.UUID, provider: LLMProvider, settings: Setti
                                "section_number": c.section_number, "location": loc, "text": c.text,
                                "authority_type": h.doc.authority_type, "authority_label": h.authority.label,
                                "jurisdiction": h.doc.jurisdiction, "flags": list(h.authority.flags),
-                               "char_start": c.char_start, "char_end": c.char_end})
+                               "char_start": c.char_start, "char_end": c.char_end, "ocr": h.ocr_applied})
 
     model = None
     regenerated = False

@@ -14,7 +14,10 @@ class LocalGpuProvider(OpenAICompatibleProvider):
                          headers_fn=lambda m, p, b: sign(token, m, p, b))
 
 
-def build_local_gpu(settings: Settings) -> LocalGpuProvider | None:
+def build_local_gpu(settings: Settings):
+    if settings.gpu_mode == "pull":
+        from .pull_gpu import PulledGpuProvider
+        return PulledGpuProvider(settings) if settings.gpu_node_token else None
     if not settings.gpu_node_url or not settings.gpu_node_token:
         return None
     return LocalGpuProvider(settings.gpu_node_url, settings.gpu_node_token, settings.gpu_request_timeout_s)

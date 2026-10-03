@@ -101,3 +101,20 @@ def patch_user(uid: uuid.UUID, body: UserPatch, admin: User = Depends(require_ad
     audit(db, "user.active_changed", user_id=admin.id, object_type="user", object_id=u.id, is_active=body.is_active)
     db.commit()
     return {"id": str(u.id), "is_active": u.is_active}
+
+
+@router.post("/users/{uid}/mfa-reset")
+def reset_mfa(uid: uuid.UUID, admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    """Lost authenticator: clears MFA so the user can sign in with their password and re-enroll."""
+    from ..models import MfaRecoveryCode
+    u = db.get(User, uid)
+    if not u:
+        raise HTTPException(404, "User not found")
+    u.mfa_enabled, u.mfa_secret_enc, u.mfa_last_step = False, None, None
+    for r in db.scalars(select(MfaRecoveryCode).where(MfaRecoveryCode.user_id == u.id)):
+        db.delete(r)
+    for s in db.scalars(select(Session).where(Session.user_id == u.id)):
+        db.delete(s)
+    audit(db, "user.mfa_reset", user_id=admin.id, object_type="user", object_id=u.id)
+    db.commit()
+    return {"ok": True}
