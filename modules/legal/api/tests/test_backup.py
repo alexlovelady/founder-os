@@ -11,7 +11,7 @@ from legalai.backup import Pg, apply_retention, is_due, latest_backup, make_back
 from legalai.config import get_settings
 from tests.test_retrieval import drain, mk_matter, upload
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 import pull_backup  # noqa: E402
 
 DOCKER = "legalai-db-1"

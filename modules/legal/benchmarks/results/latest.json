@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-10-03T02:57:54.734204+00:00",
+  "run_at": "2026-10-03T16:25:40.377004+00:00",
   "embedder": "fake",
   "metrics": {
     "retrieval_hybrid_recall_at_1": 0.534,

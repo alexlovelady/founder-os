@@ -1,9 +1,9 @@
 # Build context is the repository root (Railway uploads from the root; compose uses context: .)
 FROM node:22-slim AS web
 WORKDIR /web
-COPY apps/web/package.json apps/web/package-lock.json ./
+COPY modules/legal/web/package.json modules/legal/web/package-lock.json ./
 RUN npm ci
-COPY apps/web .
+COPY modules/legal/web .
 RUN npm run build
 
 FROM python:3.12-slim
@@ -14,10 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
  && apt-get update && apt-get install -y --no-install-recommends postgresql-client-16 \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY apps/api/pyproject.toml .
-COPY apps/api/legalai legalai
-COPY apps/api/migrations migrations
-COPY apps/api/alembic.ini .
+COPY modules/legal/api/pyproject.toml .
+COPY modules/legal/api/legalai legalai
+COPY modules/legal/api/migrations migrations
+COPY modules/legal/api/alembic.ini .
 RUN pip install --no-cache-dir .
 COPY --from=web /web/dist static
 CMD ["sh", "-c", "alembic upgrade head && uvicorn legalai.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

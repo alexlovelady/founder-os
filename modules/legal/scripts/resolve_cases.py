@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Resolve landmark cases to CourtListener opinion IDs and verify each loads (needs COURTLISTENER_TOKEN).
-Writes apps/api/legalai/corpus/cases.json. Only cases whose citation matches and whose text loads are kept."""
+Writes api/legalai/corpus/cases.json. Only cases whose citation matches and whose text loads are kept."""
 import asyncio
 import json
 import os
@@ -11,7 +11,7 @@ import httpx
 
 from legalai.corpus.adapters import CourtListenerAdapter, SourceError
 
-OUT = Path(__file__).resolve().parents[1] / "apps/api/legalai/corpus/cases.json"
+OUT = Path(__file__).resolve().parents[1] / "api/legalai/corpus/cases.json"
 
 CASES = [
     # (group, short name, search citation, must-appear word in the case name)
@@ -85,7 +85,7 @@ async def main() -> int:
             print("ok ", name, oid, len(res.content))
             OUT.write_text(json.dumps(out, indent=1))   # incremental: a stall keeps what is verified so far
             await asyncio.sleep(3)
-    Path(__file__).resolve().parents[1].joinpath("apps/api/legalai/corpus/cases.json").write_text(json.dumps(out, indent=1))
+    Path(__file__).resolve().parents[1].joinpath("api/legalai/corpus/cases.json").write_text(json.dumps(out, indent=1))
     print(f"{len(out)} verified, {len(bad)} failed:", *bad, sep="\n  ")
     return 0
 

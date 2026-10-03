@@ -1,6 +1,6 @@
 # Benchmarks
 
-Run: `cd apps/api && pytest tests/test_benchmarks.py` (also part of the normal test run).
+Run: `cd api && pytest tests/test_benchmarks.py` (also part of the normal test run).
 
 | Suite | What it measures | Gate |
 |---|---|---|

@@ -34,7 +34,7 @@ def create_app() -> FastAPI:
     def healthz():
         return {"ok": True}
 
-    # Single-page UI built from apps/web (copied to ./static in the Docker image).
+    # Single-page UI built from web (copied to ./static in the Docker image).
     static = Path(__file__).resolve().parent.parent / "static"
     if static.is_dir():
         @app.get("/{path:path}", include_in_schema=False)

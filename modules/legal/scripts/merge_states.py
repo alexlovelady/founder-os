@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Merge the per-batch verified state source files into apps/api/legalai/corpus/states.json (what the app reads)."""
+"""Merge the per-batch verified state source files into api/legalai/corpus/states.json (what the app reads)."""
 import glob
 import json
 import re
@@ -7,7 +7,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "apps/api/legalai/corpus"
+ROOT = Path(__file__).resolve().parents[1] / "api/legalai/corpus"
 CAVEAT_WORDS = re.compile(r"session law|bill|engrossed|compilation|per-section|partial|unofficial|not current|later amendments|mirror", re.I)
 
 BUILTIN = [  # already verified earlier in the project

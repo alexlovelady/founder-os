@@ -13,7 +13,7 @@ services:
       interval: 5s
       retries: 10
   api:
-    build: { context: ., dockerfile: apps/api/Dockerfile }
+    build: { context: ., dockerfile: modules/legal/api/Dockerfile }
     env_file: .env
     environment:
       DATABASE_URL: postgresql+psycopg://legalai:legalai-dev@db:5432/legalai

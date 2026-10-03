@@ -23,7 +23,7 @@ from legalai.ingestion.chunking import chunk_document
 from legalai.ingestion.parsers import parse_document
 from tests.test_retrieval import FakeEmbedder, drain, mk_matter, upload, emb  # noqa: F401
 
-ROOT = Path(__file__).resolve().parents[3] / "benchmarks"
+ROOT = Path(__file__).resolve().parents[2] / "benchmarks"
 MODE = os.environ.get("BENCH_EMBEDDER", "fake")
 TOLERANCE = 0.03
 THRESHOLDS = {"retrieval_recall_at_5": 0.85, "retrieval_mrr": 0.60, "citation_fabrication_rejected": 1.0,

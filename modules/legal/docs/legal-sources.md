@@ -34,7 +34,7 @@ The Authorities page has one-click starting points (FTC Safeguards, COPPA, FLSA,
 examples, not a complete selection.
 
 **State law.** The Legal library page has a *State law (company formation)* section covering all 50 states and DC: the LLC act
-and the corporation act per state, with an "Add every state" button. The catalog (`apps/api/legalai/corpus/states/*.json`, merged
+and the corporation act per state, with an "Add every state" button. The catalog (`api/legalai/corpus/states/*.json`, merged
 by `scripts/merge_states.py`) was built by checking each official source and fetching it, and it reports what it could not do:
 
 * **"no free official source"**: the official site could not be fetched (JavaScript-only pages, blocked by TLS or robots, or the

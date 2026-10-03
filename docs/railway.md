@@ -9,7 +9,7 @@ which is why the worker runs inside the API process (`RUN_WORKER=true`). No Redi
 2. Note the connection string. SQLAlchemy needs the driver prefix: `postgresql+psycopg://…` (replace `postgresql://`).
 
 ## 2. API service
-1. *Add service* → GitHub repo (or `railway up`). Set **Root Directory** to `apps/api`; Railway uses the Dockerfile.
+1. *Add service* → GitHub repo (or `railway up`). Set **Root Directory** to `modules/legal/api`; Railway uses the Dockerfile.
    Start command is already `alembic upgrade head && uvicorn …`.
 2. Add a **Volume** to this service mounted at `/data`.
 3. Variables:
