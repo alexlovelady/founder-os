@@ -23,6 +23,7 @@ export default function Sidebar({ email }: { email: string }) {
           </span>
         ),
       )}
+      <Link href="/app/settings" className={`${link(path === "/app/settings")} mt-4`}>Settings</Link>
       <div className="mt-auto space-y-1 px-3 py-2 text-xs text-slate-400">
         <div className="truncate">{email}</div>
         <SignOut />

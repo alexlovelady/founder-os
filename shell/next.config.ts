@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 const LEGAL = process.env.LEGAL_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   async rewrites() {
     return [
       { source: "/assets/:path*", destination: `${LEGAL}/assets/:path*` },

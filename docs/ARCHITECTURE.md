@@ -10,6 +10,21 @@
 4. **Provider-agnostic AI.** Modules ask for a *model tier* (`fast`, `deep`); a plan decides which provider serves it (private GPU now;
    cloud or the customer's own key later). Modules never hard-code a provider.
 
+## Hosting (Railway, one project)
+| Service | Role | Reachable by |
+|---|---|---|
+| `shell` | **Main service.** Public site, sign-in, business and account data, dashboard. Its own database (`Postgres`). | The internet: https://shell-production-86b1.up.railway.app |
+| `api` | LegalAI module (FastAPI) with its own database (`postgres`, pgvector) | The shell over Railway's private network (`api.railway.internal:8080`); it also keeps a public address because the owner's GPU PC pulls jobs from it |
+| future modules | Each its own service, own folder, own database if needed | The shell over the private network |
+
+The shell proxies each module under a path (`/legal-ui`), so users only ever see the shell's address. Custom subdomains
+(`app.example.com` for the shell, `legal.example.com` for LegalAI, ...) can be attached later in Railway without code changes.
+Each service is selected by its own `RAILWAY_DOCKERFILE_PATH` variable (`shell/Dockerfile`, `modules/legal/api/Dockerfile`); the root
+`railway.json` holds only settings common to all (builder, health path `/healthz`). Deploy one with `railway up -s <service> -c`.
+
+Data ownership: business and account profile data lives in the shell's database (`shell/migrations`). When a business is created or edited,
+the shell pushes the relevant profile into each module (`shell/src/lib/legal.ts`), so tools never disagree with the dashboard.
+
 ## Folders
 | Folder | What | Stack | Deploys as |
 |---|---|---|---|

@@ -11,7 +11,7 @@ Phases follow docs/FounderOS_Build_Spec.md section 75. One phase at a time: plan
 
 Open item: LegalAI's landmark case list is partial (CourtListener rate limits); re-run `modules/legal/scripts/resolve_cases.py` later.
 
-Status note (2026-10-03): the shell has a module registry, landing page, sign-in (interim: LegalAI accounts), server-side route gate,
-sidebar layout, dashboard, and LegalAI embedded same-origin through a proxy (`shell/`). Not built: businesses, onboarding, roles, billing,
-plan-based AI tiers. Firebase is deferred; swap in via `IdentityProvider` when ready. The shell is not deployed anywhere yet; it runs
-locally (`cd shell && npm run build && npm start`, with LegalAI on :8000 or `LEGAL_URL` set).
+Status note (2026-10-03): the shell is deployed as the main Railway service with its own Postgres. Built: sign-in (interim: LegalAI
+accounts), business onboarding and profile (stored in the shell DB), dashboard combining business info with LegalAI's checklist, settings
+(profile edits sync into LegalAI), LegalAI embedded same-origin over Railway's private network. Not built: roles beyond owner, team
+invites, billing, plan-based AI tiers, Firebase/identity swap, other modules, custom domains.
