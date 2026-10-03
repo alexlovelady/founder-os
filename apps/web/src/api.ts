@@ -70,6 +70,23 @@ export async function downloadPost(path: string, json: unknown): Promise<{ filen
   return { filename, applied: r.headers.get('x-revise-applied') }
 }
 
+/** GET a binary response and download it as a file. Returns the filename. */
+export async function downloadBlob(path: string): Promise<string> {
+  const r = await fetch(path, { credentials: 'same-origin' })
+  if (!r.ok) {
+    let msg = r.statusText
+    try { const d = await r.json(); msg = typeof d.detail === 'string' ? d.detail : msg } catch { /* not JSON */ }
+    throw new ApiError(r.status, msg)
+  }
+  const m = /filename="([^"]+)"/.exec(r.headers.get('content-disposition') ?? '')
+  const filename = m?.[1] ?? 'document'
+  const url = URL.createObjectURL(await r.blob())
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 5000)
+  return filename
+}
+
 /** Fetch on mount and every `ms` (if given); returns data, error, and a manual reload. */
 export function useQuery<T>(fn: () => Promise<T>, deps: unknown[], ms?: number) {
   const [data, setData] = useState<T | undefined>()

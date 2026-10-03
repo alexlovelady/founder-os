@@ -66,7 +66,7 @@ function Answer({ run, onCite }: { run: Run; onCite: (id: string) => void }) {
   )
 }
 
-function RunView({ id, evidenceOpen }: { id: string; evidenceOpen: (chunkId: string) => void }) {
+export function RunView({ id, evidenceOpen }: { id: string; evidenceOpen: (chunkId: string) => void }) {
   const { data: run, reload } = useQuery(() => api<Run>(`/api/research/${id}`), [id], 3000)
   if (!run) return <Loading />
   if (run.status !== 'complete') {

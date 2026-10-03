@@ -1,0 +1,384 @@
+[
+ {
+  "state": "Texas",
+  "code": "TX",
+  "kind": "llc",
+  "title": "Texas Business Organizations Code, LLC provisions",
+  "citation": "Tex. Bus. Orgs. Code ch. 101",
+  "items": [
+   {
+    "name": "Chapter 101 (LLCs)",
+    "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.101.htm",
+    "text_chars": 150441
+   },
+   {
+    "name": "Chapter 11 (Winding up and termination)",
+    "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.11.htm",
+    "text_chars": 73716
+   },
+   {
+    "name": "Chapter 1 (Definitions)",
+    "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.1.htm",
+    "text_chars": 46890
+   }
+  ],
+  "reason": "",
+  "notes": "Official Texas Legislative Council host tcss.legis.texas.gov; statutes.capitol.texas.gov pages are JavaScript and do not parse."
+ },
+ {
+  "state": "Texas",
+  "code": "TX",
+  "kind": "corp",
+  "title": "Texas Business Organizations Code, for-profit corporations",
+  "citation": "Tex. Bus. Orgs. Code ch. 21",
+  "items": [
+   {
+    "name": "Chapter 21 (For-profit corporations)",
+    "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.21.htm",
+    "text_chars": 332585
+   },
+   {
+    "name": "Chapter 11 (Winding up and termination)",
+    "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.11.htm",
+    "text_chars": 73716
+   },
+   {
+    "name": "Chapter 1 (Definitions)",
+    "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.1.htm",
+    "text_chars": 46890
+   }
+  ],
+  "reason": "",
+  "notes": "Same host note as LLC."
+ },
+ {
+  "state": "Texas",
+  "code": "TX",
+  "kind": "securities",
+  "title": "Texas Securities Act",
+  "citation": "Tex. Gov't Code tit. 12, ch. 4001 et seq.",
+  "items": [
+   {
+    "name": "Chapter 4001 (General provisions)",
+    "url": "https://tcss.legis.texas.gov/resources/GV/htm/GV.4001.htm",
+    "text_chars": 18830
+   }
+  ],
+  "reason": "",
+  "notes": "Only ch. 4001 verified; other chapters (4003 etc.) not checked."
+ },
+ {
+  "state": "Utah",
+  "code": "UT",
+  "kind": "llc",
+  "title": "Utah Revised Uniform Limited Liability Company Act",
+  "citation": "Utah Code tit. 48, ch. 3a",
+  "items": [],
+  "reason": "le.utah.gov fails TLS verification in the fetcher (CERTIFICATE_VERIFY_FAILED, incomplete issuer chain), so no URL can be loaded.",
+  "notes": "Search suggests recodification to Title 16 ch. 20 effective Oct 2026 (unverified). Official URL pattern exists at le.utah.gov/xcode but is unfetchable."
+ },
+ {
+  "state": "Utah",
+  "code": "UT",
+  "kind": "corp",
+  "title": "Utah Revised Business Corporation Act",
+  "citation": "Utah Code tit. 16, ch. 10a",
+  "items": [],
+  "reason": "le.utah.gov fails TLS verification in the fetcher (CERTIFICATE_VERIFY_FAILED); no alternative official host found.",
+  "notes": ""
+ },
+ {
+  "state": "Vermont",
+  "code": "VT",
+  "kind": "llc",
+  "title": "Vermont Limited Liability Company Act",
+  "citation": "11 V.S.A. ch. 25",
+  "items": [
+   {
+    "name": "Chapter 25 full chapter",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11/025",
+    "text_chars": 160469
+   }
+  ],
+  "reason": "",
+  "notes": "Page starts with site navigation chrome but contains full statute text."
+ },
+ {
+  "state": "Vermont",
+  "code": "VT",
+  "kind": "corp",
+  "title": "Vermont Business Corporation Act",
+  "citation": "11A V.S.A. chs. 1-14",
+  "items": [
+   {
+    "name": "Ch. 1 General provisions",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/001",
+    "text_chars": 22903
+   },
+   {
+    "name": "Ch. 2 Incorporation",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/002",
+    "text_chars": 10201
+   },
+   {
+    "name": "Ch. 3 Purposes and powers",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/003",
+    "text_chars": 6471
+   },
+   {
+    "name": "Ch. 6 Shares and distributions",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/006",
+    "text_chars": 25405
+   },
+   {
+    "name": "Ch. 7 Shareholders",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/007",
+    "text_chars": 34135
+   },
+   {
+    "name": "Ch. 8 Directors and officers",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/008",
+    "text_chars": 46115
+   },
+   {
+    "name": "Ch. 11 Merger and share exchange",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/011",
+    "text_chars": 44079
+   },
+   {
+    "name": "Ch. 13 Dissenters' rights",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/013",
+    "text_chars": 19195
+   },
+   {
+    "name": "Ch. 14 Dissolution",
+    "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/014",
+    "text_chars": 29876
+   }
+  ],
+  "reason": "",
+  "notes": "Uses fullchapter pages on legislature.vermont.gov (labelled unofficial online copy of VSA by the legislature)."
+ },
+ {
+  "state": "Virginia",
+  "code": "VA",
+  "kind": "llc",
+  "title": "Virginia Limited Liability Company Act",
+  "citation": "Va. Code tit. 13.1, ch. 12",
+  "items": [
+   {
+    "name": "Chapter 12 full",
+    "url": "https://law.lis.virginia.gov/vacodefull/title13.1/chapter12",
+    "text_chars": 291894
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Virginia",
+  "code": "VA",
+  "kind": "corp",
+  "title": "Virginia Stock Corporation Act",
+  "citation": "Va. Code tit. 13.1, ch. 9",
+  "items": [
+   {
+    "name": "Chapter 9 full",
+    "url": "https://law.lis.virginia.gov/vacodefull/title13.1/chapter9",
+    "text_chars": 591321
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Virginia",
+  "code": "VA",
+  "kind": "securities",
+  "title": "Virginia Securities Act",
+  "citation": "Va. Code tit. 13.1, ch. 5",
+  "items": [
+   {
+    "name": "Chapter 5 full",
+    "url": "https://law.lis.virginia.gov/vacodefull/title13.1/chapter5",
+    "text_chars": 90964
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Washington",
+  "code": "WA",
+  "kind": "llc",
+  "title": "Washington Limited Liability Company Act",
+  "citation": "RCW ch. 25.15",
+  "items": [
+   {
+    "name": "Chapter 25.15 full",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=25.15&full=true",
+    "text_chars": 132088
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Washington",
+  "code": "WA",
+  "kind": "corp",
+  "title": "Washington Business Corporation Act",
+  "citation": "RCW Title 23B",
+  "items": [
+   {
+    "name": "Ch. 23B.01 General provisions",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.01&full=true",
+    "text_chars": 40195
+   },
+   {
+    "name": "Ch. 23B.02 Incorporation",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.02&full=true",
+    "text_chars": 9947
+   },
+   {
+    "name": "Ch. 23B.06 Shares and distributions",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.06&full=true",
+    "text_chars": 30584
+   },
+   {
+    "name": "Ch. 23B.07 Shareholders",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.07&full=true",
+    "text_chars": 47759
+   },
+   {
+    "name": "Ch. 23B.08 Directors and officers",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.08&full=true",
+    "text_chars": 62313
+   },
+   {
+    "name": "Ch. 23B.10 Amendment",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.10&full=true",
+    "text_chars": 23080
+   },
+   {
+    "name": "Ch. 23B.14 Dissolution",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.14&full=true",
+    "text_chars": 34384
+   }
+  ],
+  "reason": "",
+  "notes": "23B.11 (merger) failed the corporation/shareholder check and was omitted."
+ },
+ {
+  "state": "Washington",
+  "code": "WA",
+  "kind": "securities",
+  "title": "Washington Securities Act",
+  "citation": "RCW ch. 21.20",
+  "items": [
+   {
+    "name": "Chapter 21.20 full",
+    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=21.20&full=true",
+    "text_chars": 158557
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "West Virginia",
+  "code": "WV",
+  "kind": "llc",
+  "title": "West Virginia Uniform Limited Liability Company Act",
+  "citation": "W. Va. Code ch. 31B",
+  "items": [
+   {
+    "name": "Chapter 31B PDF",
+    "url": "https://code.wvlegislature.gov/pdf/31B/",
+    "text_chars": 202360
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "West Virginia",
+  "code": "WV",
+  "kind": "corp",
+  "title": "West Virginia Business Corporation Act",
+  "citation": "W. Va. Code ch. 31D",
+  "items": [
+   {
+    "name": "Chapter 31D PDF",
+    "url": "https://code.wvlegislature.gov/pdf/31D/",
+    "text_chars": 312066
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Wisconsin",
+  "code": "WI",
+  "kind": "llc",
+  "title": "Wisconsin Uniform Limited Liability Company Law",
+  "citation": "Wis. Stat. ch. 183",
+  "items": [
+   {
+    "name": "Chapter 183 PDF",
+    "url": "https://docs.legis.wisconsin.gov/statutes/statutes/183.pdf",
+    "text_chars": 220243
+   }
+  ],
+  "reason": "",
+  "notes": "HTML chapter page is only a table of contents; use PDF."
+ },
+ {
+  "state": "Wisconsin",
+  "code": "WI",
+  "kind": "corp",
+  "title": "Wisconsin Business Corporations",
+  "citation": "Wis. Stat. ch. 180",
+  "items": [
+   {
+    "name": "Chapter 180 PDF",
+    "url": "https://docs.legis.wisconsin.gov/statutes/statutes/180.pdf",
+    "text_chars": 513328
+   }
+  ],
+  "reason": "",
+  "notes": "HTML chapter page is only a table of contents; use PDF."
+ },
+ {
+  "state": "Wyoming",
+  "code": "WY",
+  "kind": "llc",
+  "title": "Wyoming Limited Liability Company Act",
+  "citation": "Wyo. Stat. tit. 17, ch. 29",
+  "items": [
+   {
+    "name": "Title 17 PDF (includes ch. 29)",
+    "url": "https://wyoleg.gov/statutes/compress/title17.pdf",
+    "text_chars": 1519096
+   }
+  ],
+  "reason": "",
+  "notes": "Title 17 PDF also contains ch. 16 corporations; same URL used for both kinds. SOS also publishes a 2021 ch. 29 PDF (139643 chars) at sos.wyo.gov, verified but older."
+ },
+ {
+  "state": "Wyoming",
+  "code": "WY",
+  "kind": "corp",
+  "title": "Wyoming Business Corporation Act",
+  "citation": "Wyo. Stat. tit. 17, ch. 16",
+  "items": [
+   {
+    "name": "Title 17 PDF (includes ch. 16)",
+    "url": "https://wyoleg.gov/statutes/compress/title17.pdf",
+    "text_chars": 1519096
+   }
+  ],
+  "reason": "",
+  "notes": "Single combined Title 17 PDF, 1.5M chars."
+ }
+]

@@ -27,15 +27,32 @@ Add sources on the **Authorities** page (administrator). All are fetched from of
 | Federal regulations (CFR) | eCFR adapter (title + part) | Official eCFR API, no key. Verified against the live API. |
 | Federal statutes (U.S. Code) | U.S. Code adapter (title + sections) | Official GPO govinfo link service, no key. Verified live. Give section ranges like `101-122`. |
 | Specific official documents (agency guidance, court rules, state statutes published as pages or PDFs) | Official https URL | Public https only. Conditional GET, so unchanged sources cost nothing. |
-| Court opinions | CourtListener adapter | Needs a free API token (`COURTLISTENER_TOKEN`). **Not verified against the live API** (no token was available); covered by mocked tests only. |
+| Court opinions | CourtListener adapter | Needs a free API token (`COURTLISTENER_TOKEN`, set on Railway). Verified against the live API; backs off on HTTP 429. |
 | Subsequent history ("is this still good law?") | Treatment entries / bulk import | Never inferred by the system. Enter it from an authoritative source, or import a CSV/JSON export from a citator you license. |
 
 The Authorities page has one-click starting points (FTC Safeguards, COPPA, FLSA, copyright, trade secrets, and others). They are
 examples, not a complete selection.
 
-**State law.** There is no single free official bulk source for all states. Many states publish their code on an official site;
-add the specific sections or chapters you need with the URL adapter, or tell me which states matter and I will look for an
-official API or download for them.
+**State law.** The Legal library page has a *State law (company formation)* section covering all 50 states and DC: the LLC act
+and the corporation act per state, with an "Add every state" button. The catalog (`apps/api/legalai/corpus/states/*.json`, merged
+by `scripts/merge_states.py`) was built by checking each official source and fetching it, and it reports what it could not do:
+
+* **"no free official source"**: the official site could not be fetched (JavaScript-only pages, blocked by TLS or robots, or the
+  code is only available through a paid or one-section-per-page interface). These are shown, not hidden or guessed.
+* **Caveats** are shown next to the state: a session law or compilation instead of the current codified text, partial section
+  coverage, or an official mirror host. Treat those as a pointer to the source, and read the current statute before relying on it.
+* Rerun `scripts/verify_source.py` to re-check a source; state codes change, so the catalog carries a generated date.
+
+**Landmark cases.** A *Landmark cases* section adds well-known Delaware corporate, startup financing, Delaware LLC and securities
+opinions from CourtListener (`scripts/resolve_cases.py` resolves each citation to an opinion and keeps only ones whose name
+matches and whose text loads). Whether a case is still good law is never inferred; record treatment on the document.
+
+**Templates and formatting.** Drafting retrieves reference templates (authority type `template`) to follow structure and style.
+The Common Paper standard agreements (CC BY 4.0) are available as starting points on the Legal library page; the license
+requires attribution, which the system stores with each template and prints under every draft that used one. Founders
+agreements, operating agreements, offer letters and others have no verified open-licensed template, so those use the original
+outlines in `startup/catalog.py` plus whatever templates you upload. The YC SAFE and NVCA documents are not fetched
+automatically because their terms were not verified; upload them yourself if you have the right to.
 
 **Size and cost.** A large part (HIPAA's Part 164, Regulation Z) is hundreds of thousands of characters. Each passage is embedded
 twice (Voyage and the local model) so private matters can search it, which costs a few cents at Voyage and some GPU time locally.

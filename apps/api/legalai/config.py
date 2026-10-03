@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     ocr_dpi: int = 200
     ocr_max_pages: int = 150
     tesseract_cmd: str = ""
+    courtlistener_token: str = ""
     clamav_host: str = ""  # optional clamd service for signature scanning
     clamav_port: int = 3310
     clamav_required: bool = False  # true: reject uploads when the scanner is unreachable

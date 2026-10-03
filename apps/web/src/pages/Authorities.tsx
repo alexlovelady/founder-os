@@ -88,7 +88,7 @@ export default function Authorities() {
   const [open, setOpen] = useState<string>()
   return (
     <div className="stack" style={{ gap: 22 }}>
-      <div><h1>Authorities</h1><p className="muted">A shared library of public legal sources, fetched from official sources and kept with full version history. Every matter's research can draw on it; your private documents never go into it.</p></div>
+      <div><h1>Legal library</h1><p className="muted">A shared library of public legal sources, fetched from official sources and kept with full version history. Every project's research can draw on it; your private documents never go into it.</p></div>
       {!data ? <Loading /> : data.documents.length === 0 ? <div className="card"><Empty>{user.role === 'admin' ? 'The library is empty. Add an official source below.' : 'The library is empty. An administrator can add official sources.'}</Empty></div> :
         <div className="stack" style={{ gap: 8 }}>{data.documents.map(d => (
           <div key={d.id} className="card">
@@ -102,7 +102,58 @@ export default function Authorities() {
                 {user.role === 'admin' && <button className="btn sm" onClick={() => setOpen(open === d.id ? undefined : d.id)}>Treatment</button>}</div></div>
             {open === d.id && <div style={{ marginTop: 12 }}><Treatment doc={d} onSaved={() => { setOpen(undefined); reload() }} /></div>}
           </div>))}</div>}
-      {user.role === 'admin' && <Sources />}
+      {user.role === 'admin' && <><StateLaw /><LandmarkCases /><Sources /></>}
+    </div>
+  )
+}
+
+function StateLaw() {
+  const { data, reload } = useQuery(() => api<any>('/api/library/states'), [])
+  const [busy, setBusy] = useState<string>()
+  const [msg, setMsg] = useState<string>()
+  if (!data) return <Loading />
+  const list: any[] = data.states
+  if (list.length === 0) return <div className="card muted small">No state catalog is installed.</div>
+  const addable = (s: any) => ['llc', 'corp'].filter(k => s.kinds[k]?.available && !s.kinds[k].added)
+  const add = async (s: any) => {
+    setBusy(s.code); setMsg(undefined)
+    try { const r = await api<any>(`/api/library/states/${s.code}`, { json: { kinds: addable(s) } }); setMsg(`${s.name}: ${r.created} source${r.created === 1 ? '' : 's'} added.`) }
+    catch (e) { setMsg((e as Error).message) } finally { setBusy(undefined); reload() }
+  }
+  const addAll = async () => { for (const s of list) if (addable(s).length) await add(s) }
+  return (
+    <div className="card stack" style={{ gap: 8 }}>
+      <div className="row between wrap"><div><h3>State law (company formation)</h3>
+        <div className="muted small">LLC and corporation acts, checked against official state sources. Where an official free copy could not be fetched, it says so rather than guessing. Updated {data.generated ?? 'n/a'}.</div></div>
+        <button className="btn primary" disabled={!!busy} onClick={addAll}>Add every state</button></div>
+      {msg && <div className="badge ok" style={{ justifySelf: 'start' }}>{msg}</div>}
+      <table><thead><tr><th>State</th><th>LLC act</th><th>Corporation act</th><th /></tr></thead><tbody>{list.map(s => (
+        <tr key={s.code}><td><strong>{s.name}</strong></td>
+          {(['llc', 'corp'] as const).map(k => { const x = s.kinds[k]; return (
+            <td key={k} className="small">{!x || !x.available ? <span className="badge warn" title={x?.caveat}>no free official source</span>
+              : <>{x.added ? <span className="badge ok">in library</span> : <span className="badge">available</span>}{x.caveat && <div className="muted" style={{ maxWidth: 260 }}>{x.caveat}</div>}</>}</td>) })}
+          <td><button className="btn sm" disabled={!!busy || addable(s).length === 0} onClick={() => add(s)}>{addable(s).length > 0 ? 'Add' : (['llc', 'corp'].some(k => s.kinds[k]?.available) ? 'Added' : 'None')}</button></td></tr>))}</tbody></table>
+    </div>
+  )
+}
+
+function LandmarkCases() {
+  const { data, reload } = useQuery(() => api<any>('/api/library/cases'), [])
+  const [msg, setMsg] = useState<string>()
+  if (!data) return <Loading />
+  if (data.groups.length === 0) return null
+  const add = async (group: string) => {
+    try { const r = await api<any>('/api/library/cases', { json: { group } }); setMsg(`${r.created} case${r.created === 1 ? '' : 's'} added.`); reload() } catch (e) { setMsg((e as Error).message) }
+  }
+  return (
+    <div className="card stack" style={{ gap: 8 }}>
+      <h3>Landmark cases</h3>
+      <div className="muted small">Well-known court opinions from CourtListener. Treatment (good law or not) is never guessed; an administrator records it.{!data.token_configured && ' A CourtListener token is not configured, so these cannot be fetched yet.'}</div>
+      {msg && <div className="badge ok" style={{ justifySelf: 'start' }}>{msg}</div>}
+      {data.groups.map((g: any) => (
+        <div key={g.name} className="row between wrap" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: '8px 10px' }}>
+          <div><strong className="small">{g.name}</strong><div className="muted small">{g.cases.map((c: any) => c.name).join(' · ')}</div></div>
+          <button className="btn sm" disabled={g.cases.every((c: any) => c.added) || !data.token_configured} onClick={() => add(g.name)}>{g.cases.every((c: any) => c.added) ? 'Added' : 'Add group'}</button></div>))}
     </div>
   )
 }

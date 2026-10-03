@@ -1,0 +1,710 @@
+[
+ {
+  "state": "Kentucky",
+  "code": "KY",
+  "kind": "llc",
+  "title": "Kentucky Limited Liability Company Act",
+  "citation": "KRS ch. 275",
+  "items": [
+   {
+    "name": "KRS 275.015",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=47081",
+    "text_chars": 7459
+   },
+   {
+    "name": "KRS 275.025",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=39663",
+    "text_chars": 3533
+   },
+   {
+    "name": "KRS 275.165",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=44365",
+    "text_chars": 3170
+   },
+   {
+    "name": "KRS 275.170",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40445",
+    "text_chars": 3639
+   },
+   {
+    "name": "KRS 275.175",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=47082",
+    "text_chars": 4563
+   },
+   {
+    "name": "KRS 275.185",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=42381",
+    "text_chars": 3905
+   },
+   {
+    "name": "KRS 275.280",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=47084",
+    "text_chars": 5851
+   },
+   {
+    "name": "KRS 275.285",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=44359",
+    "text_chars": 3039
+   },
+   {
+    "name": "KRS 275.225",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13874",
+    "text_chars": 3837
+   },
+   {
+    "name": "KRS 275.300",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40450",
+    "text_chars": 4121
+   },
+   {
+    "name": "KRS 275.365",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=44370",
+    "text_chars": 3952
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section statute pages (apps.legislature.ky.gov; PDF). No whole-chapter text available; short sections (distributions, judicial dissolution) fail checker minimum so coverage is partial."
+ },
+ {
+  "state": "Kentucky",
+  "code": "KY",
+  "kind": "corp",
+  "title": "Kentucky Business Corporation Act",
+  "citation": "KRS ch. 271B",
+  "items": [
+   {
+    "name": "KRS 271B.1-400",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45776",
+    "text_chars": 7229
+   },
+   {
+    "name": "KRS 271B.2-020",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45778",
+    "text_chars": 3107
+   },
+   {
+    "name": "KRS 271B.6-270",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13347",
+    "text_chars": 3493
+   },
+   {
+    "name": "KRS 271B.6-400",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13351",
+    "text_chars": 3229
+   },
+   {
+    "name": "KRS 271B.7-400",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45780",
+    "text_chars": 3571
+   },
+   {
+    "name": "KRS 271B.8-300",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45781",
+    "text_chars": 4145
+   },
+   {
+    "name": "KRS 271B.8-310",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13390",
+    "text_chars": 3404
+   },
+   {
+    "name": "KRS 271B.13-020",
+    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45782",
+    "text_chars": 3822
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section statute pages (PDF); no whole-chapter text; short sections (merger, dissolution, inspection) fail checker minimum so coverage is partial."
+ },
+ {
+  "state": "Louisiana",
+  "code": "LA",
+  "kind": "llc",
+  "title": "Louisiana Limited Liability Company Law",
+  "citation": "La. R.S. 12:1301 et seq. (Title 12, ch. 22)",
+  "items": [
+   {
+    "name": "R.S. 12:1301",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76248",
+    "text_chars": 4715
+   },
+   {
+    "name": "R.S. 12:1305",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76252",
+    "text_chars": 3721
+   },
+   {
+    "name": "R.S. 12:1306",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76253",
+    "text_chars": 6589
+   },
+   {
+    "name": "R.S. 12:1308",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76255",
+    "text_chars": 5081
+   },
+   {
+    "name": "R.S. 12:1308.2",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76257",
+    "text_chars": 4612
+   },
+   {
+    "name": "R.S. 12:1310",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76260",
+    "text_chars": 3070
+   },
+   {
+    "name": "R.S. 12:1314",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76264",
+    "text_chars": 4525
+   },
+   {
+    "name": "R.S. 12:1318",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76269",
+    "text_chars": 6123
+   },
+   {
+    "name": "R.S. 12:1327",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76279",
+    "text_chars": 3779
+   },
+   {
+    "name": "R.S. 12:1359",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76316",
+    "text_chars": 3392
+   },
+   {
+    "name": "R.S. 12:1361",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=76319",
+    "text_chars": 3954
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section pages (legis.la.gov Law.aspx); short sections (distributions liability, dissolution) fail checker minimum so coverage is partial."
+ },
+ {
+  "state": "Louisiana",
+  "code": "LA",
+  "kind": "corp",
+  "title": "Louisiana Business Corporation Act",
+  "citation": "La. R.S. 12:1-101 et seq.",
+  "items": [
+   {
+    "name": "R.S. 12:1-140",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920192",
+    "text_chars": 13719
+   },
+   {
+    "name": "R.S. 12:1-202",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920205",
+    "text_chars": 4853
+   },
+   {
+    "name": "R.S. 12:1-621",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920238",
+    "text_chars": 3082
+   },
+   {
+    "name": "R.S. 12:1-640",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920248",
+    "text_chars": 3316
+   },
+   {
+    "name": "R.S. 12:1-704",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920252",
+    "text_chars": 4895
+   },
+   {
+    "name": "R.S. 12:1-732",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920282",
+    "text_chars": 7347
+   },
+   {
+    "name": "R.S. 12:1-831",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920324",
+    "text_chars": 3935
+   },
+   {
+    "name": "R.S. 12:1-863",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920348",
+    "text_chars": 3004
+   },
+   {
+    "name": "R.S. 12:1-921",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920353",
+    "text_chars": 3391
+   },
+   {
+    "name": "R.S. 12:1-1102",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920392",
+    "text_chars": 4313
+   },
+   {
+    "name": "R.S. 12:1-1104",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920396",
+    "text_chars": 5496
+   },
+   {
+    "name": "R.S. 12:1-1202",
+    "url": "https://legis.la.gov/legis/Law.aspx?d=920407",
+    "text_chars": 3274
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section pages (legis.la.gov Law.aspx); selected from scan of R.S. 12:1-120 to 1-1324; short sections fail checker minimum, so coverage partial."
+ },
+ {
+  "state": "Maine",
+  "code": "ME",
+  "kind": "llc",
+  "title": "Maine Limited Liability Company Act",
+  "citation": "31 M.R.S. ch. 21",
+  "items": [
+   {
+    "name": "Ch. 21",
+    "url": "https://www.mainelegislature.org/legis/statutes/31/title31ch21.pdf",
+    "text_chars": 242379
+   }
+  ],
+  "reason": "",
+  "notes": "Chapter PDF hosted at mainelegislature.org (official Maine Legislature domain); legislature.maine.gov chapter PDF timed out from checker."
+ },
+ {
+  "state": "Maine",
+  "code": "ME",
+  "kind": "corp",
+  "title": "Maine Business Corporation Act",
+  "citation": "13-C M.R.S.",
+  "items": [
+   {
+    "name": "Title 13-C",
+    "url": "https://legislature.maine.gov/statutes/13-C/title13-C.pdf",
+    "text_chars": 651798
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Maine",
+  "code": "ME",
+  "kind": "securities",
+  "title": "Maine Uniform Securities Act",
+  "citation": "32 M.R.S. ch. 135",
+  "items": [
+   {
+    "name": "Ch. 135",
+    "url": "https://www.mainelegislature.org/legis/statutes/32/title32ch135.pdf",
+    "text_chars": 252469
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Maryland",
+  "code": "MD",
+  "kind": "llc",
+  "title": "Maryland Limited Liability Company Act",
+  "citation": "Md. Code, Corps. & Ass'ns tit. 4A",
+  "items": [],
+  "reason": "Official Maryland General Assembly statute text (mgaleg.maryland.gov StatuteText) renders section text via JavaScript; the checker returns only site chrome. No static PDF/HTML of Title 4A found.",
+  "notes": ""
+ },
+ {
+  "state": "Maryland",
+  "code": "MD",
+  "kind": "corp",
+  "title": "Maryland General Corporation Law",
+  "citation": "Md. Code, Corps. & Ass'ns tit. 1-3",
+  "items": [],
+  "reason": "Same as Maryland LLC: official statute pages are JavaScript-rendered and fail verification; no static full-text source found.",
+  "notes": ""
+ },
+ {
+  "state": "Massachusetts",
+  "code": "MA",
+  "kind": "llc",
+  "title": "Massachusetts Limited Liability Company Act",
+  "citation": "M.G.L. c. 156C",
+  "items": [
+   {
+    "name": "test 6",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section6",
+    "text_chars": 3158
+   },
+   {
+    "name": "test 9",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section9",
+    "text_chars": 3288
+   },
+   {
+    "name": "G.L. c. 156C, §21",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section21",
+    "text_chars": 3309
+   },
+   {
+    "name": "G.L. c. 156C, §24",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section24",
+    "text_chars": 3519
+   },
+   {
+    "name": "G.L. c. 156C, §28",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section28",
+    "text_chars": 4269
+   },
+   {
+    "name": "G.L. c. 156C, §39",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section39",
+    "text_chars": 3264
+   },
+   {
+    "name": "G.L. c. 156C, §46",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section46",
+    "text_chars": 3563
+   },
+   {
+    "name": "G.L. c. 156C, §54",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section54",
+    "text_chars": 5182
+   },
+   {
+    "name": "G.L. c. 156C, §61",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section61",
+    "text_chars": 5475
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section pages only (no whole-chapter text); text_chars includes ~1.4k chars of site chrome per page. Sections under ~3000 chars fail the checker minimum, so many short sections (e.g. distributions, dissolution) are not listed."
+ },
+ {
+  "state": "Massachusetts",
+  "code": "MA",
+  "kind": "corp",
+  "title": "Massachusetts Business Corporation Act",
+  "citation": "M.G.L. c. 156D",
+  "items": [
+   {
+    "name": "G.L. c. 156D, §1.40",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section1.40",
+    "text_chars": 9924
+   },
+   {
+    "name": "G.L. c. 156D, §2.02",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section2.02",
+    "text_chars": 4328
+   },
+   {
+    "name": "G.L. c. 156D, §6.01",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.01",
+    "text_chars": 3700
+   },
+   {
+    "name": "G.L. c. 156D, §6.21",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.21",
+    "text_chars": 3359
+   },
+   {
+    "name": "G.L. c. 156D, §6.27",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.27",
+    "text_chars": 3858
+   },
+   {
+    "name": "G.L. c. 156D, §6.40",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.40",
+    "text_chars": 5327
+   },
+   {
+    "name": "G.L. c. 156D, §7.04",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section7.04",
+    "text_chars": 3867
+   },
+   {
+    "name": "G.L. c. 156D, §8.30",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section8.30",
+    "text_chars": 3389
+   },
+   {
+    "name": "G.L. c. 156D, §8.31",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section8.31",
+    "text_chars": 4686
+   },
+   {
+    "name": "G.L. c. 156D, §11.04",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section11.04",
+    "text_chars": 6192
+   },
+   {
+    "name": "G.L. c. 156D, §14.02",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section14.02",
+    "text_chars": 4339
+   },
+   {
+    "name": "G.L. c. 156D, §14.30",
+    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section14.30",
+    "text_chars": 3036
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section pages only; ~1.4k chars of site chrome per page. Short sections fail the checker minimum, so coverage is partial."
+ },
+ {
+  "state": "Michigan",
+  "code": "MI",
+  "kind": "llc",
+  "title": "Michigan Limited Liability Company Act",
+  "citation": "MCL 450.4101 et seq. (Act 23 of 1993)",
+  "items": [
+   {
+    "name": "Act 23 of 1993",
+    "url": "https://www.legislature.mi.gov/documents/mcl/pdf/mcl-Act-23-of-1993.pdf",
+    "text_chars": 180648
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Michigan",
+  "code": "MI",
+  "kind": "corp",
+  "title": "Michigan Business Corporation Act",
+  "citation": "MCL 450.1101 et seq. (Act 284 of 1972)",
+  "items": [
+   {
+    "name": "Act 284 of 1972",
+    "url": "https://www.legislature.mi.gov/documents/mcl/pdf/mcl-Act-284-of-1972.pdf",
+    "text_chars": 436978
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Michigan",
+  "code": "MI",
+  "kind": "securities",
+  "title": "Michigan Uniform Securities Act (2002)",
+  "citation": "MCL 451.2101 et seq. (Act 551 of 2008)",
+  "items": [
+   {
+    "name": "Act 551 of 2008",
+    "url": "https://www.legislature.mi.gov/documents/mcl/pdf/mcl-Act-551-of-2008.pdf",
+    "text_chars": 283048
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Minnesota",
+  "code": "MN",
+  "kind": "llc",
+  "title": "Minnesota Revised Uniform Limited Liability Company Act",
+  "citation": "Minn. Stat. ch. 322C",
+  "items": [
+   {
+    "name": "Ch. 322C",
+    "url": "https://www.revisor.mn.gov/statutes/cite/322C/pdf",
+    "text_chars": 203239
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Minnesota",
+  "code": "MN",
+  "kind": "corp",
+  "title": "Minnesota Business Corporation Act",
+  "citation": "Minn. Stat. ch. 302A",
+  "items": [
+   {
+    "name": "Ch. 302A",
+    "url": "https://www.revisor.mn.gov/statutes/cite/302A/pdf",
+    "text_chars": 427019
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Minnesota",
+  "code": "MN",
+  "kind": "securities",
+  "title": "Minnesota Securities Act",
+  "citation": "Minn. Stat. ch. 80A",
+  "items": [
+   {
+    "name": "Ch. 80A",
+    "url": "https://www.revisor.mn.gov/statutes/cite/80A/pdf",
+    "text_chars": 248594
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Mississippi",
+  "code": "MS",
+  "kind": "llc",
+  "title": "Revised Mississippi Limited Liability Company Act",
+  "citation": "Miss. Code Ann. 79-29-101 et seq.",
+  "items": [
+   {
+    "name": "SOS PDF",
+    "url": "https://www.sos.ms.gov/content/documents/pol_res/llcs/1revisedllcact.pdf",
+    "text_chars": 242659
+   }
+  ],
+  "reason": "",
+  "notes": "Mississippi Secretary of State PDF of the Revised LLC Act (labelled 2010); may not include later amendments."
+ },
+ {
+  "state": "Mississippi",
+  "code": "MS",
+  "kind": "corp",
+  "title": "Mississippi Business Corporation Act",
+  "citation": "Miss. Code Ann. 79-4-1.01 et seq.",
+  "items": [],
+  "reason": "No consolidated official Mississippi Business Corporation Act (79-4) document found on legislature/SOS sites; only amending bills found, which are not the code text.",
+  "notes": ""
+ },
+ {
+  "state": "Missouri",
+  "code": "MO",
+  "kind": "llc",
+  "title": "Missouri Limited Liability Company Act",
+  "citation": "RSMo ch. 347",
+  "items": [
+   {
+    "name": "Sec. 347.015",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.015&bid=18427",
+    "text_chars": 5262
+   },
+   {
+    "name": "Sec. 347.079",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.079&bid=18456",
+    "text_chars": 4676
+   },
+   {
+    "name": "Sec. 347.081",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.081&bid=18457",
+    "text_chars": 4013
+   },
+   {
+    "name": "Sec. 347.088",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.088&bid=18460",
+    "text_chars": 3774
+   },
+   {
+    "name": "Sec. 347.109",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.109&bid=18471",
+    "text_chars": 4290
+   },
+   {
+    "name": "Sec. 347.123",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.123&bid=18478",
+    "text_chars": 4583
+   },
+   {
+    "name": "Sec. 347.137",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.137&bid=18486",
+    "text_chars": 4586
+   },
+   {
+    "name": "Sec. 347.143",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.143&bid=60158",
+    "text_chars": 3123
+   },
+   {
+    "name": "Sec. 347.037",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.037&bid=18434",
+    "text_chars": 3762
+   },
+   {
+    "name": "Sec. 347.121",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.121&bid=18477",
+    "text_chars": 3273
+   },
+   {
+    "name": "Sec. 347.065",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.065&bid=18449",
+    "text_chars": 3437
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section pages (revisor.mo.gov OneSection). Whole-chapter view is JavaScript-loaded and unusable. Short sections fail checker minimum so coverage is partial."
+ },
+ {
+  "state": "Missouri",
+  "code": "MO",
+  "kind": "corp",
+  "title": "Missouri General and Business Corporation Law",
+  "citation": "RSMo ch. 351",
+  "items": [
+   {
+    "name": "Sec. 351.015",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.015",
+    "text_chars": 10397
+   },
+   {
+    "name": "Sec. 351.055",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.055",
+    "text_chars": 4819
+   },
+   {
+    "name": "Sec. 351.290",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.290",
+    "text_chars": 4771
+   },
+   {
+    "name": "Sec. 351.225",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.225",
+    "text_chars": 3424
+   },
+   {
+    "name": "Sec. 351.245",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.245",
+    "text_chars": 7401
+   },
+   {
+    "name": "Sec. 351.220",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.220",
+    "text_chars": 3802
+   },
+   {
+    "name": "Sec. 351.410",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.410",
+    "text_chars": 3238
+   },
+   {
+    "name": "Sec. 351.215",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.215",
+    "text_chars": 5161
+   },
+   {
+    "name": "Sec. 351.385",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.385",
+    "text_chars": 6673
+   },
+   {
+    "name": "Sec. 351.315",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.315",
+    "text_chars": 4869
+   },
+   {
+    "name": "Sec. 351.340",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.340",
+    "text_chars": 3100
+   },
+   {
+    "name": "Sec. 351.355",
+    "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.355",
+    "text_chars": 12418
+   }
+  ],
+  "reason": "",
+  "notes": "Per-section pages (revisor.mo.gov OneSection). Whole-chapter view is JavaScript-loaded. Dissolution sections too short for checker minimum, so not listed."
+ }
+]

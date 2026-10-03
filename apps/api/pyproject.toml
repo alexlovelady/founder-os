@@ -14,6 +14,8 @@ dev = ["pytest>=8", "pytest-asyncio>=0.23"]
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
+[tool.setuptools.package-data]
+legalai = ["corpus/*.json", "corpus/states/*.json"]
 [tool.setuptools.packages.find]
 include = ["legalai*"]
 [tool.pytest.ini_options]

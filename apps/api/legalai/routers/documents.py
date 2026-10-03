@@ -39,7 +39,7 @@ def _ver_out(v: DocumentVersion) -> dict:
 
 
 def _doc_out(d: Document, v: DocumentVersion | None) -> dict:
-    return {"id": str(d.id), "matter_id": str(d.matter_id), "title": d.title, "doc_type": d.doc_type,
+    return {"id": str(d.id), "matter_id": str(d.matter_id), "title": d.title, "doc_type": d.doc_type, "agreement_type": d.agreement_type,
             "authority": authority_out(d),
             "current_version": _ver_out(v) if v else None}
 

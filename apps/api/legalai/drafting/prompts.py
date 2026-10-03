@@ -37,6 +37,7 @@ def build_user(mode: str, doc_type: str, instructions: str, facts: dict, jurisdi
     if source_text:
         parts.append("SOURCE TEXT:\n<<<SOURCE>>>\n" + source_text.replace("<<<", "‹‹‹") + "\n<<<END SOURCE>>>")
     if reference:
-        parts.append("REFERENCE MATERIAL:\n" + "\n\n".join(
-            f"<<<REFERENCE>>>\n[{r['cite_id']}] {r['title']}\n{r['text'].replace('<<<', chr(0x2039) * 3)}\n<<<END REFERENCE>>>" for r in reference))
+        parts.append("REFERENCE MATERIAL (items marked TEMPLATE show conventional structure, clause order and drafting style. Follow their style, "
+                     "but write for THESE facts and never copy facts, names or amounts from a template):\n" + "\n\n".join(
+            f"<<<REFERENCE>>>\n[{r['cite_id']}] {'TEMPLATE: ' if r.get('kind') == 'template' else ''}{r['title']}\n{r['text'].replace('<<<', chr(0x2039) * 3)}\n<<<END REFERENCE>>>" for r in reference))
     return "\n\n".join(parts)

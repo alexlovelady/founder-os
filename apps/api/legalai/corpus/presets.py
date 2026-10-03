@@ -33,4 +33,12 @@ PRESETS = [
      "items": [{"name": f"DGCL ({t})", "config": {"url": f"https://delcode.delaware.gov/title8/c001/sc{n}/index.html", "title": f"Delaware General Corporation Law, {t}", "citation": f"8 Del. C. ch. 1, {t}"}}
                for n, t in (("04", "Subchapter IV Directors and Officers"), ("05", "Subchapter V Stock and Dividends"), ("06", "Subchapter VI Stock Transfers"),
                             ("07", "Subchapter VII Meetings, Elections, Voting and Notice"), ("10", "Subchapter X Sale of Assets, Dissolution and Winding Up"))]},
+    {"id": "common-paper-templates", "name": "Starter templates: Common Paper standard agreements (CC BY 4.0)", "adapter": "url", "jurisdiction": "United States (general)", "authority_type": "template",
+     "note": "Free, attorney-written standard agreements (NDA, cloud/SaaS, design partner, DPA, professional services, software license, partnership, SLA). Used as structure and style guides when drafting. Credit: Common Paper, CC BY 4.0.",
+     "items": [{"name": f"Common Paper {t}", "config": {"url": f"https://commonpaper.com/standards/{slug}/", "title": f"Common Paper {t} (template)",
+                                                         "citation": f"Common Paper {t}, licensed CC BY 4.0, https://commonpaper.com/standards/{slug}/", "official": False}}
+               for slug, t in (("mutual-nda", "Mutual NDA"), ("cloud-service-agreement", "Cloud Service Agreement"), ("design-partner-agreement", "Design Partner Agreement"),
+                               ("data-processing-agreement", "Data Processing Agreement"), ("professional-services-agreement", "Professional Services Agreement"),
+                               ("software-license-agreement", "Software License Agreement"), ("partnership-agreement", "Partnership Agreement"),
+                               ("service-level-agreement", "Service Level Agreement"))]},
 ]

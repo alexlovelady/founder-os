@@ -62,6 +62,15 @@ class ReviewLLM(LLMProvider):
                                   "placeholders": [{"name": "CLIENT_NAME", "description": "Legal name of the client"},
                                                    {"name": "NEVER_USED", "description": "x"}],
                                   "assumptions": ["Annual fees assumed"], "needs_attorney_review": ["Fees clause"]})
+        elif "explaining a contract to a busy startup founder" in text:
+            kind = "plain"
+            term_id = (re.search(r"^(CL-\d+) \[termination\]", text, re.M) or re.search(r"(CL-\d+)", text)).group(1)
+            content = json.dumps({"summary": "This is a services agreement. Either side can leave on thirty days notice.",
+                                  "key_terms": [{"label": "Termination notice", "value": "thirty days written notice", "clause": term_id},
+                                                {"label": "Made-up fee", "value": "$999,999 per month", "clause": "CL-001"},
+                                                {"label": "Bad clause ref", "value": "two years", "clause": "CL-777"}],
+                                  "watch_outs": [{"text": "Either side can end the deal quickly.", "clause": term_id}, {"text": "Ghost clause", "clause": "CL-888"}],
+                                  "questions_to_ask": ["Do we want a longer notice period?"]})
         elif "Summarize the substantive differences" in text:
             kind, content = "summary", "- Termination notice period changed.\n- Payment terms changed."
         else:
@@ -282,3 +291,16 @@ def test_startup_document_gets_its_matching_playbook_automatically(make_api, emb
     assert explicit["playbook_auto"] is False and explicit["playbook"].startswith("Balanced")
     names = [p["id"] for p in a.get("/api/playbooks").json() if p["builtin"]]
     assert {"builtin:founders-agreement", "builtin:operating-agreement", "builtin:safe-note", "builtin:contractor-ip"} <= set(names)
+
+
+def test_plain_english_summary_verifies_key_terms(make_api, emb):
+    a, m, d = setup(make_api)
+    rv = run_review(a, d, ReviewLLM())
+    plain = rv["result"]["plain"]
+    assert plain["summary"].startswith("This is a services agreement") and plain["questions_to_ask"]
+    kt = {t["label"]: t for t in plain["key_terms"]}
+    tid = kt["Termination notice"]["clause"]
+    assert kt["Termination notice"]["verified"] is True and tid and tid.startswith("CL-")
+    assert kt["Made-up fee"]["verified"] is False                       # a value that is not in the contract is flagged, not trusted
+    assert kt["Bad clause ref"]["clause"] is None                       # an unknown clause id is dropped
+    assert [w["clause"] for w in plain["watch_outs"]] == [tid, None]

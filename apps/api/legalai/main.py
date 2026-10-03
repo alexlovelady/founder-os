@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from .config import get_settings
 from .middleware import HardeningMiddleware
 from .worker import start_in_thread
-from .routers import auth, documents, drafting, gpu, jobs, admin, backups, library, matters, research, review, revise, search
+from .routers import auth, documents, drafting, gpu, jobs, admin, backups, library, matters, research, review, revise, search, startup
 
 
 def create_app() -> FastAPI:
@@ -27,7 +27,7 @@ def create_app() -> FastAPI:
                   redoc_url=None, openapi_url=None if s.app_env != "local" else "/openapi.json")
     app.add_middleware(HardeningMiddleware)
     for r in (auth.router, matters.router, documents.router, jobs.router, gpu.router, search.router, research.router,
-              review.router, drafting.router, library.router, admin.router, backups.router, revise.router):
+              review.router, drafting.router, library.router, admin.router, backups.router, revise.router, startup.router):
         app.include_router(r)
 
     @app.get("/healthz")

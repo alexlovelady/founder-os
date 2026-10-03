@@ -1,0 +1,2601 @@
+{
+ "generated": "2026-10-02",
+ "states": {
+  "AK": {
+   "name": "Alaska",
+   "code": "AK",
+   "kinds": {
+    "llc": {
+     "title": "Alaska Revised Limited Liability Company Act",
+     "citation": "AS 10.50",
+     "items": [
+      {
+       "name": "Alaska Corporations statutes and regulations (June 2026), includes AS 10.50",
+       "url": "https://www.commerce.alaska.gov/web/Portals/5/pub/corporationsstatutesandregulations.pdf",
+       "text_chars": 1028279
+      }
+     ],
+     "notes": "Single Division of Corporations PDF compiled from the statutes; covers AS 10.06 and 10.50. Disclaimer says official versions control.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Alaska Corporations Code",
+     "citation": "AS 10.06",
+     "items": [
+      {
+       "name": "Alaska Corporations statutes and regulations (June 2026), includes AS 10.06",
+       "url": "https://www.commerce.alaska.gov/web/Portals/5/pub/corporationsstatutesandregulations.pdf",
+       "text_chars": 1028279
+      }
+     ],
+     "notes": "Same PDF as LLC entry (1.03M chars).",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": true
+    }
+   }
+  },
+  "AL": {
+   "name": "Alabama",
+   "code": "AL",
+   "kinds": {
+    "llc": {
+     "title": "Alabama Limited Liability Company Law of 2014",
+     "citation": "Ala. Code tit. 10A, ch. 5A",
+     "items": [],
+     "notes": "Justia etc. not allowed. Official code (alison.legislature.state.al.us) is JavaScript/per-section and failed the checker; only a bill-stage PDF was loadable, not enacted code.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Alabama Business Corporation Law",
+     "citation": "Ala. Code tit. 10A, ch. 2A",
+     "items": [],
+     "notes": "Official code site fails checker (JS/per-section); no full-text official page found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "AR": {
+   "name": "Arkansas",
+   "code": "AR",
+   "kinds": {
+    "llc": {
+     "title": "Arkansas Uniform Limited Liability Company Act of 2021",
+     "citation": "Ark. Code tit. 4, ch. 32 (Act 1041 of 2021)",
+     "items": [
+      {
+       "name": "Act 1041 of 2021 (engrossed bill with strike/underline markup)",
+       "url": "https://arkleg.state.ar.us/Home/FTPDocument?path=%2FACTS%2F2021R%2FPublic%2FACT1041.pdf",
+       "text_chars": 350130
+      }
+     ],
+     "notes": "Session law PDF with amendment markup, not codified current text.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Arkansas Business Corporation Act of 1987",
+     "citation": "Ark. Code tit. 4, ch. 27",
+     "items": [],
+     "notes": "No official full-text page found (official code is on LexisNexis site).",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "AZ": {
+   "name": "Arizona",
+   "code": "AZ",
+   "kinds": {
+    "llc": {
+     "title": "Arizona Limited Liability Company Act",
+     "citation": "A.R.S. tit. 29, ch. 7 (29-3101 et seq.)",
+     "items": [
+      {
+       "name": "Laws 2018 ch. 168 (SB 1353), original text of LLC Act",
+       "url": "https://www.azleg.gov/legtext/53Leg/2R/laws/0168.pdf",
+       "text_chars": 179084
+      }
+     ],
+     "notes": "Session law enacting the Act (eff. 2019); not the current codified text, later amendments missing. azleg.gov code pages are one section per page, so not practical.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Arizona Corporation Law",
+     "citation": "A.R.S. tit. 10",
+     "items": [],
+     "notes": "azleg.gov publishes one section per page; no chapter-level or full-title text found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "CA": {
+   "name": "California",
+   "code": "CA",
+   "kinds": {
+    "llc": {
+     "title": "California Revised Uniform Limited Liability Company Act",
+     "citation": "Cal. Corp. Code 17701.01 et seq.",
+     "items": [],
+     "notes": "leginfo.legislature.ca.gov loads but robots.txt disallows the fetcher (ok false).",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "California General Corporation Law",
+     "citation": "Cal. Corp. Code 100 et seq.",
+     "items": [],
+     "notes": "leginfo.legislature.ca.gov blocked by robots.txt for the fetcher.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "CO": {
+   "name": "Colorado",
+   "code": "CO",
+   "kinds": {
+    "llc": {
+     "title": "Colorado Limited Liability Company Act",
+     "citation": "C.R.S. 7-80",
+     "items": [
+      {
+       "name": "C.R.S. 2024 Title 7 (OLLS PDF)",
+       "url": "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-07.pdf",
+       "text_chars": 1751423
+      }
+     ],
+     "notes": "Whole Title 7 PDF; also contains corporation code. 2025 edition exists but PDF link not located.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Colorado Business Corporation Act",
+     "citation": "C.R.S. 7-101 et seq.",
+     "items": [
+      {
+       "name": "C.R.S. 2024 Title 7 (OLLS PDF)",
+       "url": "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-07.pdf",
+       "text_chars": 1751423
+      }
+     ],
+     "notes": "Same PDF as LLC entry.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": true
+    }
+   }
+  },
+  "CT": {
+   "name": "Connecticut",
+   "code": "CT",
+   "kinds": {
+    "llc": {
+     "title": "Connecticut Uniform Limited Liability Company Act",
+     "citation": "Conn. Gen. Stat. ch. 613a",
+     "items": [
+      {
+       "name": "Chapter 613a Uniform LLC Act",
+       "url": "https://prdext3.cga.ct.gov/2025/pub/chap_613a.htm",
+       "text_chars": 218088
+      }
+     ],
+     "notes": "Hosted on prdext3.cga.ct.gov (official CGA mirror) because www.cga.ct.gov fails TLS verification in this environment. 2025 edition.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Connecticut Business Corporation Act",
+     "citation": "Conn. Gen. Stat. ch. 601",
+     "items": [
+      {
+       "name": "Chapter 601 Business Corporations",
+       "url": "https://prdext3.cga.ct.gov/2025/pub/chap_601.htm",
+       "text_chars": 666062
+      }
+     ],
+     "notes": "Same mirror host note.",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Connecticut Uniform Securities Act",
+     "citation": "Conn. Gen. Stat. ch. 672a",
+     "items": [
+      {
+       "name": "Chapter 672a Uniform Securities Act",
+       "url": "https://prdext3.cga.ct.gov/2025/pub/chap_672a.htm",
+       "text_chars": 249421
+      }
+     ],
+     "notes": "Same mirror host note.",
+     "caveat": true,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "DC": {
+   "name": "District of Columbia",
+   "code": "DC",
+   "kinds": {
+    "llc": {
+     "title": "Uniform Limited Liability Company Act of 2010",
+     "citation": "D.C. Code tit. 29, ch. 8",
+     "items": [
+      {
+       "name": "Chapter 8 Limited Liability Companies",
+       "url": "https://code.dccouncil.gov/us/dc/council/code/titles/29/chapters/8/index.full.html",
+       "text_chars": 101382
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "DC Business Corporation Act",
+     "citation": "D.C. Code tit. 29, ch. 3",
+     "items": [
+      {
+       "name": "Chapter 3 Business Corporations",
+       "url": "https://code.dccouncil.gov/us/dc/council/code/titles/29/chapters/3/index.full.html",
+       "text_chars": 268389
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "District of Columbia Uniform Securities Act",
+     "citation": "D.C. Code tit. 31, ch. 56",
+     "items": [
+      {
+       "name": "Chapter 56 Securities",
+       "url": "https://code.dccouncil.gov/us/dc/council/code/titles/31/chapters/56/index.full.html",
+       "text_chars": 147944
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "DE": {
+   "name": "Delaware",
+   "code": "DE",
+   "kinds": {
+    "llc": {
+     "title": "Delaware Limited Liability Company Act",
+     "citation": "6 Del. C. ch. 18",
+     "items": [
+      {
+       "name": "Subchapter I General Provisions",
+       "url": "https://delcode.delaware.gov/title6/c018/sc01/index.html"
+      },
+      {
+       "name": "Subchapter II Formation",
+       "url": "https://delcode.delaware.gov/title6/c018/sc02/index.html"
+      },
+      {
+       "name": "Subchapter III Members",
+       "url": "https://delcode.delaware.gov/title6/c018/sc03/index.html"
+      },
+      {
+       "name": "Subchapter IV Managers",
+       "url": "https://delcode.delaware.gov/title6/c018/sc04/index.html"
+      },
+      {
+       "name": "Subchapter V Finance",
+       "url": "https://delcode.delaware.gov/title6/c018/sc05/index.html"
+      },
+      {
+       "name": "Subchapter VI Distributions and Resignation",
+       "url": "https://delcode.delaware.gov/title6/c018/sc06/index.html"
+      },
+      {
+       "name": "Subchapter VII Assignment",
+       "url": "https://delcode.delaware.gov/title6/c018/sc07/index.html"
+      },
+      {
+       "name": "Subchapter VIII Dissolution",
+       "url": "https://delcode.delaware.gov/title6/c018/sc08/index.html"
+      }
+     ],
+     "notes": "Official Delaware Code online, one page per subchapter.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Delaware General Corporation Law",
+     "citation": "8 Del. C. ch. 1",
+     "items": [
+      {
+       "name": "Subchapter I Formation",
+       "url": "https://delcode.delaware.gov/title8/c001/sc01/index.html"
+      },
+      {
+       "name": "Subchapter II Powers",
+       "url": "https://delcode.delaware.gov/title8/c001/sc02/index.html"
+      },
+      {
+       "name": "Subchapter IV Directors and Officers",
+       "url": "https://delcode.delaware.gov/title8/c001/sc04/index.html"
+      },
+      {
+       "name": "Subchapter V Stock and Dividends",
+       "url": "https://delcode.delaware.gov/title8/c001/sc05/index.html"
+      },
+      {
+       "name": "Subchapter VI Stock Transfers",
+       "url": "https://delcode.delaware.gov/title8/c001/sc06/index.html"
+      },
+      {
+       "name": "Subchapter VII Meetings, Elections, Voting",
+       "url": "https://delcode.delaware.gov/title8/c001/sc07/index.html"
+      },
+      {
+       "name": "Subchapter VIII Amendments and Capital",
+       "url": "https://delcode.delaware.gov/title8/c001/sc08/index.html"
+      },
+      {
+       "name": "Subchapter IX Merger, Consolidation, Conversion",
+       "url": "https://delcode.delaware.gov/title8/c001/sc09/index.html"
+      },
+      {
+       "name": "Subchapter X Sale of Assets, Dissolution",
+       "url": "https://delcode.delaware.gov/title8/c001/sc10/index.html"
+      },
+      {
+       "name": "Subchapter XIV Close Corporations",
+       "url": "https://delcode.delaware.gov/title8/c001/sc14/index.html"
+      }
+     ],
+     "notes": "Official Delaware Code online, one page per subchapter.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "FL": {
+   "name": "Florida",
+   "code": "FL",
+   "kinds": {
+    "llc": {
+     "title": "Florida Revised Limited Liability Company Act",
+     "citation": "Fla. Stat. ch. 605",
+     "items": [
+      {
+       "name": "Chapter 605 (2026)",
+       "url": "https://www.flsenate.gov/Laws/Statutes/2026/Chapter605/All",
+       "text_chars": 417311
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Florida Business Corporation Act",
+     "citation": "Fla. Stat. ch. 607",
+     "items": [
+      {
+       "name": "Chapter 607 (2026)",
+       "url": "https://www.flsenate.gov/Laws/Statutes/2026/Chapter607/All",
+       "text_chars": 642103
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Florida Securities and Investor Protection Act",
+     "citation": "Fla. Stat. ch. 517",
+     "items": [
+      {
+       "name": "Chapter 517 (2026)",
+       "url": "https://www.flsenate.gov/Laws/Statutes/2026/Chapter517/All",
+       "text_chars": 257565
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "GA": {
+   "name": "Georgia",
+   "code": "GA",
+   "kinds": {
+    "llc": {
+     "title": "Georgia Limited Liability Company Act",
+     "citation": "O.C.G.A. tit. 14, ch. 11",
+     "items": [],
+     "notes": "legis.ga.gov did not surface a statute text page. No free official text found: the O.C.G.A. is published by LexisNexis; only third-party mirrors (Justia, Public.Resource.Org) surfaced, which are not allowed.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Georgia Business Corporation Code",
+     "citation": "O.C.G.A. tit. 14, ch. 2",
+     "items": [],
+     "notes": "No free official text found: the O.C.G.A. is published by LexisNexis; only third-party mirrors surfaced, which are not allowed.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "HI": {
+   "name": "Hawaii",
+   "code": "HI",
+   "kinds": {
+    "llc": {
+     "title": "Uniform Limited Liability Company Act",
+     "citation": "HRS ch. 428",
+     "items": [],
+     "notes": "Verified single sections exist (e.g. HRS_0428-0101, 0404, 0409, 0601) but coverage would be fragmentary; not recorded. Official capitol.hawaii.gov publishes each section as its own tiny file (chapter index is only a table of contents); most sections fall under the 3,000-character minimum and 12 URLs cannot cover the act. Some sections appear bracketed (repealed/superseded).",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Hawaii Business Corporation Act",
+     "citation": "HRS ch. 414",
+     "items": [],
+     "notes": "Same per-section file structure on capitol.hawaii.gov (hundreds of small section files); no single-page or PDF chapter found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "IA": {
+   "name": "Iowa",
+   "code": "IA",
+   "kinds": {
+    "llc": {
+     "title": "Revised Uniform Limited Liability Company Act",
+     "citation": "Iowa Code ch. 489",
+     "items": [
+      {
+       "name": "Chapter 489 (PDF)",
+       "url": "https://www.legis.iowa.gov/docs/code/489.pdf",
+       "text_chars": 344214
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Business Corporations",
+     "citation": "Iowa Code ch. 490",
+     "items": [
+      {
+       "name": "Chapter 490 (PDF)",
+       "url": "https://www.legis.iowa.gov/docs/code/490.pdf",
+       "text_chars": 533110
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Uniform Securities Act",
+     "citation": "Iowa Code ch. 502",
+     "items": [
+      {
+       "name": "Chapter 502 (PDF)",
+       "url": "https://www.legis.iowa.gov/docs/code/502.pdf",
+       "text_chars": 259279
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "ID": {
+   "name": "Idaho",
+   "code": "ID",
+   "kinds": {
+    "llc": {
+     "title": "Idaho Uniform Limited Liability Company Act",
+     "citation": "Idaho Code tit. 30, ch. 25",
+     "items": [
+      {
+       "name": "Title 30 Chapter 25 (PDF)",
+       "url": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title30/T30CH25.pdf",
+       "text_chars": 88242
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Idaho Business Corporation Act",
+     "citation": "Idaho Code tit. 30, ch. 29",
+     "items": [
+      {
+       "name": "Title 30 Chapter 29 (PDF)",
+       "url": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title30/T30CH29.pdf",
+       "text_chars": 345662
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Idaho Uniform Securities Act (2004)",
+     "citation": "Idaho Code tit. 30, ch. 14",
+     "items": [
+      {
+       "name": "Title 30 Chapter 14 (PDF)",
+       "url": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title30/T30CH14.pdf",
+       "text_chars": 182784
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "IL": {
+   "name": "Illinois",
+   "code": "IL",
+   "kinds": {
+    "llc": {
+     "title": "Limited Liability Company Act",
+     "citation": "805 ILCS 180",
+     "items": [],
+     "notes": "Retry later or if the verifier's certificate store is fixed; ilga.gov act page ActID 2290 appeared in search. Official source is ilga.gov (ILCS details pages) but the verifier fails TLS certificate validation (unable to get local issuer certificate) on every ilga.gov host, so no URL could be verified.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Business Corporation Act of 1983",
+     "citation": "805 ILCS 5",
+     "items": [],
+     "notes": "ilga.gov ILCS details ActID=2273 appeared in search; unverified. Official source is ilga.gov but the verifier fails TLS certificate validation on ilga.gov hosts, so no URL could be verified.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "IN": {
+   "name": "Indiana",
+   "code": "IN",
+   "kinds": {
+    "llc": {
+     "title": "Indiana Business Flexibility Act",
+     "citation": "Ind. Code art. 23-18",
+     "items": [],
+     "notes": "iga.in.gov is JavaScript-rendered (verifier extracts no text); official code is offered only as bulk ZIP downloads.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Indiana Business Corporation Law",
+     "citation": "Ind. Code art. 23-1",
+     "items": [],
+     "notes": "iga.in.gov is JavaScript-rendered (verifier extracts no text); official code is offered only as bulk ZIP downloads.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "KS": {
+   "name": "Kansas",
+   "code": "KS",
+   "kinds": {
+    "llc": {
+     "title": "Kansas Revised Limited Liability Company Act",
+     "citation": "K.S.A. 17-7662 et seq.",
+     "items": [
+      {
+       "name": "17-7663 Definitions",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0063_section/017_076_0063_k/",
+       "text_chars": 8642
+      },
+      {
+       "name": "17-7668 Nature of business; powers",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0068_section/017_076_0068_k/",
+       "text_chars": 9914
+      },
+      {
+       "name": "17-7686 Admission of members",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0086_section/017_076_0086_k/",
+       "text_chars": 4417
+      },
+      {
+       "name": "17-7687 Classes; voting; meetings; operating agreement",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0087_section/017_076_0087_k/",
+       "text_chars": 5866
+      },
+      {
+       "name": "17-76,116 Dissolution",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0116_section/017_076_0116_k/",
+       "text_chars": 4074
+      },
+      {
+       "name": "17-76,117 Involuntary dissolution",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0117_section/017_076_0117_k/",
+       "text_chars": 3508
+      }
+     ],
+     "notes": "PARTIAL: legislature publishes one page per section; only sections over 3,000 chars verified. Distributions, transfers (e.g. 17-76,102, 17-76,112) and duties (17-76,151) sections are too short to pass and are not covered.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Kansas General Corporation Code",
+     "citation": "K.S.A. 17-6001 et seq.",
+     "items": [
+      {
+       "name": "K.S.A. 17-6002",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_060_0000_article/017_060_0002_section/017_060_0002_k/",
+       "text_chars": 13562
+      },
+      {
+       "name": "K.S.A. 17-6301",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_063_0000_article/017_063_0001_section/017_063_0001_k/",
+       "text_chars": 15780
+      },
+      {
+       "name": "K.S.A. 17-6401",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_064_0000_article/017_064_0001_section/017_064_0001_k/",
+       "text_chars": 12151
+      },
+      {
+       "name": "K.S.A. 17-6501",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_065_0000_article/017_065_0001_section/017_065_0001_k/",
+       "text_chars": 5666
+      },
+      {
+       "name": "K.S.A. 17-6602",
+       "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_066_0000_article/017_066_0002_section/017_066_0002_k/",
+       "text_chars": 9000
+      }
+     ],
+     "notes": "PARTIAL: legislature publishes one page per section; only five sections over 3,000 chars verified (17-6002, 17-6301, 17-6401, 17-6501, 17-6602).",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "KY": {
+   "name": "Kentucky",
+   "code": "KY",
+   "kinds": {
+    "llc": {
+     "title": "Kentucky Limited Liability Company Act",
+     "citation": "KRS ch. 275",
+     "items": [
+      {
+       "name": "KRS 275.015",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=47081",
+       "text_chars": 7459
+      },
+      {
+       "name": "KRS 275.025",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=39663",
+       "text_chars": 3533
+      },
+      {
+       "name": "KRS 275.165",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=44365",
+       "text_chars": 3170
+      },
+      {
+       "name": "KRS 275.170",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40445",
+       "text_chars": 3639
+      },
+      {
+       "name": "KRS 275.175",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=47082",
+       "text_chars": 4563
+      },
+      {
+       "name": "KRS 275.185",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=42381",
+       "text_chars": 3905
+      },
+      {
+       "name": "KRS 275.280",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=47084",
+       "text_chars": 5851
+      },
+      {
+       "name": "KRS 275.285",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=44359",
+       "text_chars": 3039
+      },
+      {
+       "name": "KRS 275.225",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13874",
+       "text_chars": 3837
+      },
+      {
+       "name": "KRS 275.300",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40450",
+       "text_chars": 4121
+      },
+      {
+       "name": "KRS 275.365",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=44370",
+       "text_chars": 3952
+      }
+     ],
+     "notes": "Per-section statute pages (apps.legislature.ky.gov; PDF). No whole-chapter text available; short sections (distributions, judicial dissolution) fail checker minimum so coverage is partial.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Kentucky Business Corporation Act",
+     "citation": "KRS ch. 271B",
+     "items": [
+      {
+       "name": "KRS 271B.1-400",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45776",
+       "text_chars": 7229
+      },
+      {
+       "name": "KRS 271B.2-020",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45778",
+       "text_chars": 3107
+      },
+      {
+       "name": "KRS 271B.6-270",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13347",
+       "text_chars": 3493
+      },
+      {
+       "name": "KRS 271B.6-400",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13351",
+       "text_chars": 3229
+      },
+      {
+       "name": "KRS 271B.7-400",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45780",
+       "text_chars": 3571
+      },
+      {
+       "name": "KRS 271B.8-300",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45781",
+       "text_chars": 4145
+      },
+      {
+       "name": "KRS 271B.8-310",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=13390",
+       "text_chars": 3404
+      },
+      {
+       "name": "KRS 271B.13-020",
+       "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45782",
+       "text_chars": 3822
+      }
+     ],
+     "notes": "Per-section statute pages (PDF); no whole-chapter text; short sections (merger, dissolution, inspection) fail checker minimum so coverage is partial.",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "LA": {
+   "name": "Louisiana",
+   "code": "LA",
+   "kinds": {
+    "llc": {
+     "title": "Louisiana Limited Liability Company Law",
+     "citation": "La. R.S. 12:1301 et seq. (Title 12, ch. 22)",
+     "items": [
+      {
+       "name": "R.S. 12:1301",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76248",
+       "text_chars": 4715
+      },
+      {
+       "name": "R.S. 12:1305",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76252",
+       "text_chars": 3721
+      },
+      {
+       "name": "R.S. 12:1306",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76253",
+       "text_chars": 6589
+      },
+      {
+       "name": "R.S. 12:1308",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76255",
+       "text_chars": 5081
+      },
+      {
+       "name": "R.S. 12:1308.2",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76257",
+       "text_chars": 4612
+      },
+      {
+       "name": "R.S. 12:1310",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76260",
+       "text_chars": 3070
+      },
+      {
+       "name": "R.S. 12:1314",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76264",
+       "text_chars": 4525
+      },
+      {
+       "name": "R.S. 12:1318",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76269",
+       "text_chars": 6123
+      },
+      {
+       "name": "R.S. 12:1327",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76279",
+       "text_chars": 3779
+      },
+      {
+       "name": "R.S. 12:1359",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76316",
+       "text_chars": 3392
+      },
+      {
+       "name": "R.S. 12:1361",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=76319",
+       "text_chars": 3954
+      }
+     ],
+     "notes": "Per-section pages (legis.la.gov Law.aspx); short sections (distributions liability, dissolution) fail checker minimum so coverage is partial.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Louisiana Business Corporation Act",
+     "citation": "La. R.S. 12:1-101 et seq.",
+     "items": [
+      {
+       "name": "R.S. 12:1-140",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920192",
+       "text_chars": 13719
+      },
+      {
+       "name": "R.S. 12:1-202",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920205",
+       "text_chars": 4853
+      },
+      {
+       "name": "R.S. 12:1-621",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920238",
+       "text_chars": 3082
+      },
+      {
+       "name": "R.S. 12:1-640",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920248",
+       "text_chars": 3316
+      },
+      {
+       "name": "R.S. 12:1-704",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920252",
+       "text_chars": 4895
+      },
+      {
+       "name": "R.S. 12:1-732",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920282",
+       "text_chars": 7347
+      },
+      {
+       "name": "R.S. 12:1-831",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920324",
+       "text_chars": 3935
+      },
+      {
+       "name": "R.S. 12:1-863",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920348",
+       "text_chars": 3004
+      },
+      {
+       "name": "R.S. 12:1-921",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920353",
+       "text_chars": 3391
+      },
+      {
+       "name": "R.S. 12:1-1102",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920392",
+       "text_chars": 4313
+      },
+      {
+       "name": "R.S. 12:1-1104",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920396",
+       "text_chars": 5496
+      },
+      {
+       "name": "R.S. 12:1-1202",
+       "url": "https://legis.la.gov/legis/Law.aspx?d=920407",
+       "text_chars": 3274
+      }
+     ],
+     "notes": "Per-section pages (legis.la.gov Law.aspx); selected from scan of R.S. 12:1-120 to 1-1324; short sections fail checker minimum, so coverage partial.",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MA": {
+   "name": "Massachusetts",
+   "code": "MA",
+   "kinds": {
+    "llc": {
+     "title": "Massachusetts Limited Liability Company Act",
+     "citation": "M.G.L. c. 156C",
+     "items": [
+      {
+       "name": "test 6",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section6",
+       "text_chars": 3158
+      },
+      {
+       "name": "test 9",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section9",
+       "text_chars": 3288
+      },
+      {
+       "name": "G.L. c. 156C, \u00a721",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section21",
+       "text_chars": 3309
+      },
+      {
+       "name": "G.L. c. 156C, \u00a724",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section24",
+       "text_chars": 3519
+      },
+      {
+       "name": "G.L. c. 156C, \u00a728",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section28",
+       "text_chars": 4269
+      },
+      {
+       "name": "G.L. c. 156C, \u00a739",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section39",
+       "text_chars": 3264
+      },
+      {
+       "name": "G.L. c. 156C, \u00a746",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section46",
+       "text_chars": 3563
+      },
+      {
+       "name": "G.L. c. 156C, \u00a754",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section54",
+       "text_chars": 5182
+      },
+      {
+       "name": "G.L. c. 156C, \u00a761",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section61",
+       "text_chars": 5475
+      }
+     ],
+     "notes": "Per-section pages only (no whole-chapter text); text_chars includes ~1.4k chars of site chrome per page. Sections under ~3000 chars fail the checker minimum, so many short sections (e.g. distributions, dissolution) are not listed.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Massachusetts Business Corporation Act",
+     "citation": "M.G.L. c. 156D",
+     "items": [
+      {
+       "name": "G.L. c. 156D, \u00a71.40",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section1.40",
+       "text_chars": 9924
+      },
+      {
+       "name": "G.L. c. 156D, \u00a72.02",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section2.02",
+       "text_chars": 4328
+      },
+      {
+       "name": "G.L. c. 156D, \u00a76.01",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.01",
+       "text_chars": 3700
+      },
+      {
+       "name": "G.L. c. 156D, \u00a76.21",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.21",
+       "text_chars": 3359
+      },
+      {
+       "name": "G.L. c. 156D, \u00a76.27",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.27",
+       "text_chars": 3858
+      },
+      {
+       "name": "G.L. c. 156D, \u00a76.40",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section6.40",
+       "text_chars": 5327
+      },
+      {
+       "name": "G.L. c. 156D, \u00a77.04",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section7.04",
+       "text_chars": 3867
+      },
+      {
+       "name": "G.L. c. 156D, \u00a78.30",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section8.30",
+       "text_chars": 3389
+      },
+      {
+       "name": "G.L. c. 156D, \u00a78.31",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section8.31",
+       "text_chars": 4686
+      },
+      {
+       "name": "G.L. c. 156D, \u00a711.04",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section11.04",
+       "text_chars": 6192
+      },
+      {
+       "name": "G.L. c. 156D, \u00a714.02",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section14.02",
+       "text_chars": 4339
+      },
+      {
+       "name": "G.L. c. 156D, \u00a714.30",
+       "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section14.30",
+       "text_chars": 3036
+      }
+     ],
+     "notes": "Per-section pages only; ~1.4k chars of site chrome per page. Short sections fail the checker minimum, so coverage is partial.",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MD": {
+   "name": "Maryland",
+   "code": "MD",
+   "kinds": {
+    "llc": {
+     "title": "Maryland Limited Liability Company Act",
+     "citation": "Md. Code, Corps. & Ass'ns tit. 4A",
+     "items": [],
+     "notes": "Official Maryland General Assembly statute text (mgaleg.maryland.gov StatuteText) renders section text via JavaScript; the checker returns only site chrome. No static PDF/HTML of Title 4A found.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Maryland General Corporation Law",
+     "citation": "Md. Code, Corps. & Ass'ns tit. 1-3",
+     "items": [],
+     "notes": "Same as Maryland LLC: official statute pages are JavaScript-rendered and fail verification; no static full-text source found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "ME": {
+   "name": "Maine",
+   "code": "ME",
+   "kinds": {
+    "llc": {
+     "title": "Maine Limited Liability Company Act",
+     "citation": "31 M.R.S. ch. 21",
+     "items": [
+      {
+       "name": "Ch. 21",
+       "url": "https://www.mainelegislature.org/legis/statutes/31/title31ch21.pdf",
+       "text_chars": 242379
+      }
+     ],
+     "notes": "Chapter PDF hosted at mainelegislature.org (official Maine Legislature domain); legislature.maine.gov chapter PDF timed out from checker.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Maine Business Corporation Act",
+     "citation": "13-C M.R.S.",
+     "items": [
+      {
+       "name": "Title 13-C",
+       "url": "https://legislature.maine.gov/statutes/13-C/title13-C.pdf",
+       "text_chars": 651798
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Maine Uniform Securities Act",
+     "citation": "32 M.R.S. ch. 135",
+     "items": [
+      {
+       "name": "Ch. 135",
+       "url": "https://www.mainelegislature.org/legis/statutes/32/title32ch135.pdf",
+       "text_chars": 252469
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MI": {
+   "name": "Michigan",
+   "code": "MI",
+   "kinds": {
+    "llc": {
+     "title": "Michigan Limited Liability Company Act",
+     "citation": "MCL 450.4101 et seq. (Act 23 of 1993)",
+     "items": [
+      {
+       "name": "Act 23 of 1993",
+       "url": "https://www.legislature.mi.gov/documents/mcl/pdf/mcl-Act-23-of-1993.pdf",
+       "text_chars": 180648
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Michigan Business Corporation Act",
+     "citation": "MCL 450.1101 et seq. (Act 284 of 1972)",
+     "items": [
+      {
+       "name": "Act 284 of 1972",
+       "url": "https://www.legislature.mi.gov/documents/mcl/pdf/mcl-Act-284-of-1972.pdf",
+       "text_chars": 436978
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Michigan Uniform Securities Act (2002)",
+     "citation": "MCL 451.2101 et seq. (Act 551 of 2008)",
+     "items": [
+      {
+       "name": "Act 551 of 2008",
+       "url": "https://www.legislature.mi.gov/documents/mcl/pdf/mcl-Act-551-of-2008.pdf",
+       "text_chars": 283048
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MN": {
+   "name": "Minnesota",
+   "code": "MN",
+   "kinds": {
+    "llc": {
+     "title": "Minnesota Revised Uniform Limited Liability Company Act",
+     "citation": "Minn. Stat. ch. 322C",
+     "items": [
+      {
+       "name": "Ch. 322C",
+       "url": "https://www.revisor.mn.gov/statutes/cite/322C/pdf",
+       "text_chars": 203239
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Minnesota Business Corporation Act",
+     "citation": "Minn. Stat. ch. 302A",
+     "items": [
+      {
+       "name": "Ch. 302A",
+       "url": "https://www.revisor.mn.gov/statutes/cite/302A/pdf",
+       "text_chars": 427019
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Minnesota Securities Act",
+     "citation": "Minn. Stat. ch. 80A",
+     "items": [
+      {
+       "name": "Ch. 80A",
+       "url": "https://www.revisor.mn.gov/statutes/cite/80A/pdf",
+       "text_chars": 248594
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MO": {
+   "name": "Missouri",
+   "code": "MO",
+   "kinds": {
+    "llc": {
+     "title": "Missouri Limited Liability Company Act",
+     "citation": "RSMo ch. 347",
+     "items": [
+      {
+       "name": "Sec. 347.015",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.015&bid=18427",
+       "text_chars": 5262
+      },
+      {
+       "name": "Sec. 347.079",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.079&bid=18456",
+       "text_chars": 4676
+      },
+      {
+       "name": "Sec. 347.081",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.081&bid=18457",
+       "text_chars": 4013
+      },
+      {
+       "name": "Sec. 347.088",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.088&bid=18460",
+       "text_chars": 3774
+      },
+      {
+       "name": "Sec. 347.109",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.109&bid=18471",
+       "text_chars": 4290
+      },
+      {
+       "name": "Sec. 347.123",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.123&bid=18478",
+       "text_chars": 4583
+      },
+      {
+       "name": "Sec. 347.137",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.137&bid=18486",
+       "text_chars": 4586
+      },
+      {
+       "name": "Sec. 347.143",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.143&bid=60158",
+       "text_chars": 3123
+      },
+      {
+       "name": "Sec. 347.037",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.037&bid=18434",
+       "text_chars": 3762
+      },
+      {
+       "name": "Sec. 347.121",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.121&bid=18477",
+       "text_chars": 3273
+      },
+      {
+       "name": "Sec. 347.065",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=347.065&bid=18449",
+       "text_chars": 3437
+      }
+     ],
+     "notes": "Per-section pages (revisor.mo.gov OneSection). Whole-chapter view is JavaScript-loaded and unusable. Short sections fail checker minimum so coverage is partial.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Missouri General and Business Corporation Law",
+     "citation": "RSMo ch. 351",
+     "items": [
+      {
+       "name": "Sec. 351.015",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.015",
+       "text_chars": 10397
+      },
+      {
+       "name": "Sec. 351.055",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.055",
+       "text_chars": 4819
+      },
+      {
+       "name": "Sec. 351.290",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.290",
+       "text_chars": 4771
+      },
+      {
+       "name": "Sec. 351.225",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.225",
+       "text_chars": 3424
+      },
+      {
+       "name": "Sec. 351.245",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.245",
+       "text_chars": 7401
+      },
+      {
+       "name": "Sec. 351.220",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.220",
+       "text_chars": 3802
+      },
+      {
+       "name": "Sec. 351.410",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.410",
+       "text_chars": 3238
+      },
+      {
+       "name": "Sec. 351.215",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.215",
+       "text_chars": 5161
+      },
+      {
+       "name": "Sec. 351.385",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.385",
+       "text_chars": 6673
+      },
+      {
+       "name": "Sec. 351.315",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.315",
+       "text_chars": 4869
+      },
+      {
+       "name": "Sec. 351.340",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.340",
+       "text_chars": 3100
+      },
+      {
+       "name": "Sec. 351.355",
+       "url": "https://revisor.mo.gov/main/OneSection.aspx?section=351.355",
+       "text_chars": 12418
+      }
+     ],
+     "notes": "Per-section pages (revisor.mo.gov OneSection). Whole-chapter view is JavaScript-loaded. Dissolution sections too short for checker minimum, so not listed.",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MS": {
+   "name": "Mississippi",
+   "code": "MS",
+   "kinds": {
+    "llc": {
+     "title": "Revised Mississippi Limited Liability Company Act",
+     "citation": "Miss. Code Ann. 79-29-101 et seq.",
+     "items": [
+      {
+       "name": "SOS PDF",
+       "url": "https://www.sos.ms.gov/content/documents/pol_res/llcs/1revisedllcact.pdf",
+       "text_chars": 242659
+      }
+     ],
+     "notes": "Mississippi Secretary of State PDF of the Revised LLC Act (labelled 2010); may not include later amendments.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Mississippi Business Corporation Act",
+     "citation": "Miss. Code Ann. 79-4-1.01 et seq.",
+     "items": [],
+     "notes": "No consolidated official Mississippi Business Corporation Act (79-4) document found on legislature/SOS sites; only amending bills found, which are not the code text.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "MT": {
+   "name": "Montana",
+   "code": "MT",
+   "kinds": {
+    "llc": {
+     "title": "Montana Limited Liability Company Act",
+     "citation": "Mont. Code Ann. tit. 35, ch. 8",
+     "items": [],
+     "notes": "leg.mt.gov MCA publishes one page per section only (no chapter/part-level text page or PDF found; part index pages are navigation only); not practical to cover.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Montana Business Corporation Act",
+     "citation": "Mont. Code Ann. tit. 35, ch. 1",
+     "items": [],
+     "notes": "leg.mt.gov MCA publishes one page per section only (no chapter/part-level text page or PDF found; part index pages are navigation only); not practical to cover.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NC": {
+   "name": "North Carolina",
+   "code": "NC",
+   "kinds": {
+    "llc": {
+     "title": "North Carolina Limited Liability Company Act",
+     "citation": "N.C. Gen. Stat. ch. 57D",
+     "items": [
+      {
+       "name": "Chapter 57D",
+       "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/ByChapter/Chapter_57D.html",
+       "text_chars": 160285
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "North Carolina Business Corporation Act",
+     "citation": "N.C. Gen. Stat. ch. 55",
+     "items": [
+      {
+       "name": "Chapter 55",
+       "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/ByChapter/Chapter_55.html"
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "ND": {
+   "name": "North Dakota",
+   "code": "ND",
+   "kinds": {
+    "llc": {
+     "title": "North Dakota Uniform Limited Liability Company Act",
+     "citation": "N.D.C.C. ch. 10-32.1",
+     "items": [
+      {
+       "name": "Chapter 10-32.1",
+       "url": "https://ndlegis.gov/cencode/t10c32-1.pdf",
+       "text_chars": 238769
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "North Dakota Business Corporation Act",
+     "citation": "N.D.C.C. ch. 10-19.1",
+     "items": [
+      {
+       "name": "Chapter 10-19.1",
+       "url": "https://ndlegis.gov/cencode/t10c19-1.pdf",
+       "text_chars": 351764
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "North Dakota Securities Act of 1951",
+     "citation": "N.D.C.C. ch. 10-04",
+     "items": [
+      {
+       "name": "Chapter 10-04",
+       "url": "https://ndlegis.gov/cencode/t10c04.pdf",
+       "text_chars": 182603
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NE": {
+   "name": "Nebraska",
+   "code": "NE",
+   "kinds": {
+    "llc": {
+     "title": "Nebraska Uniform Limited Liability Company Act",
+     "citation": "Neb. Rev. Stat. ch. 21 (21-101 et seq.)",
+     "items": [
+      {
+       "name": "Chapter 21 full",
+       "url": "https://www.nebraskalegislature.gov/laws/laws-index/chap21-full.html",
+       "text_chars": 1400399
+      }
+     ],
+     "notes": "Whole of chapter 21 (LLC act plus Business Corporation Act) in one page",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Nebraska Model Business Corporation Act",
+     "citation": "Neb. Rev. Stat. ch. 21 (21-201 et seq.)",
+     "items": [
+      {
+       "name": "Chapter 21 full",
+       "url": "https://www.nebraskalegislature.gov/laws/laws-index/chap21-full.html",
+       "text_chars": 1400399
+      }
+     ],
+     "notes": "Same page as LLC; includes both acts",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": true
+    },
+    "securities": {
+     "title": "Nebraska Securities Act",
+     "citation": "Neb. Rev. Stat. ch. 8, art. 11",
+     "items": [
+      {
+       "name": "Chapter 8 full",
+       "url": "https://www.nebraskalegislature.gov/laws/laws-index/chap08-full.html",
+       "text_chars": 1134421
+      }
+     ],
+     "notes": "Chapter 8 also includes banking",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NH": {
+   "name": "New Hampshire",
+   "code": "NH",
+   "kinds": {
+    "llc": {
+     "title": "New Hampshire Revised LLC Act",
+     "citation": "N.H. RSA ch. 304-C",
+     "items": [
+      {
+       "name": "RSA 304-C",
+       "url": "https://www.gencourt.state.nh.us/rsa/html/XXVIII/304-C/304-C-mrg.htm",
+       "text_chars": 230812
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "New Hampshire Business Corporation Act",
+     "citation": "N.H. RSA ch. 293-A",
+     "items": [
+      {
+       "name": "RSA 293-A",
+       "url": "https://www.gencourt.state.nh.us/rsa/html/XXVII/293-A/293-A-mrg.htm",
+       "text_chars": 386895
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "New Hampshire Uniform Securities Act",
+     "citation": "N.H. RSA ch. 421-B",
+     "items": [
+      {
+       "name": "RSA 421-B",
+       "url": "https://www.gencourt.state.nh.us/rsa/html/XXXVIII/421-B/421-B-mrg.htm",
+       "text_chars": 334935
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NJ": {
+   "name": "New Jersey",
+   "code": "NJ",
+   "kinds": {
+    "llc": {
+     "title": "New Jersey Revised Uniform Limited Liability Company Act",
+     "citation": "N.J.S.A. 42:2C-1 et seq.",
+     "items": [
+      {
+       "name": "P.L. 2012, c.50 (enacted text, PDF)",
+       "url": "https://pub.njleg.gov/bills/2012/PL12/50_.PDF",
+       "text_chars": 156921
+      }
+     ],
+     "notes": "Official enacted session law text as of 2012; does not include later amendments. Current codified text on lis.njleg.state.nj.us is not usable.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "New Jersey Business Corporation Act",
+     "citation": "N.J.S.A. 14A",
+     "items": [],
+     "notes": "No verified official full-text page found; current NJ statutes database is dynamic/JS.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NM": {
+   "name": "New Mexico",
+   "code": "NM",
+   "kinds": {
+    "llc": {
+     "title": "New Mexico Limited Liability Company Act",
+     "citation": "NMSA 1978, 53-19",
+     "items": [],
+     "notes": "Official NMSA is on nmonesource.com (JS/index pages, tiny text); nmlegis.gov has only introduced bills (e.g. 2017 HB 180 RULLCA), not enacted code.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "New Mexico Business Corporation Act",
+     "citation": "NMSA 1978, 53-11",
+     "items": [],
+     "notes": "Same as LLC: nmonesource.com not usable; no enacted full text found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NV": {
+   "name": "Nevada",
+   "code": "NV",
+   "kinds": {
+    "llc": {
+     "title": "Nevada Limited-Liability Companies",
+     "citation": "NRS ch. 86",
+     "items": [
+      {
+       "name": "NRS 86",
+       "url": "https://www.leg.state.nv.us/nrs/nrs-086.html",
+       "text_chars": 207147
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Nevada Private Corporations",
+     "citation": "NRS ch. 78",
+     "items": [
+      {
+       "name": "NRS 78",
+       "url": "https://www.leg.state.nv.us/nrs/nrs-078.html",
+       "text_chars": 366010
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Nevada Securities (Uniform Act)",
+     "citation": "NRS ch. 90",
+     "items": [
+      {
+       "name": "NRS 90",
+       "url": "https://www.leg.state.nv.us/nrs/nrs-090.html",
+       "text_chars": 217861
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "NY": {
+   "name": "New York",
+   "code": "NY",
+   "kinds": {
+    "llc": {
+     "title": "New York Limited Liability Company Law",
+     "citation": "N.Y. LLC Law",
+     "items": [],
+     "notes": "nysenate.gov laws pages return HTTP 403 to the checker; legislation.nysenate.gov pdf endpoint only returns table of contents.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "New York Business Corporation Law",
+     "citation": "N.Y. BCL",
+     "items": [],
+     "notes": "nysenate.gov laws pages return HTTP 403 to the checker; no alternative official full-text found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "OH": {
+   "name": "Ohio",
+   "code": "OH",
+   "kinds": {
+    "llc": {
+     "title": "Ohio Revised Limited Liability Company Act",
+     "citation": "Ohio Rev. Code ch. 1706",
+     "items": [
+      {
+       "name": "Chapter 1706",
+       "url": "https://codes.ohio.gov/ohio-revised-code/chapter-1706",
+       "text_chars": 179002
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Ohio General Corporation Law",
+     "citation": "Ohio Rev. Code ch. 1701",
+     "items": [
+      {
+       "name": "Chapter 1701",
+       "url": "https://codes.ohio.gov/ohio-revised-code/chapter-1701",
+       "text_chars": 455092
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Ohio Securities Law",
+     "citation": "Ohio Rev. Code ch. 1707",
+     "items": [
+      {
+       "name": "Chapter 1707",
+       "url": "https://codes.ohio.gov/ohio-revised-code/chapter-1707",
+       "text_chars": 302292
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "OK": {
+   "name": "Oklahoma",
+   "code": "OK",
+   "kinds": {
+    "llc": {
+     "title": "Oklahoma Limited Liability Company Act",
+     "citation": "Okla. Stat. tit. 18, 2000 et seq.",
+     "items": [
+      {
+       "name": "Title 18 (complete, includes LLC Act)",
+       "url": "https://www.oklegislature.gov/OK_Statutes/CompleteTitles/os18.pdf",
+       "text_chars": 1732416
+      }
+     ],
+     "notes": "Same PDF as corp; whole Title 18.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Oklahoma General Corporation Act",
+     "citation": "Okla. Stat. tit. 18, 1001 et seq.",
+     "items": [
+      {
+       "name": "Title 18 (complete, includes General Corporation Act)",
+       "url": "https://www.oklegislature.gov/OK_Statutes/CompleteTitles/os18.pdf",
+       "text_chars": 1732416
+      }
+     ],
+     "notes": "Same PDF as llc; whole Title 18.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": true
+    },
+    "securities": {
+     "title": "Oklahoma Uniform Securities Act of 2004",
+     "citation": "Okla. Stat. tit. 71",
+     "items": [
+      {
+       "name": "Title 71 (complete)",
+       "url": "https://www.oklegislature.gov/OK_Statutes/CompleteTitles/os71.pdf",
+       "text_chars": 525816
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "OR": {
+   "name": "Oregon",
+   "code": "OR",
+   "kinds": {
+    "llc": {
+     "title": "Oregon Limited Liability Company Act",
+     "citation": "ORS ch. 63",
+     "items": [],
+     "notes": "Official page https://www.oregonlegislature.gov/bills_laws/ors/ors063.html fails the checker (mojibake, ok=false). Legislature site ors063/ors060 HTML pages are served in an encoding the project parser mis-decodes (garbage text, expect checks fail); archive PDFs found are outdated editions, so not recorded.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Oregon Business Corporation Act",
+     "citation": "ORS ch. 60",
+     "items": [],
+     "notes": "Official ORS 60 HTML page fails the checker (mojibake, ok=false). Legislature site ors063/ors060 HTML pages are served in an encoding the project parser mis-decodes (garbage text, expect checks fail); archive PDFs found are outdated editions, so not recorded.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Oregon Securities Law",
+     "citation": "ORS ch. 59",
+     "items": [
+      {
+       "name": "Chapter 59",
+       "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors059.html",
+       "text_chars": 172607
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "PA": {
+   "name": "Pennsylvania",
+   "code": "PA",
+   "kinds": {
+    "llc": {
+     "title": "Pennsylvania Uniform Limited Liability Company Act of 2016",
+     "citation": "15 Pa.C.S. ch. 88",
+     "items": [
+      {
+       "name": "Chapter 88",
+       "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.088..HTM",
+       "text_chars": 151180
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Pennsylvania Business Corporation Law of 1988",
+     "citation": "15 Pa.C.S. ch. 11-19",
+     "items": [
+      {
+       "name": "Chapter 15 Corporate Powers, Duties and Safeguards",
+       "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.015..HTM",
+       "text_chars": 115473
+      },
+      {
+       "name": "Chapter 17 Officers, Directors and Shareholders",
+       "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.017..HTM",
+       "text_chars": 136453
+      },
+      {
+       "name": "Chapter 19 Fundamental Changes",
+       "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.019..HTM",
+       "text_chars": 91405
+      }
+     ],
+     "notes": "Chapters 11/13 pages were mostly tables of contents so not used; chapter 17 includes fiduciary duty subchapter B.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Pennsylvania Securities Act of 2008",
+     "citation": "70 P.S. 1-101 et seq.",
+     "items": [],
+     "notes": "Not part of Consolidated Statutes on the legislature site; no verified official source found quickly.",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "RI": {
+   "name": "Rhode Island",
+   "code": "RI",
+   "kinds": {
+    "llc": {
+     "title": "Rhode Island Limited Liability Company Act",
+     "citation": "R.I. Gen. Laws ch. 7-16",
+     "items": [
+      {
+       "name": "7-16-2 Definitions",
+       "url": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-16/7-16-2.htm",
+       "text_chars": 5682
+      }
+     ],
+     "notes": "Official site publishes one page per section; most are under the checker's minimum size (ok=false) so only 7-16-2 recorded. Chapter INDEX page is only a table of contents.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Rhode Island Business Corporation Act",
+     "citation": "R.I. Gen. Laws ch. 7-1.2",
+     "items": [
+      {
+       "name": "7-1.2-811 General standards for directors",
+       "url": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-1.2/7-8/7-1.2-811.htm",
+       "text_chars": 3695
+      }
+     ],
+     "notes": "One page per section; nearly all fail checker minimum size, only 7-1.2-811 recorded.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "SC": {
+   "name": "South Carolina",
+   "code": "SC",
+   "kinds": {
+    "llc": {
+     "title": "South Carolina Uniform Limited Liability Company Act of 1996",
+     "citation": "S.C. Code Ann. 33-44",
+     "items": [
+      {
+       "name": "Chapter 44",
+       "url": "https://www.scstatehouse.gov/code/t33c044.php",
+       "text_chars": 131732
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "South Carolina Business Corporation Act of 1988",
+     "citation": "S.C. Code Ann. 33-1 to 33-20",
+     "items": [
+      {
+       "name": "Chapter 1",
+       "url": "https://www.scstatehouse.gov/code/t33c001.php",
+       "text_chars": 29650
+      },
+      {
+       "name": "Chapter 2",
+       "url": "https://www.scstatehouse.gov/code/t33c002.php",
+       "text_chars": 10640
+      },
+      {
+       "name": "Chapter 6",
+       "url": "https://www.scstatehouse.gov/code/t33c006.php",
+       "text_chars": 30927
+      },
+      {
+       "name": "Chapter 7",
+       "url": "https://www.scstatehouse.gov/code/t33c007.php",
+       "text_chars": 41481
+      },
+      {
+       "name": "Chapter 8",
+       "url": "https://www.scstatehouse.gov/code/t33c008.php",
+       "text_chars": 46422
+      },
+      {
+       "name": "Chapter 10",
+       "url": "https://www.scstatehouse.gov/code/t33c010.php",
+       "text_chars": 23725
+      },
+      {
+       "name": "Chapter 11",
+       "url": "https://www.scstatehouse.gov/code/t33c011.php",
+       "text_chars": 34650
+      },
+      {
+       "name": "Chapter 12",
+       "url": "https://www.scstatehouse.gov/code/t33c012.php",
+       "text_chars": 5807
+      },
+      {
+       "name": "Chapter 13",
+       "url": "https://www.scstatehouse.gov/code/t33c013.php",
+       "text_chars": 24926
+      },
+      {
+       "name": "Chapter 14",
+       "url": "https://www.scstatehouse.gov/code/t33c014.php",
+       "text_chars": 32989
+      }
+     ],
+     "notes": "Chapters 1,2,6,7,8,10,11,12,13,14 cover general, formation, shares/distributions, shareholders, directors, amendment, mergers, sales of assets, dissenters, dissolution.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "South Carolina Uniform Securities Act of 2005",
+     "citation": "S.C. Code Ann. 35-1",
+     "items": [
+      {
+       "name": "Chapter 1",
+       "url": "https://www.scstatehouse.gov/code/t35c001.php",
+       "text_chars": 187620
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "SD": {
+   "name": "South Dakota",
+   "code": "SD",
+   "kinds": {
+    "llc": {
+     "title": "South Dakota Uniform Limited Liability Company Act",
+     "citation": "SDCL ch. 47-34A",
+     "items": [
+      {
+       "name": "47-34A-101 Definitions",
+       "url": "https://sdlegislature.gov/api/Statutes/47-34A-101.html",
+       "text_chars": 5021
+      },
+      {
+       "name": "47-34A-409 Standards of conduct",
+       "url": "https://sdlegislature.gov/api/Statutes/47-34A-409.html",
+       "text_chars": 3029
+      }
+     ],
+     "notes": "Chapter page is only a TOC; per-section pages mostly below checker minimum size (ok=false), so only these two recorded.",
+     "caveat": true,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "South Dakota Business Corporation Act",
+     "citation": "SDCL ch. 47-1A",
+     "items": [
+      {
+       "name": "47-1A-140 Chapter definitions",
+       "url": "https://sdlegislature.gov/api/Statutes/47-1A-140.html",
+       "text_chars": 8810
+      }
+     ],
+     "notes": "Chapter page is only a TOC; per-section pages mostly below checker minimum size.",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "TN": {
+   "name": "Tennessee",
+   "code": "TN",
+   "kinds": {
+    "llc": {
+     "title": "Tennessee Revised Limited Liability Company Act",
+     "citation": "Tenn. Code Ann. 48-249-101 et seq.",
+     "items": [],
+     "notes": "Official Tennessee Code is hosted by LexisNexis (JavaScript viewer); no static official text pages found. Not verified.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Tennessee Business Corporation Act",
+     "citation": "Tenn. Code Ann. 48-11-101 et seq.",
+     "items": [],
+     "notes": "Official Tennessee Code is hosted by LexisNexis (JavaScript viewer); no static official text pages found. Not verified.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "TX": {
+   "name": "Texas",
+   "code": "TX",
+   "kinds": {
+    "llc": {
+     "title": "Texas Business Organizations Code, LLC provisions",
+     "citation": "Tex. Bus. Orgs. Code ch. 101",
+     "items": [
+      {
+       "name": "Chapter 101 (LLCs)",
+       "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.101.htm",
+       "text_chars": 150441
+      },
+      {
+       "name": "Chapter 11 (Winding up and termination)",
+       "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.11.htm",
+       "text_chars": 73716
+      },
+      {
+       "name": "Chapter 1 (Definitions)",
+       "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.1.htm",
+       "text_chars": 46890
+      }
+     ],
+     "notes": "Official Texas Legislative Council host tcss.legis.texas.gov; statutes.capitol.texas.gov pages are JavaScript and do not parse.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Texas Business Organizations Code, for-profit corporations",
+     "citation": "Tex. Bus. Orgs. Code ch. 21",
+     "items": [
+      {
+       "name": "Chapter 21 (For-profit corporations)",
+       "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.21.htm",
+       "text_chars": 332585
+      },
+      {
+       "name": "Chapter 11 (Winding up and termination)",
+       "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.11.htm",
+       "text_chars": 73716
+      },
+      {
+       "name": "Chapter 1 (Definitions)",
+       "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.1.htm",
+       "text_chars": 46890
+      }
+     ],
+     "notes": "Same host note as LLC.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Texas Securities Act",
+     "citation": "Tex. Gov't Code tit. 12, ch. 4001 et seq.",
+     "items": [
+      {
+       "name": "Chapter 4001 (General provisions)",
+       "url": "https://tcss.legis.texas.gov/resources/GV/htm/GV.4001.htm",
+       "text_chars": 18830
+      }
+     ],
+     "notes": "Only ch. 4001 verified; other chapters (4003 etc.) not checked.",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "UT": {
+   "name": "Utah",
+   "code": "UT",
+   "kinds": {
+    "llc": {
+     "title": "Utah Revised Uniform Limited Liability Company Act",
+     "citation": "Utah Code tit. 48, ch. 3a",
+     "items": [],
+     "notes": "Search suggests recodification to Title 16 ch. 20 effective Oct 2026 (unverified). Official URL pattern exists at le.utah.gov/xcode but is unfetchable. le.utah.gov fails TLS verification in the fetcher (CERTIFICATE_VERIFY_FAILED, incomplete issuer chain), so no URL can be loaded.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Utah Revised Business Corporation Act",
+     "citation": "Utah Code tit. 16, ch. 10a",
+     "items": [],
+     "notes": "le.utah.gov fails TLS verification in the fetcher (CERTIFICATE_VERIFY_FAILED); no alternative official host found.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "VA": {
+   "name": "Virginia",
+   "code": "VA",
+   "kinds": {
+    "llc": {
+     "title": "Virginia Limited Liability Company Act",
+     "citation": "Va. Code tit. 13.1, ch. 12",
+     "items": [
+      {
+       "name": "Chapter 12 full",
+       "url": "https://law.lis.virginia.gov/vacodefull/title13.1/chapter12",
+       "text_chars": 291894
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Virginia Stock Corporation Act",
+     "citation": "Va. Code tit. 13.1, ch. 9",
+     "items": [
+      {
+       "name": "Chapter 9 full",
+       "url": "https://law.lis.virginia.gov/vacodefull/title13.1/chapter9",
+       "text_chars": 591321
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Virginia Securities Act",
+     "citation": "Va. Code tit. 13.1, ch. 5",
+     "items": [
+      {
+       "name": "Chapter 5 full",
+       "url": "https://law.lis.virginia.gov/vacodefull/title13.1/chapter5",
+       "text_chars": 90964
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "VT": {
+   "name": "Vermont",
+   "code": "VT",
+   "kinds": {
+    "llc": {
+     "title": "Vermont Limited Liability Company Act",
+     "citation": "11 V.S.A. ch. 25",
+     "items": [
+      {
+       "name": "Chapter 25 full chapter",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11/025",
+       "text_chars": 160469
+      }
+     ],
+     "notes": "Page starts with site navigation chrome but contains full statute text.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Vermont Business Corporation Act",
+     "citation": "11A V.S.A. chs. 1-14",
+     "items": [
+      {
+       "name": "Ch. 1 General provisions",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/001",
+       "text_chars": 22903
+      },
+      {
+       "name": "Ch. 2 Incorporation",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/002",
+       "text_chars": 10201
+      },
+      {
+       "name": "Ch. 3 Purposes and powers",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/003",
+       "text_chars": 6471
+      },
+      {
+       "name": "Ch. 6 Shares and distributions",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/006",
+       "text_chars": 25405
+      },
+      {
+       "name": "Ch. 7 Shareholders",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/007",
+       "text_chars": 34135
+      },
+      {
+       "name": "Ch. 8 Directors and officers",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/008",
+       "text_chars": 46115
+      },
+      {
+       "name": "Ch. 11 Merger and share exchange",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/011",
+       "text_chars": 44079
+      },
+      {
+       "name": "Ch. 13 Dissenters' rights",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/013",
+       "text_chars": 19195
+      },
+      {
+       "name": "Ch. 14 Dissolution",
+       "url": "https://legislature.vermont.gov/statutes/fullchapter/11A/014",
+       "text_chars": 29876
+      }
+     ],
+     "notes": "Uses fullchapter pages on legislature.vermont.gov (labelled unofficial online copy of VSA by the legislature).",
+     "caveat": true,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "WA": {
+   "name": "Washington",
+   "code": "WA",
+   "kinds": {
+    "llc": {
+     "title": "Washington Limited Liability Company Act",
+     "citation": "RCW ch. 25.15",
+     "items": [
+      {
+       "name": "Chapter 25.15 full",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=25.15&full=true",
+       "text_chars": 132088
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Washington Business Corporation Act",
+     "citation": "RCW Title 23B",
+     "items": [
+      {
+       "name": "Ch. 23B.01 General provisions",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.01&full=true",
+       "text_chars": 40195
+      },
+      {
+       "name": "Ch. 23B.02 Incorporation",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.02&full=true",
+       "text_chars": 9947
+      },
+      {
+       "name": "Ch. 23B.06 Shares and distributions",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.06&full=true",
+       "text_chars": 30584
+      },
+      {
+       "name": "Ch. 23B.07 Shareholders",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.07&full=true",
+       "text_chars": 47759
+      },
+      {
+       "name": "Ch. 23B.08 Directors and officers",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.08&full=true",
+       "text_chars": 62313
+      },
+      {
+       "name": "Ch. 23B.10 Amendment",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.10&full=true",
+       "text_chars": 23080
+      },
+      {
+       "name": "Ch. 23B.14 Dissolution",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=23B.14&full=true",
+       "text_chars": 34384
+      }
+     ],
+     "notes": "23B.11 (merger) failed the corporation/shareholder check and was omitted.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    },
+    "securities": {
+     "title": "Washington Securities Act",
+     "citation": "RCW ch. 21.20",
+     "items": [
+      {
+       "name": "Chapter 21.20 full",
+       "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=21.20&full=true",
+       "text_chars": 158557
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Securities Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "WI": {
+   "name": "Wisconsin",
+   "code": "WI",
+   "kinds": {
+    "llc": {
+     "title": "Wisconsin Uniform Limited Liability Company Law",
+     "citation": "Wis. Stat. ch. 183",
+     "items": [
+      {
+       "name": "Chapter 183 PDF",
+       "url": "https://docs.legis.wisconsin.gov/statutes/statutes/183.pdf",
+       "text_chars": 220243
+      }
+     ],
+     "notes": "HTML chapter page is only a table of contents; use PDF.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Wisconsin Business Corporations",
+     "citation": "Wis. Stat. ch. 180",
+     "items": [
+      {
+       "name": "Chapter 180 PDF",
+       "url": "https://docs.legis.wisconsin.gov/statutes/statutes/180.pdf",
+       "text_chars": 513328
+      }
+     ],
+     "notes": "HTML chapter page is only a table of contents; use PDF.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "WV": {
+   "name": "West Virginia",
+   "code": "WV",
+   "kinds": {
+    "llc": {
+     "title": "West Virginia Uniform Limited Liability Company Act",
+     "citation": "W. Va. Code ch. 31B",
+     "items": [
+      {
+       "name": "Chapter 31B PDF",
+       "url": "https://code.wvlegislature.gov/pdf/31B/",
+       "text_chars": 202360
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "West Virginia Business Corporation Act",
+     "citation": "W. Va. Code ch. 31D",
+     "items": [
+      {
+       "name": "Chapter 31D PDF",
+       "url": "https://code.wvlegislature.gov/pdf/31D/",
+       "text_chars": 312066
+      }
+     ],
+     "notes": "",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": false
+    }
+   }
+  },
+  "WY": {
+   "name": "Wyoming",
+   "code": "WY",
+   "kinds": {
+    "llc": {
+     "title": "Wyoming Limited Liability Company Act",
+     "citation": "Wyo. Stat. tit. 17, ch. 29",
+     "items": [
+      {
+       "name": "Title 17 PDF (includes ch. 29)",
+       "url": "https://wyoleg.gov/statutes/compress/title17.pdf",
+       "text_chars": 1519096
+      }
+     ],
+     "notes": "Title 17 PDF also contains ch. 16 corporations; same URL used for both kinds. SOS also publishes a 2021 ch. 29 PDF (139643 chars) at sos.wyo.gov, verified but older.",
+     "caveat": false,
+     "label": "LLC Act",
+     "duplicate_of_other_kind": false
+    },
+    "corp": {
+     "title": "Wyoming Business Corporation Act",
+     "citation": "Wyo. Stat. tit. 17, ch. 16",
+     "items": [
+      {
+       "name": "Title 17 PDF (includes ch. 16)",
+       "url": "https://wyoleg.gov/statutes/compress/title17.pdf",
+       "text_chars": 1519096
+      }
+     ],
+     "notes": "Single combined Title 17 PDF, 1.5M chars.",
+     "caveat": false,
+     "label": "Corporation Act",
+     "duplicate_of_other_kind": true
+    }
+   }
+  }
+ }
+}

@@ -3,7 +3,11 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { api, setCsrf, useQuery, type Gpu, type User } from './api'
 import { Disclaimer, Loading, Logo, icons } from './ui'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
+import Home from './pages/Home'
+import ReviewWizard from './pages/ReviewWizard'
+import CreateWizard from './pages/CreateWizard'
+import Ask from './pages/Ask'
+import Help from './pages/Help'
 import Matters from './pages/Matters'
 import MatterPage from './pages/MatterPage'
 import JobsPage from './pages/JobsPage'
@@ -16,11 +20,11 @@ export const useAuth = () => useContext(AuthCtx)
 
 function GpuIndicator() {
   const { data } = useQuery(() => api<Gpu>('/api/gpu/status'), [], 10000)
-  if (!data) return <div className="gpu small muted">Checking GPU…</div>
+  if (!data) return <div className="gpu small muted">Checking AI computer…</div>
   const queued = (data.queue.QUEUED ?? 0) + (data.queue.RUNNING ?? 0) + (data.queue.RETRYABLE ?? 0)
   return (
     <div className="gpu small" title={data.last_heartbeat_at ? `Last heartbeat ${new Date(data.last_heartbeat_at).toLocaleTimeString()}` : 'No heartbeat yet'}>
-      <div className="row"><span className={`dot ${data.online ? 'on' : 'off'}`} /><strong>Private GPU: {data.online ? 'Online' : 'Offline'}</strong></div>
+      <div className="row"><span className={`dot ${data.online ? 'on' : 'off'}`} /><strong>Private AI: {data.online ? 'Online' : 'Offline'}</strong></div>
       {data.online
         ? <div className="muted">{data.gpu}{data.vram_free_mb != null && ` · ${(data.vram_free_mb / 1024).toFixed(1)} GB free`}<br />Queue: {queued}</div>
         : <div className="muted">{data.waiting} job{data.waiting === 1 ? '' : 's'} waiting</div>}
@@ -35,10 +39,14 @@ function Shell({ children }: { children: ReactNode }) {
       <aside className="side">
         <div className="brand"><Logo />Legal AI</div>
         <nav className="nav">
-          <NavLink to="/" end>{icons.home}Dashboard</NavLink>
-          <NavLink to="/matters">{icons.folder}Matters</NavLink>
-          <NavLink to="/authorities">{icons.folder}Authorities</NavLink>
-          <NavLink to="/jobs">{icons.jobs}Jobs</NavLink>
+          <NavLink to="/" end>{icons.home}Home</NavLink>
+          <NavLink to="/review">{icons.jobs}Review a contract</NavLink>
+          <NavLink to="/create">{icons.jobs}Create a document</NavLink>
+          <NavLink to="/ask">{icons.jobs}Ask a question</NavLink>
+          <NavLink to="/matters">{icons.folder}Projects</NavLink>
+          <NavLink to="/authorities">{icons.folder}Legal library</NavLink>
+          <NavLink to="/jobs">{icons.jobs}Activity</NavLink>
+          <NavLink to="/help">{icons.home}How to use this</NavLink>
           <NavLink to="/settings">{icons.gear}Settings</NavLink>
         </nav>
         <div className="side-foot">
@@ -68,7 +76,11 @@ export default function App() {
     <AuthCtx.Provider value={{ user, logout }}>
       <Shell>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/review" element={<ReviewWizard />} />
+          <Route path="/create" element={<CreateWizard />} />
+          <Route path="/ask" element={<Ask />} />
+          <Route path="/help" element={<Help />} />
           <Route path="/matters" element={<Matters />} />
           <Route path="/matters/:id/*" element={<MatterPage />} />
           <Route path="/authorities" element={<Authorities />} />

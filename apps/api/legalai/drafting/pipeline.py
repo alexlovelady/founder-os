@@ -90,10 +90,24 @@ async def run_draft(draft_id: uuid.UUID, provider: LLMProvider, settings: Settin
         jur = inp.get("jurisdiction") or matter.jurisdiction
         perspective = inp.get("perspective", "neutral")
         res = await hybrid_search(db, matter, instructions[:500], settings, k=5, jurisdictions=[jur] if inp.get("jurisdiction") else None)
-        reference = [{"cite_id": h.cite_id, "title": h.doc.title, "text": h.chunk.text, "chunk_id": str(h.chunk.id)} for h in res.hits]
+        reference = [{"cite_id": h.cite_id, "title": h.doc.title, "text": h.chunk.text, "chunk_id": str(h.chunk.id), "kind": "reference"} for h in res.hits]
         warnings = list(res.warnings)
+        # Templates (library or matter documents typed "template") guide structure and style. They are found with a
+        # template-focused query so a founders agreement is shaped like real agreements, not like unrelated passages.
+        attribution: list[str] = []
+        if doc_type:
+            tres = await hybrid_search(db, matter, f"{doc_type} standard agreement terms clauses", settings, k=14)
+            tpl = [h for h in tres.hits if h.doc.authority_type == "template"][:3]
+            n = len(reference)
+            for i, h in enumerate(tpl, start=1):
+                reference.append({"cite_id": f"CITE-{n + i:03d}", "title": h.doc.title, "text": h.chunk.text, "chunk_id": str(h.chunk.id), "kind": "template"})
+                if h.doc.citation_text and h.doc.citation_text not in attribution:
+                    attribution.append(h.doc.citation_text)
+        outline, guidance = inp.get("outline"), inp.get("guidance", "")
     obj, model = await generate(provider, settings, usage, mode=mode, doc_type=doc_type, instructions=instructions, facts=facts,
                                 jurisdiction=jur, source_text=source_text, perspective=perspective, reference=reference)
+    if outline:
+        pass  # the outline is already part of `instructions` for catalog drafts
     content = obj["content"].strip()
     provided = " ".join([instructions, json.dumps(facts), source_text, jur])
     checks = _checks(content, provided, obj.get("placeholders") or [])
@@ -105,7 +119,7 @@ async def run_draft(draft_id: uuid.UUID, provider: LLMProvider, settings: Settin
                                   evidence=[{"cite_id": r["cite_id"], "title": r["title"], "text": r["text"], "flags": [], "jurisdiction": ""} for r in reference])
     result = {"critic": critic, "placeholders": obj.get("placeholders") or [], "assumptions": obj.get("assumptions") or [],
               "needs_attorney_review": obj.get("needs_attorney_review") or [], "checks": checks, "warnings": warnings,
-              "reference": [{k: r[k] for k in ("cite_id", "title", "chunk_id")} for r in reference]}
+              "reference": [{k: r[k] for k in ("cite_id", "title", "chunk_id", "kind")} for r in reference], "attribution": attribution}
     h = hashlib.sha256(content.encode()).hexdigest()
     with session_scope() as db:
         d = db.get(Draft, draft_id)

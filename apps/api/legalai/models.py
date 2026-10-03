@@ -106,6 +106,7 @@ class Matter(Base, TimestampMixin):
     external_embedding_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     llm_fallback_mode: Mapped[str] = mapped_column(String(20), default=FallbackMode.disabled.value)
     kind: Mapped[str] = mapped_column(String(20), default="matter")  # matter | library (shared public authorities)
+    profile: Mapped[dict] = mapped_column(JSONB, default=dict)  # company profile + checklist state for the startup workflow
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
@@ -140,6 +141,7 @@ class Document(Base, TimestampMixin):
     superseded: Mapped[bool] = mapped_column(Boolean, default=False)
     metadata_source: Mapped[str] = mapped_column(String(20), default="detected")  # detected | user
     treatment: Mapped[list] = mapped_column(JSONB, default=list)  # [{type, citing, note, date, source}]
+    agreement_type: Mapped[str] = mapped_column(String(40), default="")  # founders_agreement, safe, nda, ... ("" until parsed)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 

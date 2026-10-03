@@ -1,0 +1,368 @@
+[
+ {
+  "state": "Ohio",
+  "code": "OH",
+  "kind": "llc",
+  "title": "Ohio Revised Limited Liability Company Act",
+  "citation": "Ohio Rev. Code ch. 1706",
+  "items": [
+   {
+    "name": "Chapter 1706",
+    "url": "https://codes.ohio.gov/ohio-revised-code/chapter-1706",
+    "text_chars": 179002
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Ohio",
+  "code": "OH",
+  "kind": "corp",
+  "title": "Ohio General Corporation Law",
+  "citation": "Ohio Rev. Code ch. 1701",
+  "items": [
+   {
+    "name": "Chapter 1701",
+    "url": "https://codes.ohio.gov/ohio-revised-code/chapter-1701",
+    "text_chars": 455092
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Ohio",
+  "code": "OH",
+  "kind": "securities",
+  "title": "Ohio Securities Law",
+  "citation": "Ohio Rev. Code ch. 1707",
+  "items": [
+   {
+    "name": "Chapter 1707",
+    "url": "https://codes.ohio.gov/ohio-revised-code/chapter-1707",
+    "text_chars": 302292
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Oklahoma",
+  "code": "OK",
+  "kind": "llc",
+  "title": "Oklahoma Limited Liability Company Act",
+  "citation": "Okla. Stat. tit. 18, 2000 et seq.",
+  "items": [
+   {
+    "name": "Title 18 (complete, includes LLC Act)",
+    "url": "https://www.oklegislature.gov/OK_Statutes/CompleteTitles/os18.pdf",
+    "text_chars": 1732416
+   }
+  ],
+  "reason": "",
+  "notes": "Same PDF as corp; whole Title 18."
+ },
+ {
+  "state": "Oklahoma",
+  "code": "OK",
+  "kind": "corp",
+  "title": "Oklahoma General Corporation Act",
+  "citation": "Okla. Stat. tit. 18, 1001 et seq.",
+  "items": [
+   {
+    "name": "Title 18 (complete, includes General Corporation Act)",
+    "url": "https://www.oklegislature.gov/OK_Statutes/CompleteTitles/os18.pdf",
+    "text_chars": 1732416
+   }
+  ],
+  "reason": "",
+  "notes": "Same PDF as llc; whole Title 18."
+ },
+ {
+  "state": "Oklahoma",
+  "code": "OK",
+  "kind": "securities",
+  "title": "Oklahoma Uniform Securities Act of 2004",
+  "citation": "Okla. Stat. tit. 71",
+  "items": [
+   {
+    "name": "Title 71 (complete)",
+    "url": "https://www.oklegislature.gov/OK_Statutes/CompleteTitles/os71.pdf",
+    "text_chars": 525816
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Oregon",
+  "code": "OR",
+  "kind": "llc",
+  "title": "Oregon Limited Liability Company Act",
+  "citation": "ORS ch. 63",
+  "items": [],
+  "reason": "Official page https://www.oregonlegislature.gov/bills_laws/ors/ors063.html fails the checker (mojibake, ok=false). Legislature site ors063/ors060 HTML pages are served in an encoding the project parser mis-decodes (garbage text, expect checks fail); archive PDFs found are outdated editions, so not recorded.",
+  "notes": ""
+ },
+ {
+  "state": "Oregon",
+  "code": "OR",
+  "kind": "corp",
+  "title": "Oregon Business Corporation Act",
+  "citation": "ORS ch. 60",
+  "items": [],
+  "reason": "Official ORS 60 HTML page fails the checker (mojibake, ok=false). Legislature site ors063/ors060 HTML pages are served in an encoding the project parser mis-decodes (garbage text, expect checks fail); archive PDFs found are outdated editions, so not recorded.",
+  "notes": ""
+ },
+ {
+  "state": "Oregon",
+  "code": "OR",
+  "kind": "securities",
+  "title": "Oregon Securities Law",
+  "citation": "ORS ch. 59",
+  "items": [
+   {
+    "name": "Chapter 59",
+    "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors059.html",
+    "text_chars": 172607
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Pennsylvania",
+  "code": "PA",
+  "kind": "llc",
+  "title": "Pennsylvania Uniform Limited Liability Company Act of 2016",
+  "citation": "15 Pa.C.S. ch. 88",
+  "items": [
+   {
+    "name": "Chapter 88",
+    "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.088..HTM",
+    "text_chars": 151180
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Pennsylvania",
+  "code": "PA",
+  "kind": "corp",
+  "title": "Pennsylvania Business Corporation Law of 1988",
+  "citation": "15 Pa.C.S. ch. 11-19",
+  "items": [
+   {
+    "name": "Chapter 15 Corporate Powers, Duties and Safeguards",
+    "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.015..HTM",
+    "text_chars": 115473
+   },
+   {
+    "name": "Chapter 17 Officers, Directors and Shareholders",
+    "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.017..HTM",
+    "text_chars": 136453
+   },
+   {
+    "name": "Chapter 19 Fundamental Changes",
+    "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/15/00.019..HTM",
+    "text_chars": 91405
+   }
+  ],
+  "reason": "",
+  "notes": "Chapters 11/13 pages were mostly tables of contents so not used; chapter 17 includes fiduciary duty subchapter B."
+ },
+ {
+  "state": "Pennsylvania",
+  "code": "PA",
+  "kind": "securities",
+  "title": "Pennsylvania Securities Act of 2008",
+  "citation": "70 P.S. 1-101 et seq.",
+  "items": [],
+  "reason": "Not part of Consolidated Statutes on the legislature site; no verified official source found quickly.",
+  "notes": ""
+ },
+ {
+  "state": "Rhode Island",
+  "code": "RI",
+  "kind": "llc",
+  "title": "Rhode Island Limited Liability Company Act",
+  "citation": "R.I. Gen. Laws ch. 7-16",
+  "items": [
+   {
+    "name": "7-16-2 Definitions",
+    "url": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-16/7-16-2.htm",
+    "text_chars": 5682
+   }
+  ],
+  "reason": "",
+  "notes": "Official site publishes one page per section; most are under the checker's minimum size (ok=false) so only 7-16-2 recorded. Chapter INDEX page is only a table of contents."
+ },
+ {
+  "state": "Rhode Island",
+  "code": "RI",
+  "kind": "corp",
+  "title": "Rhode Island Business Corporation Act",
+  "citation": "R.I. Gen. Laws ch. 7-1.2",
+  "items": [
+   {
+    "name": "7-1.2-811 General standards for directors",
+    "url": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-1.2/7-8/7-1.2-811.htm",
+    "text_chars": 3695
+   }
+  ],
+  "reason": "",
+  "notes": "One page per section; nearly all fail checker minimum size, only 7-1.2-811 recorded."
+ },
+ {
+  "state": "South Carolina",
+  "code": "SC",
+  "kind": "llc",
+  "title": "South Carolina Uniform Limited Liability Company Act of 1996",
+  "citation": "S.C. Code Ann. 33-44",
+  "items": [
+   {
+    "name": "Chapter 44",
+    "url": "https://www.scstatehouse.gov/code/t33c044.php",
+    "text_chars": 131732
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "South Carolina",
+  "code": "SC",
+  "kind": "corp",
+  "title": "South Carolina Business Corporation Act of 1988",
+  "citation": "S.C. Code Ann. 33-1 to 33-20",
+  "items": [
+   {
+    "name": "Chapter 1",
+    "url": "https://www.scstatehouse.gov/code/t33c001.php",
+    "text_chars": 29650
+   },
+   {
+    "name": "Chapter 2",
+    "url": "https://www.scstatehouse.gov/code/t33c002.php",
+    "text_chars": 10640
+   },
+   {
+    "name": "Chapter 6",
+    "url": "https://www.scstatehouse.gov/code/t33c006.php",
+    "text_chars": 30927
+   },
+   {
+    "name": "Chapter 7",
+    "url": "https://www.scstatehouse.gov/code/t33c007.php",
+    "text_chars": 41481
+   },
+   {
+    "name": "Chapter 8",
+    "url": "https://www.scstatehouse.gov/code/t33c008.php",
+    "text_chars": 46422
+   },
+   {
+    "name": "Chapter 10",
+    "url": "https://www.scstatehouse.gov/code/t33c010.php",
+    "text_chars": 23725
+   },
+   {
+    "name": "Chapter 11",
+    "url": "https://www.scstatehouse.gov/code/t33c011.php",
+    "text_chars": 34650
+   },
+   {
+    "name": "Chapter 12",
+    "url": "https://www.scstatehouse.gov/code/t33c012.php",
+    "text_chars": 5807
+   },
+   {
+    "name": "Chapter 13",
+    "url": "https://www.scstatehouse.gov/code/t33c013.php",
+    "text_chars": 24926
+   },
+   {
+    "name": "Chapter 14",
+    "url": "https://www.scstatehouse.gov/code/t33c014.php",
+    "text_chars": 32989
+   }
+  ],
+  "reason": "",
+  "notes": "Chapters 1,2,6,7,8,10,11,12,13,14 cover general, formation, shares/distributions, shareholders, directors, amendment, mergers, sales of assets, dissenters, dissolution."
+ },
+ {
+  "state": "South Carolina",
+  "code": "SC",
+  "kind": "securities",
+  "title": "South Carolina Uniform Securities Act of 2005",
+  "citation": "S.C. Code Ann. 35-1",
+  "items": [
+   {
+    "name": "Chapter 1",
+    "url": "https://www.scstatehouse.gov/code/t35c001.php",
+    "text_chars": 187620
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "South Dakota",
+  "code": "SD",
+  "kind": "llc",
+  "title": "South Dakota Uniform Limited Liability Company Act",
+  "citation": "SDCL ch. 47-34A",
+  "items": [
+   {
+    "name": "47-34A-101 Definitions",
+    "url": "https://sdlegislature.gov/api/Statutes/47-34A-101.html",
+    "text_chars": 5021
+   },
+   {
+    "name": "47-34A-409 Standards of conduct",
+    "url": "https://sdlegislature.gov/api/Statutes/47-34A-409.html",
+    "text_chars": 3029
+   }
+  ],
+  "reason": "",
+  "notes": "Chapter page is only a TOC; per-section pages mostly below checker minimum size (ok=false), so only these two recorded."
+ },
+ {
+  "state": "South Dakota",
+  "code": "SD",
+  "kind": "corp",
+  "title": "South Dakota Business Corporation Act",
+  "citation": "SDCL ch. 47-1A",
+  "items": [
+   {
+    "name": "47-1A-140 Chapter definitions",
+    "url": "https://sdlegislature.gov/api/Statutes/47-1A-140.html",
+    "text_chars": 8810
+   }
+  ],
+  "reason": "",
+  "notes": "Chapter page is only a TOC; per-section pages mostly below checker minimum size."
+ },
+ {
+  "state": "Tennessee",
+  "code": "TN",
+  "kind": "llc",
+  "title": "Tennessee Revised Limited Liability Company Act",
+  "citation": "Tenn. Code Ann. 48-249-101 et seq.",
+  "items": [],
+  "reason": "Official Tennessee Code is hosted by LexisNexis (JavaScript viewer); no static official text pages found. Not verified.",
+  "notes": ""
+ },
+ {
+  "state": "Tennessee",
+  "code": "TN",
+  "kind": "corp",
+  "title": "Tennessee Business Corporation Act",
+  "citation": "Tenn. Code Ann. 48-11-101 et seq.",
+  "items": [],
+  "reason": "Official Tennessee Code is hosted by LexisNexis (JavaScript viewer); no static official text pages found. Not verified.",
+  "notes": ""
+ }
+]

@@ -64,6 +64,13 @@ Honest limits: ClamAV is not deployed (RAM cost); CourtListener support is mock-
 ships with the system (you record treatment); state codes need per-state sources; the benchmark is small and was tuned on its own
 questions; OCR quality depends on scan quality; backups on the server share the data volume (pull an off-site copy).
 
+## Startup workflow (UI)
+Home shows a first-run company form, three actions (Review a contract, Create a document, Ask a legal question) and a legal
+checklist that ticks itself when it recognises an uploaded document. Review gives a verdict, a plain-English summary with checked
+key terms, risks in order, and a Word file with tracked changes. Create asks a few plain questions per document type and drafts
+from library templates, with blanks wherever a fact was not given; download as Word or save into the project. Ask reuses the
+cited-research pipeline. "Matters" are called Projects in the UI, and the company workspace is one project created at onboarding.
+
 ## Local development
 ```bash
 docker compose up -d db                       # pgvector Postgres on :5442

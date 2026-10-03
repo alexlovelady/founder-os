@@ -20,7 +20,7 @@ from ..providers.base import LLMProvider
 from ..llm_utils import Usage, _json_array, _model, _strip_think
 from .checks import (broken_cross_references, classify_topics, detect_agreement_type, key_figures, missing_topics,
                      undefined_terms, unused_definitions)
-from .prompts import (ASSESS_PROMPT, EXTRACT_PROMPT, PROMPT_VERSION, TOPIC_LIST, playbook_block)
+from .prompts import (ASSESS_PROMPT, EXTRACT_PROMPT, PLAIN_PROMPT, PROMPT_VERSION, TOPIC_LIST, playbook_block)
 
 MAX_CLAUSES = 80
 BATCH_CHARS = 3200
@@ -123,12 +123,22 @@ def _batches(clauses: list[dict]) -> list[list[dict]]:
     return out
 
 
-async def _chat_json(provider, model, prompt, usage, retries=1):
+async def _chat_json(provider, model, prompt, usage, retries=1, expect="array"):
     for attempt in range(retries + 1):
-        r = await provider.chat([{"role": "user", "content": prompt + ("" if attempt == 0 else "\n\nReturn ONLY the JSON array, nothing else.")}],
+        r = await provider.chat([{"role": "user", "content": prompt + ("" if attempt == 0 else "\n\nReturn ONLY the JSON, nothing else.")}],
                                 model, temperature=0)
         usage.add(r)
-        arr = _json_array(_strip_think(r.content))
+        text = _strip_think(r.content)
+        if expect == "object":
+            m = re.search(r"\{.*\}", text, re.S)
+            try:
+                obj = json.loads(m.group(0)) if m else None
+            except ValueError:
+                obj = None
+            if isinstance(obj, dict):
+                return obj
+            continue
+        arr = _json_array(text)
         if arr is not None:
             return arr
     return None
@@ -239,6 +249,23 @@ async def run_review(review_id: uuid.UUID, provider: LLMProvider, settings: Sett
                            "playbook_rule": t if t in pb_topics else "", "suggested_revision": ""})
     issues.sort(key=lambda x: RISKS.index(x["risk"]))
 
+    # 4b. plain-English explanation for non-lawyers. Key terms must be found in the cited clause or they are marked unverified.
+    plain = None
+    arr2 = await _chat_json(provider, _model(provider, settings, "deep"), PLAIN_PROMPT.format(
+        table=table, figures=json.dumps(asdict(figs)), issues="\n".join(f"- [{i['risk']}] {i['title']}: {i['why']}" for i in issues[:10]) or "- none"), usage, retries=0, expect="object")
+    if isinstance(arr2, dict):
+        norm = lambda t: re.sub(r"\s+", " ", str(t)).lower()
+        kt = []
+        for t in (arr2.get("key_terms") or [])[:8]:
+            if isinstance(t, dict) and str(t.get("value") or "").strip():
+                cl = t.get("clause") if t.get("clause") in by_id else None
+                hay = norm(by_id[cl]["text"]) if cl else norm(full_text)
+                kt.append({"label": str(t.get("label") or "")[:60], "value": str(t["value"])[:200], "clause": cl,
+                           "verified": norm(t["value"]) in hay})
+        plain = {"summary": str(arr2.get("summary") or "")[:1200], "key_terms": kt,
+                 "watch_outs": [{"text": str(w.get("text"))[:300], "clause": w.get("clause") if w.get("clause") in by_id else None}
+                                for w in (arr2.get("watch_outs") or [])[:5] if isinstance(w, dict) and w.get("text")],
+                 "questions_to_ask": [str(q)[:300] for q in (arr2.get("questions_to_ask") or [])[:5] if str(q).strip()]}
     # 5. obligations
     obligations = []
     for cid, o in extracted.items():
@@ -261,7 +288,7 @@ async def run_review(review_id: uuid.UUID, provider: LLMProvider, settings: Sett
         critic = await run_critic(provider, settings, usage, kind="contract review (issue list)", output_text=text or "(no issues)",
                                   evidence=[{"cite_id": c["id"], "title": c["section"] or c["id"], "text": c["text"], "flags": [], "jurisdiction": ""} for c in clauses])
     counts = {r: sum(1 for i in issues if i["risk"] == r) for r in RISKS}
-    result = {"agreement_type": agreement_type, "perspective": perspective, "playbook": pb["name"] if pb else None, "playbook_auto": playbook_auto, "clauses": out_clauses,
+    result = {"agreement_type": agreement_type, "perspective": perspective, "playbook": pb["name"] if pb else None, "playbook_auto": playbook_auto, "plain": plain, "clauses": out_clauses,
               "issues": issues, "missing_terms": missing, "undefined_terms": undef, "unused_definitions": unused,
               "broken_cross_references": broken, "figures": asdict(figs), "risk_counts": counts, "warnings": warnings,
               "obligation_count": len(obligations), "critic": critic}

@@ -68,6 +68,8 @@ def validate_config(adapter: str, cfg: dict) -> dict:
         for k in ("title", "citation", "effective_date"):
             if cfg.get(k):
                 out[k] = str(cfg[k])[:300]
+        if cfg.get("official") is False:
+            out["official"] = False
         return out
     raise SourceError(f"Unknown adapter '{adapter}'")
 
@@ -253,10 +255,17 @@ class CourtListenerAdapter:
         hdr = {"Authorization": f"Token {token}"}
 
         async def get_json(url):
-            r = await self.fetch(url, hdr)
+            import asyncio
+            import json
+            for attempt in range(4):  # CourtListener throttles bursts: honour Retry-After, back off, then give up clearly
+                r = await self.fetch(url, hdr)
+                if r.status == 429 and attempt < 3:
+                    wait = min(60, int(r.headers.get("retry-after", 0) or 0) or 5 * (attempt + 1) ** 2)
+                    await asyncio.sleep(wait)
+                    continue
+                break
             if r.status != 200:
                 raise SourceError(f"CourtListener returned HTTP {r.status}")
-            import json
             return json.loads(r.content)
 
         op = await get_json(f"{self.BASE}/opinions/{int(cfg['opinion_id'])}/")

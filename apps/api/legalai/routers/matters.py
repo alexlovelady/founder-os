@@ -43,7 +43,7 @@ def matter_out(m: Matter, role: str) -> dict:
             "relevant_date": m.relevant_date.isoformat() if m.relevant_date else None, "status": m.status,
             "privacy_mode": m.privacy_mode, "external_embedding_enabled": m.external_embedding_enabled,
             "llm_fallback_mode": m.llm_fallback_mode, "my_role": role,
-            "embedding_route": embedding_route(m, get_settings()),
+            "embedding_route": embedding_route(m, get_settings()), "profile": m.profile or {},
             "embedding_model": embedding_model_id(m, get_settings()), "created_at": m.created_at.isoformat()}
 
 

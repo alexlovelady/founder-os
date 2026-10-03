@@ -1,0 +1,254 @@
+[
+ {
+  "state": "Alabama",
+  "code": "AL",
+  "kind": "llc",
+  "title": "Alabama Limited Liability Company Law of 2014",
+  "citation": "Ala. Code tit. 10A, ch. 5A",
+  "items": [],
+  "reason": "Official code (alison.legislature.state.al.us) is JavaScript/per-section and failed the checker; only a bill-stage PDF was loadable, not enacted code.",
+  "notes": "Justia etc. not allowed."
+ },
+ {
+  "state": "Alabama",
+  "code": "AL",
+  "kind": "corp",
+  "title": "Alabama Business Corporation Law",
+  "citation": "Ala. Code tit. 10A, ch. 2A",
+  "items": [],
+  "reason": "Official code site fails checker (JS/per-section); no full-text official page found.",
+  "notes": ""
+ },
+ {
+  "state": "Alaska",
+  "code": "AK",
+  "kind": "llc",
+  "title": "Alaska Revised Limited Liability Company Act",
+  "citation": "AS 10.50",
+  "items": [
+   {
+    "name": "Alaska Corporations statutes and regulations (June 2026), includes AS 10.50",
+    "url": "https://www.commerce.alaska.gov/web/Portals/5/pub/corporationsstatutesandregulations.pdf",
+    "text_chars": 1028279
+   }
+  ],
+  "reason": "",
+  "notes": "Single Division of Corporations PDF compiled from the statutes; covers AS 10.06 and 10.50. Disclaimer says official versions control."
+ },
+ {
+  "state": "Alaska",
+  "code": "AK",
+  "kind": "corp",
+  "title": "Alaska Corporations Code",
+  "citation": "AS 10.06",
+  "items": [
+   {
+    "name": "Alaska Corporations statutes and regulations (June 2026), includes AS 10.06",
+    "url": "https://www.commerce.alaska.gov/web/Portals/5/pub/corporationsstatutesandregulations.pdf",
+    "text_chars": 1028279
+   }
+  ],
+  "reason": "",
+  "notes": "Same PDF as LLC entry (1.03M chars)."
+ },
+ {
+  "state": "Arizona",
+  "code": "AZ",
+  "kind": "llc",
+  "title": "Arizona Limited Liability Company Act",
+  "citation": "A.R.S. tit. 29, ch. 7 (29-3101 et seq.)",
+  "items": [
+   {
+    "name": "Laws 2018 ch. 168 (SB 1353), original text of LLC Act",
+    "url": "https://www.azleg.gov/legtext/53Leg/2R/laws/0168.pdf",
+    "text_chars": 179084
+   }
+  ],
+  "reason": "",
+  "notes": "Session law enacting the Act (eff. 2019); not the current codified text, later amendments missing. azleg.gov code pages are one section per page, so not practical."
+ },
+ {
+  "state": "Arizona",
+  "code": "AZ",
+  "kind": "corp",
+  "title": "Arizona Corporation Law",
+  "citation": "A.R.S. tit. 10",
+  "items": [],
+  "reason": "azleg.gov publishes one section per page; no chapter-level or full-title text found.",
+  "notes": ""
+ },
+ {
+  "state": "Arkansas",
+  "code": "AR",
+  "kind": "llc",
+  "title": "Arkansas Uniform Limited Liability Company Act of 2021",
+  "citation": "Ark. Code tit. 4, ch. 32 (Act 1041 of 2021)",
+  "items": [
+   {
+    "name": "Act 1041 of 2021 (engrossed bill with strike/underline markup)",
+    "url": "https://arkleg.state.ar.us/Home/FTPDocument?path=%2FACTS%2F2021R%2FPublic%2FACT1041.pdf",
+    "text_chars": 350130
+   }
+  ],
+  "reason": "",
+  "notes": "Session law PDF with amendment markup, not codified current text."
+ },
+ {
+  "state": "Arkansas",
+  "code": "AR",
+  "kind": "corp",
+  "title": "Arkansas Business Corporation Act of 1987",
+  "citation": "Ark. Code tit. 4, ch. 27",
+  "items": [],
+  "reason": "No official full-text page found (official code is on LexisNexis site).",
+  "notes": ""
+ },
+ {
+  "state": "California",
+  "code": "CA",
+  "kind": "llc",
+  "title": "California Revised Uniform Limited Liability Company Act",
+  "citation": "Cal. Corp. Code 17701.01 et seq.",
+  "items": [],
+  "reason": "leginfo.legislature.ca.gov loads but robots.txt disallows the fetcher (ok false).",
+  "notes": ""
+ },
+ {
+  "state": "California",
+  "code": "CA",
+  "kind": "corp",
+  "title": "California General Corporation Law",
+  "citation": "Cal. Corp. Code 100 et seq.",
+  "items": [],
+  "reason": "leginfo.legislature.ca.gov blocked by robots.txt for the fetcher.",
+  "notes": ""
+ },
+ {
+  "state": "Colorado",
+  "code": "CO",
+  "kind": "llc",
+  "title": "Colorado Limited Liability Company Act",
+  "citation": "C.R.S. 7-80",
+  "items": [
+   {
+    "name": "C.R.S. 2024 Title 7 (OLLS PDF)",
+    "url": "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-07.pdf",
+    "text_chars": 1751423
+   }
+  ],
+  "reason": "",
+  "notes": "Whole Title 7 PDF; also contains corporation code. 2025 edition exists but PDF link not located."
+ },
+ {
+  "state": "Colorado",
+  "code": "CO",
+  "kind": "corp",
+  "title": "Colorado Business Corporation Act",
+  "citation": "C.R.S. 7-101 et seq.",
+  "items": [
+   {
+    "name": "C.R.S. 2024 Title 7 (OLLS PDF)",
+    "url": "https://leg.colorado.gov/sites/default/files/images/olls/crs2024-title-07.pdf",
+    "text_chars": 1751423
+   }
+  ],
+  "reason": "",
+  "notes": "Same PDF as LLC entry."
+ },
+ {
+  "state": "Connecticut",
+  "code": "CT",
+  "kind": "llc",
+  "title": "Connecticut Uniform Limited Liability Company Act",
+  "citation": "Conn. Gen. Stat. ch. 613a",
+  "items": [
+   {
+    "name": "Chapter 613a Uniform LLC Act",
+    "url": "https://prdext3.cga.ct.gov/2025/pub/chap_613a.htm",
+    "text_chars": 218088
+   }
+  ],
+  "reason": "",
+  "notes": "Hosted on prdext3.cga.ct.gov (official CGA mirror) because www.cga.ct.gov fails TLS verification in this environment. 2025 edition."
+ },
+ {
+  "state": "Connecticut",
+  "code": "CT",
+  "kind": "corp",
+  "title": "Connecticut Business Corporation Act",
+  "citation": "Conn. Gen. Stat. ch. 601",
+  "items": [
+   {
+    "name": "Chapter 601 Business Corporations",
+    "url": "https://prdext3.cga.ct.gov/2025/pub/chap_601.htm",
+    "text_chars": 666062
+   }
+  ],
+  "reason": "",
+  "notes": "Same mirror host note."
+ },
+ {
+  "state": "Connecticut",
+  "code": "CT",
+  "kind": "securities",
+  "title": "Connecticut Uniform Securities Act",
+  "citation": "Conn. Gen. Stat. ch. 672a",
+  "items": [
+   {
+    "name": "Chapter 672a Uniform Securities Act",
+    "url": "https://prdext3.cga.ct.gov/2025/pub/chap_672a.htm",
+    "text_chars": 249421
+   }
+  ],
+  "reason": "",
+  "notes": "Same mirror host note."
+ },
+ {
+  "state": "District of Columbia",
+  "code": "DC",
+  "kind": "llc",
+  "title": "Uniform Limited Liability Company Act of 2010",
+  "citation": "D.C. Code tit. 29, ch. 8",
+  "items": [
+   {
+    "name": "Chapter 8 Limited Liability Companies",
+    "url": "https://code.dccouncil.gov/us/dc/council/code/titles/29/chapters/8/index.full.html",
+    "text_chars": 101382
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "District of Columbia",
+  "code": "DC",
+  "kind": "corp",
+  "title": "DC Business Corporation Act",
+  "citation": "D.C. Code tit. 29, ch. 3",
+  "items": [
+   {
+    "name": "Chapter 3 Business Corporations",
+    "url": "https://code.dccouncil.gov/us/dc/council/code/titles/29/chapters/3/index.full.html",
+    "text_chars": 268389
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "District of Columbia",
+  "code": "DC",
+  "kind": "securities",
+  "title": "District of Columbia Uniform Securities Act",
+  "citation": "D.C. Code tit. 31, ch. 56",
+  "items": [
+   {
+    "name": "Chapter 56 Securities",
+    "url": "https://code.dccouncil.gov/us/dc/council/code/titles/31/chapters/56/index.full.html",
+    "text_chars": 147944
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ }
+]

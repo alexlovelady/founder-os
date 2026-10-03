@@ -61,7 +61,7 @@ async def refresh_source(source_id: uuid.UUID, settings: Settings, adapter=None)
             doc = Document(matter_id=lib.id, title=res.title or s.name, doc_type=("statute" if s.authority_type == "statute" else "regulation"
                                                                                     if s.authority_type == "regulation" else "other"),
                            authority_type=s.authority_type, jurisdiction=s.jurisdiction, citation_text=res.citation,
-                           source_url=res.source_url, official_source=True, metadata_source="user")
+                           source_url=res.source_url, official_source=bool(cfg.get("official", True)), metadata_source="user")
             db.add(doc)
             db.flush()
             s.document_id = doc.id

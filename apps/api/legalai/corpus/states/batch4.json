@@ -1,0 +1,280 @@
+[
+ {
+  "state": "Montana",
+  "code": "MT",
+  "kind": "llc",
+  "title": "Montana Limited Liability Company Act",
+  "citation": "Mont. Code Ann. tit. 35, ch. 8",
+  "items": [],
+  "reason": "leg.mt.gov MCA publishes one page per section only (no chapter/part-level text page or PDF found; part index pages are navigation only); not practical to cover.",
+  "notes": ""
+ },
+ {
+  "state": "Montana",
+  "code": "MT",
+  "kind": "corp",
+  "title": "Montana Business Corporation Act",
+  "citation": "Mont. Code Ann. tit. 35, ch. 1",
+  "items": [],
+  "reason": "leg.mt.gov MCA publishes one page per section only (no chapter/part-level text page or PDF found; part index pages are navigation only); not practical to cover.",
+  "notes": ""
+ },
+ {
+  "state": "Nebraska",
+  "code": "NE",
+  "kind": "llc",
+  "title": "Nebraska Uniform Limited Liability Company Act",
+  "citation": "Neb. Rev. Stat. ch. 21 (21-101 et seq.)",
+  "items": [
+   {
+    "name": "Chapter 21 full",
+    "url": "https://www.nebraskalegislature.gov/laws/laws-index/chap21-full.html",
+    "text_chars": 1400399
+   }
+  ],
+  "reason": "",
+  "notes": "Whole of chapter 21 (LLC act plus Business Corporation Act) in one page"
+ },
+ {
+  "state": "Nebraska",
+  "code": "NE",
+  "kind": "corp",
+  "title": "Nebraska Model Business Corporation Act",
+  "citation": "Neb. Rev. Stat. ch. 21 (21-201 et seq.)",
+  "items": [
+   {
+    "name": "Chapter 21 full",
+    "url": "https://www.nebraskalegislature.gov/laws/laws-index/chap21-full.html",
+    "text_chars": 1400399
+   }
+  ],
+  "reason": "",
+  "notes": "Same page as LLC; includes both acts"
+ },
+ {
+  "state": "Nebraska",
+  "code": "NE",
+  "kind": "securities",
+  "title": "Nebraska Securities Act",
+  "citation": "Neb. Rev. Stat. ch. 8, art. 11",
+  "items": [
+   {
+    "name": "Chapter 8 full",
+    "url": "https://www.nebraskalegislature.gov/laws/laws-index/chap08-full.html",
+    "text_chars": 1134421
+   }
+  ],
+  "reason": "",
+  "notes": "Chapter 8 also includes banking"
+ },
+ {
+  "state": "Nevada",
+  "code": "NV",
+  "kind": "llc",
+  "title": "Nevada Limited-Liability Companies",
+  "citation": "NRS ch. 86",
+  "items": [
+   {
+    "name": "NRS 86",
+    "url": "https://www.leg.state.nv.us/nrs/nrs-086.html",
+    "text_chars": 207147
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Nevada",
+  "code": "NV",
+  "kind": "corp",
+  "title": "Nevada Private Corporations",
+  "citation": "NRS ch. 78",
+  "items": [
+   {
+    "name": "NRS 78",
+    "url": "https://www.leg.state.nv.us/nrs/nrs-078.html",
+    "text_chars": 366010
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Nevada",
+  "code": "NV",
+  "kind": "securities",
+  "title": "Nevada Securities (Uniform Act)",
+  "citation": "NRS ch. 90",
+  "items": [
+   {
+    "name": "NRS 90",
+    "url": "https://www.leg.state.nv.us/nrs/nrs-090.html",
+    "text_chars": 217861
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "New Hampshire",
+  "code": "NH",
+  "kind": "llc",
+  "title": "New Hampshire Revised LLC Act",
+  "citation": "N.H. RSA ch. 304-C",
+  "items": [
+   {
+    "name": "RSA 304-C",
+    "url": "https://www.gencourt.state.nh.us/rsa/html/XXVIII/304-C/304-C-mrg.htm",
+    "text_chars": 230812
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "New Hampshire",
+  "code": "NH",
+  "kind": "corp",
+  "title": "New Hampshire Business Corporation Act",
+  "citation": "N.H. RSA ch. 293-A",
+  "items": [
+   {
+    "name": "RSA 293-A",
+    "url": "https://www.gencourt.state.nh.us/rsa/html/XXVII/293-A/293-A-mrg.htm",
+    "text_chars": 386895
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "New Hampshire",
+  "code": "NH",
+  "kind": "securities",
+  "title": "New Hampshire Uniform Securities Act",
+  "citation": "N.H. RSA ch. 421-B",
+  "items": [
+   {
+    "name": "RSA 421-B",
+    "url": "https://www.gencourt.state.nh.us/rsa/html/XXXVIII/421-B/421-B-mrg.htm",
+    "text_chars": 334935
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "New Jersey",
+  "code": "NJ",
+  "kind": "llc",
+  "title": "New Jersey Revised Uniform Limited Liability Company Act",
+  "citation": "N.J.S.A. 42:2C-1 et seq.",
+  "items": [
+   {
+    "name": "P.L. 2012, c.50 (enacted text, PDF)",
+    "url": "https://pub.njleg.gov/bills/2012/PL12/50_.PDF",
+    "text_chars": 156921
+   }
+  ],
+  "reason": "",
+  "notes": "Official enacted session law text as of 2012; does not include later amendments. Current codified text on lis.njleg.state.nj.us is not usable."
+ },
+ {
+  "state": "New Jersey",
+  "code": "NJ",
+  "kind": "corp",
+  "title": "New Jersey Business Corporation Act",
+  "citation": "N.J.S.A. 14A",
+  "items": [],
+  "reason": "No verified official full-text page found; current NJ statutes database is dynamic/JS.",
+  "notes": ""
+ },
+ {
+  "state": "New Mexico",
+  "code": "NM",
+  "kind": "llc",
+  "title": "New Mexico Limited Liability Company Act",
+  "citation": "NMSA 1978, 53-19",
+  "items": [],
+  "reason": "Official NMSA is on nmonesource.com (JS/index pages, tiny text); nmlegis.gov has only introduced bills (e.g. 2017 HB 180 RULLCA), not enacted code.",
+  "notes": ""
+ },
+ {
+  "state": "New Mexico",
+  "code": "NM",
+  "kind": "corp",
+  "title": "New Mexico Business Corporation Act",
+  "citation": "NMSA 1978, 53-11",
+  "items": [],
+  "reason": "Same as LLC: nmonesource.com not usable; no enacted full text found.",
+  "notes": ""
+ },
+ {
+  "state": "New York",
+  "code": "NY",
+  "kind": "llc",
+  "title": "New York Limited Liability Company Law",
+  "citation": "N.Y. LLC Law",
+  "items": [],
+  "reason": "nysenate.gov laws pages return HTTP 403 to the checker; legislation.nysenate.gov pdf endpoint only returns table of contents.",
+  "notes": ""
+ },
+ {
+  "state": "New York",
+  "code": "NY",
+  "kind": "corp",
+  "title": "New York Business Corporation Law",
+  "citation": "N.Y. BCL",
+  "items": [],
+  "reason": "nysenate.gov laws pages return HTTP 403 to the checker; no alternative official full-text found.",
+  "notes": ""
+ },
+ {
+  "state": "North Dakota",
+  "code": "ND",
+  "kind": "llc",
+  "title": "North Dakota Uniform Limited Liability Company Act",
+  "citation": "N.D.C.C. ch. 10-32.1",
+  "items": [
+   {
+    "name": "Chapter 10-32.1",
+    "url": "https://ndlegis.gov/cencode/t10c32-1.pdf",
+    "text_chars": 238769
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "North Dakota",
+  "code": "ND",
+  "kind": "corp",
+  "title": "North Dakota Business Corporation Act",
+  "citation": "N.D.C.C. ch. 10-19.1",
+  "items": [
+   {
+    "name": "Chapter 10-19.1",
+    "url": "https://ndlegis.gov/cencode/t10c19-1.pdf",
+    "text_chars": 351764
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "North Dakota",
+  "code": "ND",
+  "kind": "securities",
+  "title": "North Dakota Securities Act of 1951",
+  "citation": "N.D.C.C. ch. 10-04",
+  "items": [
+   {
+    "name": "Chapter 10-04",
+    "url": "https://ndlegis.gov/cencode/t10c04.pdf",
+    "text_chars": 182603
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ }
+]

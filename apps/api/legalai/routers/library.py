@@ -1,5 +1,7 @@
 import json
+import os
 import uuid
+from pathlib import Path
 from datetime import date as Date
 from typing import Literal
 
@@ -12,6 +14,7 @@ from ..audit import audit
 from ..corpus.adapters import SourceError, validate_config
 from ..corpus.presets import PRESETS
 from ..corpus.refresh import get_library_matter
+from ..config import get_settings
 from ..db import get_db
 from ..jobs.queue import enqueue
 from ..models import CorpusSource, Document, DocumentVersion, User
@@ -28,7 +31,7 @@ class SourceIn(BaseModel):
     config: dict
     jurisdiction: str = Field("", max_length=100)
     authority_type: Literal["statute", "regulation", "court_opinion", "court_rule", "administrative_guidance", "agency_material",
-                            "official_form", "constitution", "treatise"] = "regulation"
+                            "official_form", "constitution", "treatise", "template"] = "regulation"
     refresh_hours: int = Field(24, ge=1, le=24 * 30)
 
 
@@ -196,3 +199,111 @@ def import_treatment(body: ImportBody, admin: User = Depends(require_admin), db:
     audit(db, "corpus.treatment_imported", user_id=admin.id, matter_id=lib.id, matched=matched, unmatched=len(unmatched))
     db.commit()
     return {"matched": matched, "unmatched": unmatched}
+
+
+# ---- state entity law and landmark cases (verified catalogs) ----------------------------------------------------
+_CORPUS = Path(__file__).resolve().parents[1] / "corpus"
+
+
+def _load(name: str):
+    p = _CORPUS / name
+    return json.loads(p.read_text(encoding="utf8")) if p.exists() else None
+
+
+def _existing(db: DbSession) -> tuple[set[str], set[int]]:
+    urls, ops = set(), set()
+    for s in db.scalars(select(CorpusSource)):
+        if s.adapter == "url":
+            urls.add(s.config.get("url", ""))
+        elif s.adapter == "courtlistener":
+            ops.add(int(s.config.get("opinion_id", 0)))
+    return urls, ops
+
+
+@router.get("/states")
+def list_states(admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    """Every jurisdiction with what could be verified from official sources, and what is already in the library."""
+    data = _load("states.json")
+    if not data:
+        return {"states": [], "generated": None}
+    urls, _ = _existing(db)
+    out = []
+    for code, st in data["states"].items():
+        kinds = {}
+        for kind, k in st["kinds"].items():
+            u = {i["url"] for i in k["items"]}
+            kinds[kind] = {"title": k["title"], "citation": k["citation"], "available": bool(k["items"]), "pages": len(k["items"]),
+                           "chars": sum(i.get("text_chars", 0) for i in k["items"]), "added": bool(u) and u <= urls,
+                           "caveat": k["notes"] if (k["caveat"] or not k["items"]) else "", "shared": k.get("duplicate_of_other_kind", False)}
+        out.append({"code": code, "name": st["name"], "kinds": kinds})
+    return {"states": out, "generated": data["generated"]}
+
+
+class AddState(BaseModel):
+    kinds: list[Literal["llc", "corp", "securities"]] = Field(default_factory=lambda: ["llc", "corp"])
+
+
+@router.post("/states/{code}", status_code=201)
+def add_state(code: str, body: AddState, admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    data = _load("states.json")
+    st = (data or {}).get("states", {}).get(code.upper())
+    if not st:
+        raise HTTPException(404, "Unknown jurisdiction")
+    urls, _ = _existing(db)
+    created, skipped = 0, 0
+    for kind in body.kinds:
+        k = st["kinds"].get(kind)
+        if not k:
+            continue
+        for it in k["items"]:
+            if it["url"] in urls:
+                skipped += 1
+                continue
+            src = CorpusSource(name=f"{st['name']} {k['label']}: {it['name']}", adapter="url", authority_type="statute", jurisdiction=st["name"],
+                               refresh_hours=24 * 7, config={"url": it["url"], "title": f"{st['name']} {k['title']}: {it['name']}", "citation": k["citation"]})
+            db.add(src)
+            db.flush()
+            enqueue(db, "corpus_refresh", matter_id=None, user_id=admin.id, payload={"source_id": str(src.id)}, max_attempts=3)
+            urls.add(it["url"])
+            created += 1
+    audit(db, "corpus.state_added", user_id=admin.id, state=code.upper(), created=created, skipped=skipped, kinds=body.kinds)
+    db.commit()
+    return {"created": created, "skipped_existing": skipped}
+
+
+@router.get("/cases")
+def list_cases(admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    cases = _load("cases.json") or []
+    _, ops = _existing(db)
+    groups: dict[str, list] = {}
+    for c in cases:
+        groups.setdefault(c["group"], []).append({**c, "added": c["opinion_id"] in ops})
+    return {"groups": [{"name": g, "cases": cs} for g, cs in groups.items()], "token_configured": bool(get_settings().courtlistener_token or os.environ.get("COURTLISTENER_TOKEN"))}
+
+
+class AddCases(BaseModel):
+    group: str | None = None
+    opinion_ids: list[int] | None = None
+
+
+@router.post("/cases", status_code=201)
+def add_cases(body: AddCases, admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    cases = _load("cases.json") or []
+    pick = [c for c in cases if (body.group and c["group"] == body.group) or (body.opinion_ids and c["opinion_id"] in body.opinion_ids)]
+    if not pick:
+        raise HTTPException(404, "No matching cases")
+    _, ops = _existing(db)
+    created = 0
+    for c in pick:
+        if c["opinion_id"] in ops:
+            continue
+        court = "Delaware" if c["group"].startswith("Delaware") else "United States"
+        src = CorpusSource(name=c["name"], adapter="courtlistener", authority_type="court_opinion", jurisdiction=court, refresh_hours=24 * 30,
+                           config={"opinion_id": c["opinion_id"]})
+        db.add(src)
+        db.flush()
+        enqueue(db, "corpus_refresh", matter_id=None, user_id=admin.id, payload={"source_id": str(src.id)}, max_attempts=3)
+        created += 1
+    audit(db, "corpus.cases_added", user_id=admin.id, created=created)
+    db.commit()
+    return {"created": created}

@@ -1,0 +1,303 @@
+[
+ {
+  "state": "Florida",
+  "code": "FL",
+  "kind": "llc",
+  "title": "Florida Revised Limited Liability Company Act",
+  "citation": "Fla. Stat. ch. 605",
+  "items": [
+   {
+    "name": "Chapter 605 (2026)",
+    "url": "https://www.flsenate.gov/Laws/Statutes/2026/Chapter605/All",
+    "text_chars": 417311
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Florida",
+  "code": "FL",
+  "kind": "corp",
+  "title": "Florida Business Corporation Act",
+  "citation": "Fla. Stat. ch. 607",
+  "items": [
+   {
+    "name": "Chapter 607 (2026)",
+    "url": "https://www.flsenate.gov/Laws/Statutes/2026/Chapter607/All",
+    "text_chars": 642103
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Florida",
+  "code": "FL",
+  "kind": "securities",
+  "title": "Florida Securities and Investor Protection Act",
+  "citation": "Fla. Stat. ch. 517",
+  "items": [
+   {
+    "name": "Chapter 517 (2026)",
+    "url": "https://www.flsenate.gov/Laws/Statutes/2026/Chapter517/All",
+    "text_chars": 257565
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Georgia",
+  "code": "GA",
+  "kind": "llc",
+  "title": "Georgia Limited Liability Company Act",
+  "citation": "O.C.G.A. tit. 14, ch. 11",
+  "items": [],
+  "reason": "No free official text found: the O.C.G.A. is published by LexisNexis; only third-party mirrors (Justia, Public.Resource.Org) surfaced, which are not allowed.",
+  "notes": "legis.ga.gov did not surface a statute text page."
+ },
+ {
+  "state": "Georgia",
+  "code": "GA",
+  "kind": "corp",
+  "title": "Georgia Business Corporation Code",
+  "citation": "O.C.G.A. tit. 14, ch. 2",
+  "items": [],
+  "reason": "No free official text found: the O.C.G.A. is published by LexisNexis; only third-party mirrors surfaced, which are not allowed.",
+  "notes": ""
+ },
+ {
+  "state": "Hawaii",
+  "code": "HI",
+  "kind": "llc",
+  "title": "Uniform Limited Liability Company Act",
+  "citation": "HRS ch. 428",
+  "items": [],
+  "reason": "Official capitol.hawaii.gov publishes each section as its own tiny file (chapter index is only a table of contents); most sections fall under the 3,000-character minimum and 12 URLs cannot cover the act. Some sections appear bracketed (repealed/superseded).",
+  "notes": "Verified single sections exist (e.g. HRS_0428-0101, 0404, 0409, 0601) but coverage would be fragmentary; not recorded."
+ },
+ {
+  "state": "Hawaii",
+  "code": "HI",
+  "kind": "corp",
+  "title": "Hawaii Business Corporation Act",
+  "citation": "HRS ch. 414",
+  "items": [],
+  "reason": "Same per-section file structure on capitol.hawaii.gov (hundreds of small section files); no single-page or PDF chapter found.",
+  "notes": ""
+ },
+ {
+  "state": "Idaho",
+  "code": "ID",
+  "kind": "llc",
+  "title": "Idaho Uniform Limited Liability Company Act",
+  "citation": "Idaho Code tit. 30, ch. 25",
+  "items": [
+   {
+    "name": "Title 30 Chapter 25 (PDF)",
+    "url": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title30/T30CH25.pdf",
+    "text_chars": 88242
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Idaho",
+  "code": "ID",
+  "kind": "corp",
+  "title": "Idaho Business Corporation Act",
+  "citation": "Idaho Code tit. 30, ch. 29",
+  "items": [
+   {
+    "name": "Title 30 Chapter 29 (PDF)",
+    "url": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title30/T30CH29.pdf",
+    "text_chars": 345662
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Idaho",
+  "code": "ID",
+  "kind": "securities",
+  "title": "Idaho Uniform Securities Act (2004)",
+  "citation": "Idaho Code tit. 30, ch. 14",
+  "items": [
+   {
+    "name": "Title 30 Chapter 14 (PDF)",
+    "url": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title30/T30CH14.pdf",
+    "text_chars": 182784
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Illinois",
+  "code": "IL",
+  "kind": "llc",
+  "title": "Limited Liability Company Act",
+  "citation": "805 ILCS 180",
+  "items": [],
+  "reason": "Official source is ilga.gov (ILCS details pages) but the verifier fails TLS certificate validation (unable to get local issuer certificate) on every ilga.gov host, so no URL could be verified.",
+  "notes": "Retry later or if the verifier's certificate store is fixed; ilga.gov act page ActID 2290 appeared in search."
+ },
+ {
+  "state": "Illinois",
+  "code": "IL",
+  "kind": "corp",
+  "title": "Business Corporation Act of 1983",
+  "citation": "805 ILCS 5",
+  "items": [],
+  "reason": "Official source is ilga.gov but the verifier fails TLS certificate validation on ilga.gov hosts, so no URL could be verified.",
+  "notes": "ilga.gov ILCS details ActID=2273 appeared in search; unverified."
+ },
+ {
+  "state": "Indiana",
+  "code": "IN",
+  "kind": "llc",
+  "title": "Indiana Business Flexibility Act",
+  "citation": "Ind. Code art. 23-18",
+  "items": [],
+  "reason": "iga.in.gov is JavaScript-rendered (verifier extracts no text); official code is offered only as bulk ZIP downloads.",
+  "notes": ""
+ },
+ {
+  "state": "Indiana",
+  "code": "IN",
+  "kind": "corp",
+  "title": "Indiana Business Corporation Law",
+  "citation": "Ind. Code art. 23-1",
+  "items": [],
+  "reason": "iga.in.gov is JavaScript-rendered (verifier extracts no text); official code is offered only as bulk ZIP downloads.",
+  "notes": ""
+ },
+ {
+  "state": "Iowa",
+  "code": "IA",
+  "kind": "llc",
+  "title": "Revised Uniform Limited Liability Company Act",
+  "citation": "Iowa Code ch. 489",
+  "items": [
+   {
+    "name": "Chapter 489 (PDF)",
+    "url": "https://www.legis.iowa.gov/docs/code/489.pdf",
+    "text_chars": 344214
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Iowa",
+  "code": "IA",
+  "kind": "corp",
+  "title": "Business Corporations",
+  "citation": "Iowa Code ch. 490",
+  "items": [
+   {
+    "name": "Chapter 490 (PDF)",
+    "url": "https://www.legis.iowa.gov/docs/code/490.pdf",
+    "text_chars": 533110
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Iowa",
+  "code": "IA",
+  "kind": "securities",
+  "title": "Uniform Securities Act",
+  "citation": "Iowa Code ch. 502",
+  "items": [
+   {
+    "name": "Chapter 502 (PDF)",
+    "url": "https://www.legis.iowa.gov/docs/code/502.pdf",
+    "text_chars": 259279
+   }
+  ],
+  "reason": "",
+  "notes": ""
+ },
+ {
+  "state": "Kansas",
+  "code": "KS",
+  "kind": "llc",
+  "title": "Kansas Revised Limited Liability Company Act",
+  "citation": "K.S.A. 17-7662 et seq.",
+  "items": [
+   {
+    "name": "17-7663 Definitions",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0063_section/017_076_0063_k/",
+    "text_chars": 8642
+   },
+   {
+    "name": "17-7668 Nature of business; powers",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0068_section/017_076_0068_k/",
+    "text_chars": 9914
+   },
+   {
+    "name": "17-7686 Admission of members",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0086_section/017_076_0086_k/",
+    "text_chars": 4417
+   },
+   {
+    "name": "17-7687 Classes; voting; meetings; operating agreement",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0087_section/017_076_0087_k/",
+    "text_chars": 5866
+   },
+   {
+    "name": "17-76,116 Dissolution",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0116_section/017_076_0116_k/",
+    "text_chars": 4074
+   },
+   {
+    "name": "17-76,117 Involuntary dissolution",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_076_0000_article/017_076_0117_section/017_076_0117_k/",
+    "text_chars": 3508
+   }
+  ],
+  "reason": "",
+  "notes": "PARTIAL: legislature publishes one page per section; only sections over 3,000 chars verified. Distributions, transfers (e.g. 17-76,102, 17-76,112) and duties (17-76,151) sections are too short to pass and are not covered."
+ },
+ {
+  "state": "Kansas",
+  "code": "KS",
+  "kind": "corp",
+  "title": "Kansas General Corporation Code",
+  "citation": "K.S.A. 17-6001 et seq.",
+  "items": [
+   {
+    "name": "K.S.A. 17-6002",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_060_0000_article/017_060_0002_section/017_060_0002_k/",
+    "text_chars": 13562
+   },
+   {
+    "name": "K.S.A. 17-6301",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_063_0000_article/017_063_0001_section/017_063_0001_k/",
+    "text_chars": 15780
+   },
+   {
+    "name": "K.S.A. 17-6401",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_064_0000_article/017_064_0001_section/017_064_0001_k/",
+    "text_chars": 12151
+   },
+   {
+    "name": "K.S.A. 17-6501",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_065_0000_article/017_065_0001_section/017_065_0001_k/",
+    "text_chars": 5666
+   },
+   {
+    "name": "K.S.A. 17-6602",
+    "url": "https://kslegislature.gov/laws/017_000_0000_chapter/017_066_0000_article/017_066_0002_section/017_066_0002_k/",
+    "text_chars": 9000
+   }
+  ],
+  "reason": "",
+  "notes": "PARTIAL: legislature publishes one page per section; only five sections over 3,000 chars verified (17-6002, 17-6301, 17-6401, 17-6501, 17-6602)."
+ }
+]
