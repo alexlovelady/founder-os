@@ -172,3 +172,17 @@ def test_finished_draft_can_be_downloaded_and_saved_as_a_document(make_api, emb)
     assert [d["title"] for d in docs] == ["Mutual NDA"] and docs[0]["current_version"]["parse_status"] == "parsed"
     bob = make_api("bob@example.com")
     assert bob.get(f"/api/drafts/{did}/download").status_code == 404 and bob.post(f"/api/drafts/{did}/save").status_code == 404
+
+
+def test_interactive_jobs_run_before_bulk_library_work(make_api):
+    from legalai.db import session_scope
+    from legalai.jobs.queue import claim_next, enqueue
+    make_api("admin@example.com")
+    with session_scope() as db:
+        bulk = enqueue(db, "corpus_refresh", matter_id=None, user_id=None, payload={})
+        draft = enqueue(db, "draft", matter_id=None, user_id=None, payload={})
+        db.flush()
+        assert claim_next(db).id == draft.id            # newer, but a person is waiting on it
+        draft.state = "COMPLETE"
+        db.flush()
+        assert claim_next(db).id == bulk.id

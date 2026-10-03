@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import or_, select
+from sqlalchemy import case, or_, select
 from sqlalchemy.orm import Session as DbSession
 
 from ..audit import audit
-from ..models import Job, JobState as S
+from ..models import Job, JobState as S, Matter
 
 TRANSITIONS: dict[str, set[str]] = {
     S.NEW.value: {S.QUEUED.value, S.CANCELED.value},
@@ -67,12 +67,21 @@ def cancel(db: DbSession, job: Job, user_id: uuid.UUID) -> None:
     audit(db, "job.canceled", user_id=user_id, matter_id=job.matter_id, object_type="job", object_id=job.id)
 
 
+BACKGROUND_TYPES = ("backup", "corpus_refresh")
+LIBRARY_BOUND_TYPES = ("embed_document", "ingest_document", "ocr_document")
+
+
 def claim_next(db: DbSession) -> Job | None:
-    """Lock one runnable job (SKIP LOCKED so multiple workers are safe). Caller commits."""
+    """Lock one runnable job (SKIP LOCKED so multiple workers are safe). Caller commits.
+
+    Interactive work (a person is waiting on a draft, review, answer or their own upload) goes first. Bulk work, meaning library
+    refreshes, indexing library documents, and backups, only runs when nothing interactive is waiting, then oldest first."""
+    library = select(Matter.id).where(Matter.kind == "library").scalar_subquery()
+    background = case((Job.job_type.in_(BACKGROUND_TYPES), 1), (Job.job_type.in_(LIBRARY_BOUND_TYPES) & (Job.matter_id == library), 1), else_=0)
     return db.scalar(
         select(Job)
         .where(Job.state.in_(RUNNABLE), or_(Job.next_attempt_at.is_(None), Job.next_attempt_at <= now()))
-        .order_by(Job.created_at)
+        .order_by(background, Job.created_at)
         .with_for_update(skip_locked=True)
         .limit(1)
     )
