@@ -1,11 +1,164 @@
 [
  {
+  "group": "Delaware LLC law",
+  "name": "Dieckman v. Regency (implied covenant in LLC agreements)",
+  "opinion_id": 4117504,
+  "case_name": "Dieckman v. Regency GP LP, Regency GP LLC",
+  "citation": "155 A.3d 358; 2017 Del. LEXIS 27",
+  "decided": "2017-01-20",
+  "chars": 35781
+ },
+ {
+  "group": "Securities law basics for fundraising",
+  "name": "SEC v. W.J. Howey (what is an investment contract)",
+  "opinion_id": 104302,
+  "case_name": "Securities and Exchange Commission v. W. J. Howey Co.",
+  "citation": "328 U.S. 293; 66 S. Ct. 1100; 90 L. Ed. 1244; 1946 U.S. LEXIS 3159",
+  "decided": "1946-10-14",
+  "chars": 17423
+ },
+ {
+  "group": "Securities law basics for fundraising",
+  "name": "Reves v. Ernst & Young (when is a note a security)",
+  "opinion_id": 9431912,
+  "case_name": "Reves v. Ernst & Young",
+  "citation": "494 U.S. 56; 110 S. Ct. 945; 108 L. Ed. 2d 47; 1990 U.S. LEXIS 1051",
+  "decided": "1990-04-16",
+  "chars": 12223
+ },
+ {
+  "group": "Securities law basics for fundraising",
+  "name": "Basic v. Levinson (materiality)",
+  "opinion_id": 112022,
+  "case_name": "Basic Inc. v. Levinson",
+  "citation": "485 U.S. 224; 108 S. Ct. 978; 99 L. Ed. 2d 194; 1988 U.S. LEXIS 1197",
+  "decided": "1988-03-07",
+  "chars": 80953
+ },
+ {
+  "group": "Securities law basics for fundraising",
+  "name": "TSC Industries v. Northway (materiality standard)",
+  "opinion_id": 109481,
+  "case_name": "TSC Industries, Inc. v. Northway, Inc.",
+  "citation": "426 U.S. 438; 96 S. Ct. 2126; 48 L. Ed. 2d 757; 1976 U.S. LEXIS 155",
+  "decided": "1976-06-14",
+  "chars": 48207
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Smith v. Van Gorkom (duty of care in a sale)",
+  "opinion_id": 1479784,
+  "case_name": "Smith v. Van Gorkom (duty of care in a sale)",
+  "citation": "",
+  "decided": "",
+  "chars": 144395
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Revlon v. MacAndrews & Forbes (duties in a sale of control)",
+  "opinion_id": 2161715,
+  "case_name": "Revlon v. MacAndrews & Forbes (duties in a sale of control)",
+  "citation": "",
+  "decided": "",
+  "chars": 40171
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Unocal v. Mesa Petroleum (defensive measures)",
+  "opinion_id": 2053200,
+  "case_name": "Unocal v. Mesa Petroleum (defensive measures)",
+  "citation": "",
+  "decided": "",
+  "chars": 42260
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Weinberger v. UOP (entire fairness)",
+  "opinion_id": 1954871,
+  "case_name": "Weinberger v. UOP (entire fairness)",
+  "citation": "",
+  "decided": "",
+  "chars": 51226
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Guth v. Loft (corporate opportunity)",
+  "opinion_id": 6559391,
+  "case_name": "Guth v. Loft (corporate opportunity)",
+  "citation": "",
+  "decided": "",
+  "chars": 36430
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Aronson v. Lewis (business judgment rule)",
+  "opinion_id": 2379496,
+  "case_name": "Aronson v. Lewis (business judgment rule)",
+  "citation": "",
+  "decided": "",
+  "chars": 45329
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "In re Caremark (oversight duty)",
+  "opinion_id": 1968607,
+  "case_name": "In re Caremark (oversight duty)",
+  "citation": "",
+  "decided": "",
+  "chars": 54096
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Stone v. Ritter (oversight duty)",
+  "opinion_id": 2334726,
+  "case_name": "Stone v. Ritter (oversight duty)",
+  "citation": "",
+  "decided": "",
+  "chars": 32573
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Schnell v. Chris-Craft (inequitable conduct)",
+  "opinion_id": 2318589,
+  "case_name": "Schnell v. Chris-Craft (inequitable conduct)",
+  "citation": "",
+  "decided": "",
+  "chars": 6969
+ },
+ {
   "group": "Delaware corporate duties",
   "name": "Blasius v. Atlas (stockholder franchise)",
   "opinion_id": 1487789,
-  "case_name": "Blasius Industries, Inc. v. Atlas Corp.",
-  "citation": "564 A.2d 651; 1988 Del. Ch. LEXIS 103; 1989 WL 107540",
-  "decided": "1988-07-25",
+  "case_name": "Blasius v. Atlas (stockholder franchise)",
+  "citation": "",
+  "decided": "",
   "chars": 76873
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Corwin v. KKR Financial (stockholder approval)",
+  "opinion_id": 3006872,
+  "case_name": "Corwin v. KKR Financial (stockholder approval)",
+  "citation": "",
+  "decided": "",
+  "chars": 38263
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Brophy v. Cities Service (insider trading duty)",
+  "opinion_id": 3373615,
+  "case_name": "Brophy v. Cities Service (insider trading duty)",
+  "citation": "",
+  "decided": "",
+  "chars": 8591
+ },
+ {
+  "group": "Delaware corporate duties",
+  "name": "Marchand v. Barnhill (board oversight)",
+  "opinion_id": 4407830,
+  "case_name": "Marchand v. Barnhill (board oversight)",
+  "citation": "",
+  "decided": "",
+  "chars": 67800
  }
 ]
