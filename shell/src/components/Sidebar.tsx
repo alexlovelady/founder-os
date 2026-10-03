@@ -22,11 +22,12 @@ const GROUPS: { id: string; label: string }[] = [
 const link = (active: boolean) =>
   `flex items-center justify-between rounded-lg px-3 py-1.5 text-sm ${active ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800/60"}`;
 
-export default function Sidebar({ email, tools }: { email: string; tools: NavTool[] }) {
+export default function Sidebar({ email, tools, isAdmin = false, switcher }: { email: string; tools: NavTool[]; isAdmin?: boolean; switcher?: React.ReactNode }) {
   const path = usePathname();
   return (
     <aside className="flex w-60 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-slate-800 bg-slate-900 p-3">
       <Link href="/" className="mb-3 px-3 py-2 text-lg font-semibold text-white">FounderOS</Link>
+      {switcher}
       <div className="mb-2"><SearchBox /></div>
       <Link href="/app/dashboard" className={link(path === "/app/dashboard")}>Dashboard</Link>
       {GROUPS.map((g) => {
@@ -50,7 +51,13 @@ export default function Sidebar({ email, tools }: { email: string; tools: NavToo
           </div>
         );
       })}
-      <Link href="/app/settings" className={`${link(path === "/app/settings")} mt-4`}>Settings</Link>
+      <div className="mt-4 space-y-0.5">
+        <Link href="/app/team" className={link(path.startsWith("/app/team"))}>Team</Link>
+        <Link href="/app/notifications" className={link(path.startsWith("/app/notifications"))}>Notifications</Link>
+        <Link href="/app/billing" className={link(path.startsWith("/app/billing"))}>Plan and billing</Link>
+        <Link href="/app/settings" className={link(path === "/app/settings")}>Settings</Link>
+        {isAdmin && <Link href="/admin" className={link(path.startsWith("/admin"))}>Platform admin</Link>}
+      </div>
       <div className="mt-auto space-y-1 px-3 py-2 text-xs text-slate-400">
         <div className="truncate">{email}</div>
         <SignOut />

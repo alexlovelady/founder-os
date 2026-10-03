@@ -5,6 +5,7 @@ import { RULES, RULES_VERSION, rulesForBusiness } from "./seed";
 import { summarize } from "./summary";
 import type { ItemDto, ListDto } from "./types";
 import ComplianceCenter from "./ui/ComplianceCenter";
+import { complianceActions } from "./actions";
 
 const dateStr = z.string().refine(isValidDate, "Use a date like 2026-12-31");
 const httpUrl = z.string().trim().max(2000).refine((u) => /^https?:\/\/[^\s]+$/i.test(u), "Use a full web address starting with https://");
@@ -116,6 +117,7 @@ export const tool: ToolDef = {
   description: "Deadlines, filings, licenses and recurring obligations, from rules matched to your business. A checklist to review with your own advisers, not legal advice.",
   group: "business",
   status: "live",
+  actions: complianceActions(() => tool),
   migrations: [
     {
       name: "0001_items",

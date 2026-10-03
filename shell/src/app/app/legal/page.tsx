@@ -3,7 +3,7 @@ import { getModule } from "@/config/modules";
 export default function LegalPage() {
   const mod = getModule("legal")!;
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-[calc(100vh-3rem)] flex-col md:h-screen">
       <div className="flex items-center justify-between border-b border-slate-800 px-6 py-3">
         <h1 className="font-medium">{mod.name}</h1>
         <a href="/legal-ui/" target="_blank" rel="noreferrer" className="text-sm text-slate-400 underline">

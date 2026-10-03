@@ -48,9 +48,13 @@ async def main() -> int:
         print("COURTLISTENER_TOKEN required", file=sys.stderr)
         return 2
     hdr = {"Authorization": f"Token {tok}"}
-    out, bad = [], []
+    out = json.loads(OUT.read_text()) if OUT.exists() else []     # keep what is already verified; only resolve the rest
+    done = {c["name"] for c in out}
+    bad = []
     async with httpx.AsyncClient(timeout=30, headers=hdr) as c:
         for group, name, cite, word in CASES:
+            if name in done:
+                continue
             await asyncio.sleep(4)
             r = await c.get("https://www.courtlistener.com/api/rest/v4/search/", params={"q": f'citation:("{cite}")', "type": "o"})
             for wait in (10, 30, 60):

@@ -1,8 +1,18 @@
+import { createActionRegistry } from "./actions";
 import type { AttentionItem, BusinessContext, EntityRef, Facts, LinkedItem, SearchHit, ToolContext, ToolDef } from "./index";
 
-export type BaseContext = Omit<ToolContext, "facts" | "context" | "links" | "search">;
+export type BaseContext = Omit<ToolContext, "facts" | "context" | "links" | "search" | "audit" | "notify" | "plan" | "useQuota">;
+
+export interface PlatformServices {
+  audit?: ToolContext["audit"];
+  notify?: ToolContext["notify"];
+  plan?: ToolContext["plan"];
+  useQuota?: ToolContext["useQuota"];
+}
 
 export interface ContextOptions {
+  /** Shell-provided services. Anything left out falls back to a harmless default (no-op audit/notify, unlimited plan). */
+  services?: PlatformServices;
   /** Extra summaries from services that are not tools (the shell passes LegalAI's here). */
   extraSummaries?: () => Promise<Record<string, string>>;
 }
@@ -25,6 +35,11 @@ export function withPlatform(base: BaseContext, tools: ToolDef[], opts: ContextO
   let factsP: Promise<Facts> | undefined;
   let contextP: Promise<BusinessContext> | undefined;
   const ctx = base as ToolContext;
+  ctx.audit = opts.services?.audit ?? (async () => {});
+  ctx.notify = opts.services?.notify ?? (async () => {});
+  ctx.plan = opts.services?.plan ?? { id: "unlimited", limits: {}, features: {} };
+  ctx.useQuota = opts.services?.useQuota ?? (async () => {});
+  ctx.actions = createActionRegistry(tools);
 
   ctx.facts = () =>
     (factsP ??= (async () => {

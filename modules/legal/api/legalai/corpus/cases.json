@@ -160,5 +160,59 @@
   "citation": "",
   "decided": "",
   "chars": 67800
+ },
+ {
+  "group": "Delaware startups and venture financings",
+  "name": "In re Trados (preferred vs common stockholders)",
+  "opinion_id": 4967620,
+  "case_name": "In re Trados Inc. Shareholder Litigation",
+  "citation": "73 A.3d 17; 2013 Del. Ch. LEXIS 207; 2013 WL 4516775",
+  "decided": "2013-08-16",
+  "chars": 221146
+ },
+ {
+  "group": "Delaware startups and venture financings",
+  "name": "Carsanaro v. Bloodhound Technologies (startup financing)",
+  "opinion_id": 4967104,
+  "case_name": "Carsanaro v. Bloodhound Technologies, Inc.",
+  "citation": "65 A.3d 618; 2013 Del. Ch. LEXIS 69; 2013 WL 1104901",
+  "decided": "2013-03-15",
+  "chars": 139360
+ },
+ {
+  "group": "Delaware startups and venture financings",
+  "name": "Klaassen v. Allegro Development (CEO termination, board duties)",
+  "opinion_id": 4969444,
+  "case_name": "Klaassen v. Allegro Development Corp.",
+  "citation": "106 A.3d 1035; 2014 WL 996375; 2014 Del. LEXIS 119",
+  "decided": "2014-03-14",
+  "chars": 41828
+ },
+ {
+  "group": "Delaware startups and venture financings",
+  "name": "Omnicare v. NCS Healthcare (deal protection)",
+  "opinion_id": 1952721,
+  "case_name": "Omnicare, Inc. v. NCS Healthcare, Inc.",
+  "citation": "818 A.2d 914; 2003 Del. LEXIS 195; 2003 WL 1787943",
+  "decided": "2003-04-04",
+  "chars": 119712
+ },
+ {
+  "group": "Delaware LLC law",
+  "name": "Elf Atochem v. Jaffari (LLC contract freedom)",
+  "opinion_id": 1895452,
+  "case_name": "Elf Atochem North America, Inc. v. Jaffari",
+  "citation": "727 A.2d 286; 79 A.L.R. 5th 803; 1999 Del. LEXIS 111; 1999 WL 203756",
+  "decided": "1999-04-06",
+  "chars": 43434
+ },
+ {
+  "group": "Delaware LLC law",
+  "name": "Gatz Properties v. Auriga Capital (LLC fiduciary duties)",
+  "opinion_id": 4966713,
+  "case_name": "Gatz Properties, LLC v. Auriga Capital Corp.",
+  "citation": "59 A.3d 1206; 2012 WL 5425227; 2012 Del. LEXIS 577",
+  "decided": "2012-11-07",
+  "chars": 52160
  }
 ]

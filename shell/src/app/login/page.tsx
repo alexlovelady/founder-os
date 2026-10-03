@@ -26,7 +26,10 @@ export default function Login() {
           return;
         }
       }
-      router.replace("/app/dashboard");
+      // Honor ?next=/some/path (e.g. an invite link) but only same-site paths: a single leading slash, never //host or a backslash.
+      const next = new URLSearchParams(window.location.search).get("next") ?? "";
+      const sameSite = next.startsWith("/") && !next.startsWith("//") && !next.includes("\\");
+      router.replace(sameSite ? next : "/app/dashboard");
       router.refresh();
     } catch (err) {
       setError((err as Error).message);

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { HttpError, json, readJson, route, UUID_RE, uuidParam, type AttentionItem, type ToolContext, type ToolDef } from "@founderos/sdk";
 import Chat from "./ui/Chat";
+import { confirmProposal, dismissProposal, extractProposals, insertProposals, listProposals, renderCatalog, validateProposals, wantsChange, type proposalOut } from "./proposals";
 import {
   buildPrompt, extractActions, extractKeywords, numberTokens, rankSources, splitContextText, titleFrom, unsupportedClaims, validateCitations,
   type Action, type HistoryMessage, type StoredSource,
@@ -16,12 +17,13 @@ interface ConvRow { id: string; title: string; created_at: Date; updated_at: Dat
 interface MsgRow {
   id: string; conversation_id: string; seq: string; role: "user" | "assistant"; content: string; sources: StoredSource[];
   status: "pending" | "done" | "failed"; ai_job_id: string | null; error: string | null;
-  meta: { pending?: { candidates: StoredSource[]; toolPages: string[]; grounding: string[] }; warnings?: string[]; actions?: Action[]; dropped?: number };
+  meta: { pending?: { candidates: StoredSource[]; toolPages: string[]; grounding: string[]; propose?: boolean }; warnings?: string[]; actions?: Action[]; dropped?: number; proposalsIgnored?: number };
   created_at: Date;
 }
 
 const convOut = (c: ConvRow) => ({ id: c.id, title: c.title, createdAt: c.created_at.toISOString(), updatedAt: c.updated_at.toISOString() });
-const msgOut = (m: MsgRow, note?: string) => ({
+type ProposalOut = ReturnType<typeof proposalOut>;
+const msgOut = (m: MsgRow, note?: string, proposals: ProposalOut[] = []) => ({
   id: m.id,
   conversationId: m.conversation_id,
   role: m.role,
@@ -31,6 +33,8 @@ const msgOut = (m: MsgRow, note?: string) => ({
   sources: m.status === "done" ? m.sources : [],
   warnings: m.meta.warnings ?? [],
   actions: m.meta.actions ?? [],
+  proposals,
+  proposalsIgnored: m.meta.proposalsIgnored ?? 0,
   note: note ?? null,
   createdAt: m.created_at.toISOString(),
 });
@@ -74,6 +78,9 @@ async function fail(ctx: ToolContext, id: string, error: string): Promise<MsgRow
 async function launch(ctx: ToolContext, assistantId: string, question: string, history: HistoryMessage[]): Promise<MsgRow> {
   const bc = await ctx.context();
   const { head, summaries } = splitContextText(bc.asText(), tool.name);
+  // Actions are offered to the model only when the user's question asks for a change and their role may make one.
+  const propose = ctx.canWrite && wantsChange(question, history);
+  const catalog = propose ? renderCatalog(ctx.actions) : "";
   const groups = (await Promise.all([question, ...extractKeywords(question)].map((q) => ctx.search(q.slice(0, 200), 3)))).flat();
   const built = buildPrompt({
     head,
@@ -83,6 +90,7 @@ async function launch(ctx: ToolContext, assistantId: string, question: string, h
     toolPages: [...new Set([...Object.keys(bc.summaries), ...Object.keys(bc.facts)])].filter((t) => /^[a-z]+$/.test(t) && t !== "legal" && t !== "founderai").sort().map((t) => `/app/t/${t}`),
     history,
     question,
+    catalog: catalog || undefined,
   });
   let jobId: string;
   try {
@@ -94,6 +102,7 @@ async function launch(ctx: ToolContext, assistantId: string, question: string, h
     candidates: built.sources.map(({ snippet: _s, ...rest }) => rest),
     toolPages: built.toolPages,
     grounding: numberTokens(built.prompt).slice(0, 3000),
+    propose: !!catalog,
   };
   const [m] = await ctx.sql<MsgRow[]>`
     UPDATE founderai_messages SET status = 'pending', error = NULL, ai_job_id = ${jobId}, content = '', sources = '[]'::jsonb,
@@ -106,8 +115,14 @@ async function launch(ctx: ToolContext, assistantId: string, question: string, h
 async function finish(ctx: ToolContext, m: MsgRow, text: string): Promise<MsgRow> {
   const p = m.meta.pending;
   if (!text.trim() || !p) return fail(ctx, m.id, "The assistant returned an empty answer. Try asking again.");
+  // The proposal block never reaches the user as text. Proposals are validated and previewed here but only a click runs anything.
+  const ex = extractProposals(text.trim());
+  const proposalsAllowed = !!p.propose && ctx.canWrite;
+  const { drafts, dropped: proposalsDropped } = proposalsAllowed ? await validateProposals(ctx, ex.proposals) : { drafts: [], dropped: ex.proposals.length };
+  const answer = ex.text || (drafts.length ? "Here is what I suggest. Nothing changes until you confirm it." : "");
+  if (!answer.trim()) return fail(ctx, m.id, "The assistant returned an empty answer. Try asking again.");
   const byNumber = new Map(p.candidates.map((s) => [s.n, s]));
-  const v = validateCitations(text.trim(), new Set(byNumber.keys()));
+  const v = validateCitations(answer, new Set(byNumber.keys()));
   const cited = v.cited.map((n) => byNumber.get(n)!);
   const warnings: string[] = [];
   const claims = unsupportedClaims(v.text, new Set(p.grounding));
@@ -115,15 +130,16 @@ async function finish(ctx: ToolContext, m: MsgRow, text: string): Promise<MsgRow
   const actions = extractActions(v.text, new Set(p.candidates.map((s) => s.href)), new Set([...p.toolPages.map((t) => t.replace("/app/t/", "")), ...p.candidates.map((s) => s.tool)]));
   const [done] = await ctx.sql<MsgRow[]>`
     UPDATE founderai_messages SET status = 'done', content = ${v.text}, sources = ${ctx.sql.json(cited as never)},
-      meta = ${ctx.sql.json({ warnings, actions, dropped: v.dropped } as never)}, error = NULL
+      meta = ${ctx.sql.json({ warnings, actions, dropped: v.dropped, proposalsIgnored: proposalsDropped + ex.ignored } as never)}, error = NULL
     WHERE id = ${m.id} AND business_id = ${ctx.businessId} AND status = 'pending' RETURNING *`;
+  if (done && drafts.length) await insertProposals(ctx, done, drafts);
   return done ?? (await ownMessage(ctx, m.id));
 }
 
 export const tool: ToolDef = {
   id: "founderai",
   name: "Ask FounderOS",
-  description: "An assistant grounded in your business and every tool. Read-only for now: it answers and suggests where to go next. It is not a lawyer, accountant or financial adviser.",
+  description: "An assistant grounded in your business and every tool. It answers, suggests where to go next, and can propose changes (like a new task) that only happen when you confirm them. It is not a lawyer, accountant or financial adviser.",
   group: "business",
   status: "live",
   migrations: [
@@ -154,6 +170,30 @@ export const tool: ToolDef = {
       );
       CREATE INDEX founderai_messages_conversation ON founderai_messages (conversation_id, seq);`,
     },
+    {
+      name: "0002_proposals",
+      sql: `CREATE TABLE founderai_proposals (
+        id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        business_id     uuid NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+        user_id         text NOT NULL,
+        conversation_id uuid NOT NULL REFERENCES founderai_conversations(id) ON DELETE CASCADE,
+        message_id      uuid NOT NULL REFERENCES founderai_messages(id) ON DELETE CASCADE,
+        position        int NOT NULL DEFAULT 0,
+        tool_id         text NOT NULL,
+        action_id       text NOT NULL,
+        input           jsonb NOT NULL,
+        preview         jsonb NOT NULL,
+        status          text NOT NULL DEFAULT 'proposed' CHECK (status IN ('proposed', 'confirmed', 'dismissed', 'failed')),
+        result          jsonb,
+        error           text,
+        decided_by      text,
+        decided_at      timestamptz,
+        idempotency_key text NOT NULL UNIQUE,
+        expires_at      timestamptz NOT NULL,
+        created_at      timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE INDEX founderai_proposals_message ON founderai_proposals (business_id, user_id, message_id, position);`,
+    },
   ],
 
   api: route({
@@ -169,7 +209,8 @@ export const tool: ToolDef = {
       const rows = await ctx.sql<MsgRow[]>`
         SELECT id, conversation_id, seq, role, content, sources, status, ai_job_id, error, meta, created_at FROM founderai_messages
         WHERE conversation_id = ${c.id} AND business_id = ${ctx.businessId} ORDER BY seq LIMIT 400`;
-      return json({ conversation: convOut(c), messages: rows.map((m) => msgOut(m)), aiAvailable: ctx.ai.available });
+      const props = await listProposals(ctx, rows.filter((m) => m.role === "assistant").map((m) => m.id));
+      return json({ conversation: convOut(c), messages: rows.map((m) => msgOut(m, undefined, props.get(m.id))), aiAvailable: ctx.ai.available });
     },
 
     "DELETE conversations/:id": async (ctx, _req, p) => {
@@ -228,7 +269,8 @@ export const tool: ToolDef = {
           else if (st?.state === "waiting") note = st.message;
         }
       }
-      return json({ message: msgOut(m, note) });
+      const props = m.role === "assistant" ? await listProposals(ctx, [m.id]) : new Map();
+      return json({ message: msgOut(m, note, props.get(m.id)) });
     },
 
     // Retry a failed answer for a question that is already saved.
@@ -245,6 +287,10 @@ export const tool: ToolDef = {
       await ctx.sql`UPDATE founderai_conversations SET updated_at = now() WHERE id = ${m.conversation_id} AND business_id = ${ctx.businessId}`;
       return json({ message: msgOut(next) });
     },
+
+    // The only way anything an answer suggested ever happens: the user's own click. Never callable by the model.
+    "POST proposals/:id/confirm": async (ctx, _req, p) => json(await confirmProposal(ctx, uuidParam(p.id))),
+    "POST proposals/:id/dismiss": async (ctx, _req, p) => json({ proposal: await dismissProposal(ctx, uuidParam(p.id)) }),
   }),
 
   async Page({ ctx, path }) {

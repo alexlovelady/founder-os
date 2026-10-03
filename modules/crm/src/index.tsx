@@ -8,6 +8,7 @@ import {
   CONTACT_STATUSES, CONTACT_TYPES, daysBetween, DEFAULT_STALE_DAYS, EMAIL_RE, formatUsd, isOpenStage, normalizeEmail, OPEN_STAGES,
   parseContactsCsv, STAGES, toCsv, type Stage,
 } from "./logic";
+import { crmActions } from "./actions";
 import { ContactDetail, ContactsView, OpportunityDetail, PipelineView } from "./ui/CrmApp";
 
 const DAY_MS = 86_400_000;
@@ -84,6 +85,7 @@ export const tool: ToolDef = {
   description: "Contacts, a sales pipeline, notes and follow-up reminders for a small business. Flags deals that have gone quiet.",
   group: "growth",
   status: "live",
+  actions: crmActions(() => tool),
   migrations: [
     {
       name: "0001_crm",

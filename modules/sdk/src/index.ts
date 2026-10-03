@@ -10,6 +10,9 @@
  */
 import type { ReactNode } from "react";
 export { withPlatform } from "./context";
+export { callToolApi, clipText } from "./actions";
+export type { ToolAction, ActionRisk, ActionPreview, ActionResult, ActionRegistry, RegisteredAction } from "./actions";
+import type { ActionRegistry, ToolAction } from "./actions";
 import type postgres from "postgres";
 
 export type Sql = postgres.Sql;
@@ -87,6 +90,24 @@ export interface BusinessContext {
   asText(): string;
 }
 
+/** What the business's subscription allows. A limit that is missing or null means "unlimited". Plan data comes from the shell. */
+export interface PlanInfo {
+  id: string;
+  /** e.g. { aiRequestsPerMonth: 200, storageMb: 500, teamMembers: 3 } */
+  limits: Record<string, number | null>;
+  /** e.g. { competitors: true, productScan: false } */
+  features: Record<string, boolean>;
+}
+
+export interface NotifyInput {
+  title: string;
+  body?: string;
+  href?: string;
+  severity?: "info" | "review" | "high";
+  /** Same key twice = one notification (e.g. "compliance-due-<itemId>-2026-12-01"). */
+  dedupeKey?: string;
+}
+
 export interface ToolContext {
   sql: Sql;
   businessId: string;
@@ -106,8 +127,20 @@ export interface ToolContext {
     /** Everything linked to this record, in either direction, with titles and URLs resolved by the owning tools. */
     list(ref: EntityRef): Promise<LinkedItem[]>;
   };
+  /** Record something that happened (who did what to which record). Never put secrets or document contents in `meta`. */
+  audit(action: string, meta?: Record<string, unknown>, resource?: EntityRef): Promise<void>;
+  /** Put a message in the owner's notification inbox (and email, if enabled). Safe to call repeatedly with a dedupeKey. */
+  notify(n: NotifyInput): Promise<void>;
+  /** The subscription plan: use `plan.limits` / `plan.features` to gate costly or premium behaviour. */
+  plan: PlanInfo;
+  /** Count usage against the plan (e.g. "ai_request", "storage_bytes"). Throws HttpError 402 with a clear message when the limit is reached. */
+  useQuota(metric: string, amount?: number): Promise<void>;
   /** Search every tool at once (each tool's `search()`), for global search and for the assistant. */
   search(query: string, limitPerTool?: number): Promise<{ tool: string; toolName: string; hits: SearchHit[] }[]>;
+  /** Every live tool's declared `actions` (see actions.ts). Set by `withPlatform`; used by the assistant. */
+  actions?: ActionRegistry;
+  /** Set only while an action runs: the same key twice must have the same effect as once. */
+  idempotencyKey?: string;
 }
 
 export interface AttentionItem {
@@ -150,6 +183,8 @@ export interface ToolDef {
   search?: (ctx: ToolContext, query: string, limit: number) => Promise<SearchHit[]>;
   /** Small facts other tools may read, e.g. { documentCategories: ["contracts"], overdueTasks: 2 }. JSON-serializable. */
   facts?: (ctx: ToolContext) => Promise<Record<string, unknown>>;
+  /** Changes the assistant may PROPOSE and a person confirms (see actions.ts). Never destructive, never external or paid. */
+  actions?: ToolAction[];
 }
 
 export class HttpError extends Error {

@@ -2,11 +2,22 @@
 import { useRef, useState } from "react";
 import { LinkedItems } from "@founderos/sdk/ui";
 import { CATEGORIES } from "../facts";
-import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, readError, type DocDto, type VersionDto } from "./shared";
+import { ExtractionPanel, LegalPanel, SuggestionChip, SummaryBox } from "./DetailPanels";
+import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, readError, type DetailDto } from "./shared";
 
-export default function VaultDetail({ initial, canWrite }: { initial: { document: DocDto; versions: VersionDto[] }; canWrite: boolean }) {
+export default function VaultDetail({ initial, canWrite }: { initial: DetailDto; canWrite: boolean }) {
   const [doc, setDoc] = useState(initial.document);
   const [versions, setVersions] = useState(initial.versions);
+  const [extraction, setExtraction] = useState(initial.extraction);
+  const [suggestion, setSuggestion] = useState(initial.suggestion);
+  const [summaryKey, setSummaryKey] = useState(0);
+  const [summary, setSummary] = useState(initial.summary);
+
+  // Take in a fresh detail response (after a new version or a re-extract).
+  function takeDetail(d: DetailDto) {
+    setDoc(d.document); setVersions(d.versions); setExtraction(d.extraction); setSuggestion(d.suggestion); setSummary(d.summary);
+    setSummaryKey((k) => k + 1);
+  }
   const [name, setName] = useState(doc.name);
   const [tags, setTags] = useState(doc.tags.join(", "));
   const [docType, setDocType] = useState(doc.docType);
@@ -19,8 +30,9 @@ export default function VaultDetail({ initial, canWrite }: { initial: { document
     setError(undefined); setMessage(undefined);
     const r = await fetch(`${BASE}/documents/${doc.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!r.ok) { setError(await readError(r)); return; }
-    const d = (await r.json()).document as DocDto;
+    const d = (await r.json()).document as DetailDto["document"];
     setDoc(d); setName(d.name); setTags(d.tags.join(", ")); setDocType(d.docType);
+    setSuggestion((s) => (s && s.category === d.category && s.docType.toLowerCase() === d.docType.trim().toLowerCase() ? null : s));
     setMessage("Saved.");
   }
 
@@ -32,8 +44,8 @@ export default function VaultDetail({ initial, canWrite }: { initial: { document
     setBusy(false);
     if (fileInput.current) fileInput.current.value = "";
     if (!r.ok) { setError(await readError(r)); return; }
-    const d = await r.json();
-    setDoc(d.document); setVersions(d.versions);
+    const d = (await r.json()) as DetailDto;
+    takeDetail(d);
     setMessage(`Version ${d.document.version} added. Earlier versions are kept.`);
   }
 
@@ -73,6 +85,8 @@ export default function VaultDetail({ initial, canWrite }: { initial: { document
       <p className="text-xs text-slate-500">{NOTE}</p>
       {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}</p>}
       {message && <p role="status" className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-2 text-sm text-emerald-300">{message}</p>}
+
+      {suggestion && <SuggestionChip key={`${suggestion.category}-${suggestion.docType}`} docId={doc.id} suggestion={suggestion} canWrite={canWrite} onApplied={(a) => { setDoc({ ...doc, category: a.category, docType: a.docType }); setDocType(a.docType); setSuggestion(null); setMessage("Saved."); }} />}
 
       <section aria-label="Details" className="space-y-3 rounded-xl border border-slate-800 bg-slate-900 p-4">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -126,6 +140,10 @@ export default function VaultDetail({ initial, canWrite }: { initial: { document
           ))}
         </ul>
       </section>
+
+      <ExtractionPanel key={`${doc.version}-${extraction.extractedAt}`} docId={doc.id} extraction={extraction} canWrite={canWrite} onDetail={takeDetail} />
+      <SummaryBox key={summaryKey} docId={doc.id} initial={summary} pending={initial.summaryPending && summaryKey === 0} canWrite={canWrite} hasText={extraction.status === "ready"} />
+      <LegalPanel docId={doc.id} docName={doc.name} canWrite={canWrite} initial={initial.legalLink} />
 
       <LinkedItems tool="vault" id={doc.id} canWrite={canWrite} />
 

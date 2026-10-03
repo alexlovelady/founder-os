@@ -45,7 +45,17 @@ export async function listBusinesses(userId: string): Promise<Business[]> {
 }
 
 export async function currentBusiness(userId: string): Promise<Business | null> {
-  return (await listBusinesses(userId))[0] ?? null;
+  const all = await listBusinesses(userId);
+  try {
+    // The user's chosen business (set by the business switcher). Membership is already guaranteed by listBusinesses.
+    const { cookies } = await import("next/headers");
+    const want = (await cookies()).get("fos_business")?.value;
+    const picked = want ? all.find((b) => b.id === want) : undefined;
+    if (picked) return picked;
+  } catch {
+    /* no request scope (scheduler, tests): fall back to the first business */
+  }
+  return all[0] ?? null;
 }
 
 export async function createBusiness(userId: string, input: BusinessInput): Promise<Business> {

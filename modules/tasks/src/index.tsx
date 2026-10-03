@@ -3,6 +3,7 @@ import { z } from "zod";
 import { HttpError, json, readJson, requireWrite, route, UUID_RE, uuidParam, type AttentionItem, type Sql, type ToolContext, type ToolDef } from "@founderos/sdk";
 import { isIsoDate, nextDueDate, RECURRENCES, type Recurrence } from "./dates";
 import TasksBoard from "./ui/TasksBoard";
+import { tasksActions } from "./actions";
 
 const STATUSES = ["todo", "in_progress", "done"] as const;
 const PRIORITIES = ["low", "medium", "high"] as const;
@@ -148,6 +149,7 @@ export const tool: ToolDef = {
   description: "One task list for everything: yours, and the ones other tools raise.",
   group: "operations",
   status: "live",
+  actions: tasksActions(() => tool),
   migrations: [
     {
       name: "0001_items",

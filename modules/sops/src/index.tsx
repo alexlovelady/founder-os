@@ -6,6 +6,7 @@ import { EMPTY_SOP, formatSop } from "./sop";
 import { DOC_KINDS, generateDocument, KIND_LABEL, TEMPLATE_KINDS, type DocKind } from "./templates";
 import SopsHome from "./ui/SopsHome";
 import DocEditor from "./ui/DocEditor";
+import { sopsActions } from "./actions";
 
 const STATUSES = ["draft", "active", "archived"] as const;
 const FREQS = ["none", "quarterly", "yearly"] as const;
@@ -69,6 +70,7 @@ export const tool: ToolDef = {
   description: "Write your processes and everyday business documents: SOPs, proposals, quotes, policies, checklists. Templates fill from your business profile; AI drafting is optional.",
   group: "operations",
   status: "live",
+  actions: sopsActions(() => tool),
   migrations: [
     {
       name: "0001_documents",

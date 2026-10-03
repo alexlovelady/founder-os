@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/server";
 import { BusinessInput, createBusiness, listBusinesses, setModuleLink } from "@/lib/business";
 import { provisionLegal } from "@/lib/legal";
+import { db } from "@/lib/db";
+import { recordAudit } from "@/lib/platform/audit";
+import { trackEvent } from "@/lib/platform/events";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +16,8 @@ export async function POST(req: Request) {
   const parsed = BusinessInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 });
   const business = await createBusiness(session.user.id, parsed.data);
+  await recordAudit(db(), { businessId: business.id, userId: session.user.id, action: "business.created", resource: { tool: "business", id: business.id } });
+  await trackEvent(db(), { businessId: business.id, userId: session.user.id, name: "onboarding_completed" });
   const legal = await provisionLegal(session, business);
   if (legal) await setModuleLink(business.id, "legal", legal);
   return NextResponse.json({ id: business.id, legalLinked: Boolean(legal) }, { status: 201 });

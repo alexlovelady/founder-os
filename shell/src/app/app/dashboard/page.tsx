@@ -36,7 +36,7 @@ export default async function Dashboard() {
   const ops = OPERATION_QUESTIONS.filter((q) => business.operations[q.key]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-8">
+    <div className="mx-auto max-w-5xl space-y-8 p-4 sm:p-8">
       <div>
         <h1 className="text-2xl font-semibold">{first ? `Welcome back, ${first}` : "Welcome back"}</h1>
         <p className="mt-1 text-slate-400">{business.name}</p>

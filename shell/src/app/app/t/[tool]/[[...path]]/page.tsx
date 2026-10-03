@@ -15,7 +15,7 @@ export default async function ToolPage({ params }: { params: Promise<{ tool: str
   if (!ctx) redirect("/app/onboarding");
   const Page = tool.Page;
   return (
-    <div className="mx-auto max-w-5xl p-8">
+    <div className="mx-auto max-w-5xl p-4 sm:p-8">
       <h1 className="mb-1 text-2xl font-semibold">{tool.name}</h1>
       <p className="mb-6 text-sm text-slate-400">{tool.description}</p>
       <Page ctx={ctx} path={path} />

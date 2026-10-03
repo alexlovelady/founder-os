@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CATEGORIES } from "../facts";
-import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, readError, type DocDto } from "./shared";
+import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, readError, Snippet, type DocDto } from "./shared";
 
 export default function VaultLibrary({ initial, canWrite }: { initial: DocDto[]; canWrite: boolean }) {
   const [docs, setDocs] = useState(initial);
@@ -121,7 +121,7 @@ export default function VaultLibrary({ initial, canWrite }: { initial: DocDto[];
         <section className="min-w-0 flex-1 space-y-3" aria-label="Documents">
           <div className="flex flex-wrap items-center gap-2">
             <label className="sr-only" htmlFor="vault-search">Search documents</label>
-            <input id="vault-search" type="search" className="min-w-0 flex-1 basis-48 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Search name, tag, type, filename" value={q} onChange={(e) => setQ(e.target.value)} />
+            <input id="vault-search" type="search" className="min-w-0 flex-1 basis-48 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Search names, tags and the text inside files" value={q} onChange={(e) => setQ(e.target.value)} />
             <label className="sr-only" htmlFor="vault-status">Status</label>
             <select id="vault-status" className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">Not archived</option><option value="active">Active</option><option value="draft">Draft</option><option value="review">In review</option><option value="archived">Archived</option><option value="all">Everything</option>
@@ -143,6 +143,7 @@ export default function VaultLibrary({ initial, canWrite }: { initial: DocDto[];
                       <td className="px-3 py-2">
                         <a href={`/app/t/vault/d/${d.id}`} className="font-medium underline">{d.name}</a>
                         <div className="text-xs text-slate-500">{[d.docType, d.status !== "active" ? d.status : "", ...d.tags.map((t) => `#${t}`)].filter(Boolean).join(" · ")}</div>
+                        {d.snippet && <p className="mt-1 text-xs text-slate-400" aria-label="Matching text from the file"><Snippet html={d.snippet} /></p>}
                       </td>
                       <td className="px-3 py-2 text-slate-300">{d.category}</td>
                       <td className="px-3 py-2"><ExpiryBadge date={d.expirationDate} daysLeft={d.daysLeft} /></td>

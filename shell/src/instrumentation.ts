@@ -6,4 +6,9 @@ export async function register() {
   const { db } = await import("./lib/db");
   const applied = await runToolMigrations(db(), TOOLS);
   if (applied.length) console.log("tool migrations applied:", applied.join(", "));
+  // notifications scheduler (outbox, daily reminders, weekly brief); guarded against double start and `next build`
+  const { setBriefEnabledHook } = await import("./lib/notify/hooks");
+  const { planFor } = await import("./lib/tools/plan");
+  setBriefEnabledHook(async (businessId) => (await planFor(db(), businessId)).features.weeklyBrief !== false);
+  (await import("./lib/notify/scheduler")).startScheduler();
 }
