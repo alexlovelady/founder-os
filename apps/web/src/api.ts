@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export type User = { id: string; email: string; display_name: string; role: string }
+export type User = { id: string; email: string; display_name: string; role: string; mfa_enabled?: boolean }
 export type Matter = {
   id: string; name: string; description: string; jurisdiction: string; relevant_date: string | null
   status: string; privacy_mode: 'standard' | 'private' | 'local_only'; external_embedding_enabled: boolean
@@ -8,7 +8,7 @@ export type Matter = {
   embedding_route: 'external' | 'local'; embedding_model: string
 }
 export type Version = { id: string; version_number: number; filename: string; content_type: string; size_bytes: number; sha256: string; status: string; created_at: string
-  parse_status: string; parse_error: string | null; page_count: number | null; embed_status: string; embedding_model: string | null }
+  parse_status: string; parse_error: string | null; page_count: number | null; ocr_applied?: boolean; ocr_confidence?: number | null; embed_status: string; embedding_model: string | null }
 export type Authority = {
   authority_type: string; jurisdiction: string; court: string; court_level: string; citation: string
   document_date: string | null; effective_from: string | null; effective_to: string | null; precedential_status: string
@@ -51,6 +51,23 @@ export async function api<T = unknown>(path: string, opts: { method?: string; js
     throw new ApiError(r.status, msg)
   }
   return r.json() as Promise<T>
+}
+
+/** POST JSON and download the binary response as a file (used for generated documents). */
+export async function downloadPost(path: string, json: unknown): Promise<{ filename: string; applied: string | null }> {
+  const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(json), credentials: 'same-origin' })
+  if (!r.ok) {
+    let msg = r.statusText
+    try { const d = await r.json(); msg = typeof d.detail === 'string' ? d.detail : msg } catch { /* not JSON */ }
+    throw new ApiError(r.status, msg)
+  }
+  const m = /filename="([^"]+)"/.exec(r.headers.get('content-disposition') ?? '')
+  const filename = m?.[1] ?? 'document'
+  const url = URL.createObjectURL(await r.blob())
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 5000)
+  return { filename, applied: r.headers.get('x-revise-applied') }
 }
 
 /** Fetch on mount and every `ms` (if given); returns data, error, and a manual reload. */

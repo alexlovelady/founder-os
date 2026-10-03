@@ -202,13 +202,14 @@ function AuthorityEditor({ d, onSaved }: { d: Doc; onSaved: () => void }) {
 }
 
 function ProcBadges({ v }: { v: Version }) {
-  const parse = v.parse_status === 'parsed' ? <span className="badge ok">Parsed{v.page_count ? ` · ${v.page_count} pp` : ''}</span>
+  const parse = v.parse_status === 'ocr_pending' ? <span className="badge warn">Running OCR…</span> : v.parse_status === 'parsed' ? <span className="badge ok">Parsed{v.page_count ? ` · ${v.page_count} pp` : ''}</span>
     : v.parse_status === 'needs_ocr' ? <span className="badge warn" title={v.parse_error ?? ''}>Needs OCR</span>
     : v.parse_status === 'failed' ? <span className="badge bad" title={v.parse_error ?? ''}>Parse failed</span>
     : <span className="badge warn">Parsing…</span>
   const emb = v.parse_status !== 'parsed' ? null : v.embed_status === 'embedded' ? <span className="badge ok" title={v.embedding_model ?? ''}>Searchable</span>
     : <span className="badge warn">Embedding…</span>
-  return <>{parse}{emb}</>
+  const ocr = v.ocr_applied ? <span className={`badge ${(v.ocr_confidence ?? 0) < 70 ? 'bad' : 'warn'}`} title={v.parse_error ?? ''}>OCR {v.ocr_confidence != null ? `${Math.round(v.ocr_confidence)}%` : ''}</span> : null
+  return <>{parse}{ocr}{emb}</>
 }
 
 function Versions({ docId }: { docId: string }) {

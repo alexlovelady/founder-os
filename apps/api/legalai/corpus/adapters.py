@@ -37,6 +37,20 @@ def validate_config(adapter: str, cfg: dict) -> dict:
         if not (1 <= title <= 50 and 1 <= part <= 9999):
             raise SourceError("title/part out of range")
         return {"title": title, "part": part}
+    if adapter == "uscode":
+        try:
+            title = int(cfg["title"])
+        except (KeyError, TypeError, ValueError):
+            raise SourceError("uscode needs an integer title")
+        if not 1 <= title <= 54:
+            raise SourceError("title out of range")
+        parse_sections(cfg.get("sections", ""))
+        return {"title": title, "sections": str(cfg["sections"])[:300], **({"title_text": str(cfg["title_text"])[:200]} if cfg.get("title_text") else {})}
+    if adapter == "courtlistener":
+        try:
+            return {"opinion_id": int(cfg["opinion_id"])}
+        except (KeyError, TypeError, ValueError):
+            raise SourceError("courtlistener needs an integer opinion_id")
     if adapter == "url":
         url = str(cfg.get("url", ""))
         if not url.startswith("https://"):
@@ -135,7 +149,110 @@ class UrlAdapter:
                            etag=r.headers.get("etag"), retrieved_at=datetime.now(timezone.utc))
 
 
-ADAPTERS = {"ecfr": EcfrAdapter, "url": UrlAdapter}
+def parse_sections(spec: str) -> list[str]:
+    """'101-122, 201, 203-205' -> ['101', ..., '122', '201', '203', ...]. Capped to keep one source reasonable."""
+    out: list[str] = []
+    for part in str(spec).split(","):
+        part = part.strip()
+        if not part:
+            continue
+        m = re.fullmatch(r"(\d+)\s*-\s*(\d+)", part)
+        if m:
+            a, b = int(m.group(1)), int(m.group(2))
+            if b < a or b - a > 150:
+                raise SourceError("Section ranges must be ascending and at most 150 sections")
+            out += [str(n) for n in range(a, b + 1)]
+        elif re.fullmatch(r"\d+[A-Za-z0-9-]*", part):
+            out.append(part)
+        else:
+            raise SourceError(f"Bad section '{part}'")
+    if not out or len(out) > 200:
+        raise SourceError("Give between 1 and 200 sections")
+    return out
+
+
+class UscodeAdapter:
+    """U.S. Code sections from the GPO govinfo link service (official, no key). Each section is fetched politely and
+    joined into one document so the library holds e.g. '17 U.S.C. 101-122' as a unit with a single version history."""
+
+    LINK = "https://www.govinfo.gov/link/uscode/{title}/{section}?link-type=html&year=mostrecent"
+
+    def __init__(self, fetch=safe_get, delay: float = 0.4):
+        self.fetch, self.delay = fetch, delay
+
+    async def run(self, cfg: dict, etag: str | None = None) -> FetchResult:
+        import asyncio
+        from ..ingestion.parsers import parse_html
+        title, sections = int(cfg["title"]), parse_sections(cfg["sections"])
+        parts, missing, edition = [], [], None
+        for sec in sections:
+            r = await self.fetch(self.LINK.format(title=title, section=sec))
+            m = re.search(r"/(USCODE-(\d{4})-title\d+)/", r.url)
+            if r.status != 200 or not m:
+                missing.append(sec)
+                continue
+            edition = edition or m.group(2)
+            text = parse_html(r.content).text
+            i = text.find(f"§{sec}.")
+            parts.append(text[i:] if i >= 0 else text)
+            await asyncio.sleep(self.delay)
+        if not parts:
+            raise SourceError("No sections could be fetched from govinfo")
+        body = "\n\n".join(parts)
+        return FetchResult(content=body.encode(), filename=f"usc-{title}-{sections[0]}.txt",
+                           title=cfg.get("title_text") or f"{title} U.S.C. §§ {cfg['sections']}",
+                           citation=f"{title} U.S.C. §§ {cfg['sections']}" + (f" ({edition} ed.)" if edition else ""),
+                           effective_from=date.today(), source_url=f"https://www.govinfo.gov/app/collection/uscode",
+                           etag=None, retrieved_at=datetime.now(timezone.utc))
+
+
+class CourtListenerAdapter:
+    """One court opinion from CourtListener (Free Law Project). Needs a free API token in COURTLISTENER_TOKEN.
+    Fetches the opinion text and cluster metadata (case name, date, citations, precedential status). It does NOT derive
+    treatment (whether the case was overruled or followed): that must come from an authoritative source via the
+    treatment import or the library UI."""
+
+    BASE = "https://www.courtlistener.com/api/rest/v4"
+
+    def __init__(self, fetch=safe_get, token: str | None = None):
+        self.fetch, self.token = fetch, token
+
+    async def run(self, cfg: dict, etag: str | None = None) -> FetchResult:
+        import os
+        from ..ingestion.parsers import parse_html
+        token = self.token or os.environ.get("COURTLISTENER_TOKEN", "")
+        if not token:
+            raise SourceError("COURTLISTENER_TOKEN is not set")
+        hdr = {"Authorization": f"Token {token}"}
+
+        async def get_json(url):
+            r = await self.fetch(url, hdr)
+            if r.status != 200:
+                raise SourceError(f"CourtListener returned HTTP {r.status}")
+            import json
+            return json.loads(r.content)
+
+        op = await get_json(f"{self.BASE}/opinions/{int(cfg['opinion_id'])}/")
+        text = op.get("plain_text") or ""
+        if not text.strip():
+            html = op.get("html_with_citations") or op.get("html") or op.get("html_lawbox") or ""
+            text = parse_html(html.encode()).text if html else ""
+        if len(text.strip()) < 200:
+            raise SourceError("The opinion has no usable text")
+        meta = {}
+        if op.get("cluster"):
+            meta = await get_json(op["cluster"].replace("http://", "https://"))
+        cites = meta.get("citations") or []
+        citation = "; ".join(f"{c.get('volume')} {c.get('reporter')} {c.get('page')}" for c in cites if isinstance(c, dict)) or cfg.get("citation", "")
+        filed = meta.get("date_filed")
+        return FetchResult(content=text.encode(), filename=f"opinion-{cfg['opinion_id']}.txt",
+                           title=meta.get("case_name") or f"Opinion {cfg['opinion_id']}", citation=citation,
+                           effective_from=date.fromisoformat(filed) if filed else None,
+                           source_url=op.get("absolute_url") and f"https://www.courtlistener.com{op['absolute_url']}" or "https://www.courtlistener.com",
+                           etag=None, retrieved_at=datetime.now(timezone.utc))
+
+
+ADAPTERS = {"ecfr": EcfrAdapter, "url": UrlAdapter, "uscode": UscodeAdapter, "courtlistener": CourtListenerAdapter}
 
 
 def build_adapter(name: str):

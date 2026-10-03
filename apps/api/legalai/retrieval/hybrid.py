@@ -19,6 +19,7 @@ from ..providers.embeddings import build_embedding_provider
 from .authority import AuthorityAssessment, assess
 
 CANDIDATES = 50
+EXACT = re.compile(r'\d|§|"|“')
 WORD = re.compile(r"[A-Za-z0-9]{2,}")
 STOP = {"the", "and", "for", "are", "was", "what", "which", "that", "this", "with", "from", "have", "has", "does",
         "how", "can", "may", "any", "not", "but", "its", "their", "there", "when", "who", "whom", "between"}
@@ -173,9 +174,12 @@ async def hybrid_search(db: DbSession, matter: Matter, query: str, settings: Set
             warnings.append(f"Semantic search unavailable ({e}); showing keyword results only.")
             res.mode_used = "lexical"
 
+    # Natural-language questions are best served by the embedding model; questions with digits, section signs or quoted
+    # terms (statute numbers, amounts, defined terms) need the exact-match path to keep real weight.
+    exact = bool(EXACT.search(query))
     fused: dict = {}
     for kind, rows in lists:
-        w = settings.w_semantic if kind == "sem" else settings.w_lexical
+        w = (settings.w_semantic_exact if exact else settings.w_semantic) if kind == "sem" else settings.w_lexical
         for rank, (c, doc, ver) in enumerate(rows, start=1):
             h = fused.setdefault(c.id, Hit(c, doc, ver))
             h.score += w / (settings.rrf_k + rank)

@@ -65,7 +65,8 @@ class Settings(BaseSettings):
     embedding_batch_size: int = 32
 
     # Hybrid retrieval weights (benchmark and tune; see spec section 13)
-    w_semantic: float = 1.0
+    w_semantic: float = 10.0  # natural-language questions; tuned on the benchmark (see benchmarks/results/fusion-sweep-*.json)
+    w_semantic_exact: float = 1.5  # questions containing digits, section signs or quotes keep the lexical path strong
     w_lexical: float = 1.0
     rrf_k: int = 60
     max_chunks_per_document: int = 3

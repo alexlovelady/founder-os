@@ -1,0 +1,35 @@
+{
+  "run_at": "2026-10-03T02:15:57.006459+00:00",
+  "embedder": "fake",
+  "metrics": {
+    "retrieval_hybrid_recall_at_1": 0.534,
+    "retrieval_hybrid_recall_at_5": 0.8058,
+    "retrieval_hybrid_hard_recall_at_5": 0.4516,
+    "retrieval_lexical_recall_at_1": 0.5243,
+    "retrieval_lexical_recall_at_5": 0.8155,
+    "retrieval_lexical_hard_recall_at_5": 0.4839,
+    "retrieval_semantic_recall_at_1": 0.4369,
+    "retrieval_semantic_recall_at_5": 0.7087,
+    "retrieval_semantic_hard_recall_at_5": 0.3871,
+    "retrieval_recall_at_5": 0.8058,
+    "retrieval_mrr": 0.6453,
+    "retrieval_cases": 103.0,
+    "retrieval_hard_cases": 31.0,
+    "retrieval_easy_recall_at_5": 0.9583,
+    "valid_quote_accepted": 1.0,
+    "citation_fabrication_rejected": 1.0,
+    "quote_mutation_detected": 1.0,
+    "wrong_source_flagged": 1.0,
+    "uncited_claim_flagged": 1.0,
+    "adversarial_cases": 412.0
+  },
+  "thresholds": {
+    "retrieval_recall_at_5": 0.85,
+    "retrieval_mrr": 0.6,
+    "citation_fabrication_rejected": 1.0,
+    "quote_mutation_detected": 1.0,
+    "valid_quote_accepted": 0.98,
+    "wrong_source_flagged": 0.85,
+    "uncited_claim_flagged": 1.0
+  }
+}

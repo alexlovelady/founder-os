@@ -1,19 +1,56 @@
 {
-  "metrics": {
-    "retrieval_hybrid_recall_at_1": 0.6923,
-    "retrieval_hybrid_recall_at_5": 1.0,
-    "retrieval_lexical_recall_at_1": 0.7179,
-    "retrieval_lexical_recall_at_5": 0.9487,
-    "retrieval_semantic_recall_at_1": 0.641,
-    "retrieval_semantic_recall_at_5": 0.9231,
-    "retrieval_recall_at_5": 1.0,
-    "retrieval_mrr": 0.8376,
+  "fake": {
+    "retrieval_hybrid_recall_at_1": 0.534,
+    "retrieval_hybrid_recall_at_5": 0.8058,
+    "retrieval_lexical_recall_at_1": 0.5243,
+    "retrieval_lexical_recall_at_5": 0.8155,
+    "retrieval_semantic_recall_at_1": 0.4369,
+    "retrieval_semantic_recall_at_5": 0.7087,
+    "retrieval_recall_at_5": 0.8058,
+    "retrieval_mrr": 0.6453,
     "valid_quote_accepted": 1.0,
     "citation_fabrication_rejected": 1.0,
     "quote_mutation_detected": 1.0,
     "wrong_source_flagged": 1.0,
     "uncited_claim_flagged": 1.0,
-    "adversarial_cases": 197.0
+    "adversarial_cases": 412.0,
+    "retrieval_hybrid_hard_recall_at_5": 0.4516,
+    "retrieval_lexical_hard_recall_at_5": 0.4839,
+    "retrieval_semantic_hard_recall_at_5": 0.3871,
+    "retrieval_cases": 103.0,
+    "retrieval_hard_cases": 31.0,
+    "retrieval_easy_recall_at_5": 0.9583
   },
-  "embedder": "fake"
+  "local": {
+    "retrieval_hybrid_recall_at_1": 0.8058,
+    "retrieval_hybrid_recall_at_5": 0.9515,
+    "retrieval_hybrid_hard_recall_at_5": 0.8387,
+    "retrieval_lexical_recall_at_1": 0.5243,
+    "retrieval_lexical_recall_at_5": 0.8155,
+    "retrieval_lexical_hard_recall_at_5": 0.4839,
+    "retrieval_semantic_recall_at_1": 0.7767,
+    "retrieval_semantic_recall_at_5": 0.8738,
+    "retrieval_semantic_hard_recall_at_5": 0.7097,
+    "retrieval_recall_at_5": 0.9515,
+    "retrieval_mrr": 0.8705,
+    "retrieval_cases": 103.0,
+    "retrieval_hard_cases": 31.0,
+    "retrieval_easy_recall_at_5": 1.0
+  },
+  "voyage": {
+    "retrieval_hybrid_recall_at_1": 0.8738,
+    "retrieval_hybrid_recall_at_5": 0.9709,
+    "retrieval_hybrid_hard_recall_at_5": 0.9032,
+    "retrieval_lexical_recall_at_1": 0.5243,
+    "retrieval_lexical_recall_at_5": 0.8155,
+    "retrieval_lexical_hard_recall_at_5": 0.4839,
+    "retrieval_semantic_recall_at_1": 0.8932,
+    "retrieval_semantic_recall_at_5": 0.9806,
+    "retrieval_semantic_hard_recall_at_5": 0.9355,
+    "retrieval_recall_at_5": 0.9709,
+    "retrieval_mrr": 0.9158,
+    "retrieval_cases": 103.0,
+    "retrieval_hard_cases": 31.0,
+    "retrieval_easy_recall_at_5": 1.0
+  }
 }

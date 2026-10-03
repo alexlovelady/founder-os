@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, type FormEvent } from 'react'
-import { api, fmtTime, useQuery, type Doc, type Matter, type Version } from '../api'
+import { api, downloadPost, fmtTime, useQuery, type Doc, type Matter, type Version } from '../api'
+import { Link } from 'react-router-dom'
 import { Empty, Err, Loading } from '../ui'
 
 export function DiffView({ ops }: { ops: { op: string; text: string }[] }) {
@@ -133,13 +134,53 @@ function Reviews({ m }: { m: Matter }) {
   )
 }
 
+function RevisePanel({ m, redlines }: { m: Matter; redlines: any[] }) {
+  const docs = useQuery(() => api<Doc[]>(`/api/matters/${m.id}/documents`), [m.id])
+  const withRedlines = (docs.data ?? []).filter(d => redlines.some(r => r.document_id === d.id))
+  const [docId, setDocId] = useState('')
+  const did = docId || withRedlines[0]?.id
+  const [fmt, setFmt] = useState('tracked_docx')
+  const [pending, setPending] = useState(false)
+  const [save, setSave] = useState(false)
+  const [pv, setPv] = useState<any>()
+  const [msg, setMsg] = useState<string>()
+  const [err, setErr] = useState<string>()
+  const [busy, setBusy] = useState(false)
+  if (withRedlines.length === 0) return null
+  const body = { format: fmt, include_pending: pending, save_as_version: save }
+  const wrap = async (fn: () => Promise<void>) => { setErr(undefined); setMsg(undefined); setBusy(true); try { await fn() } catch (e) { setErr((e as Error).message) } finally { setBusy(false) } }
+  return (
+    <div className="card stack">
+      <div><h3>Create the revised document</h3><div className="muted small">Applies the accepted redlines to your uploaded document. Word files are edited in place, so formatting is kept.</div></div>
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))' }}>
+        <label>Document<select value={did} onChange={e => { setDocId(e.target.value); setPv(undefined) }}>{withRedlines.map(d => <option key={d.id} value={d.id}>{d.title}</option>)}</select></label>
+        <label>Format<select value={fmt} onChange={e => setFmt(e.target.value)}>
+          <option value="tracked_docx">Word with tracked changes (accept or reject in Word)</option><option value="docx">Word, clean revised copy</option><option value="txt">Plain text</option><option value="md">Markdown</option></select></label></div>
+      <div className="row wrap"><label className="inline"><input type="checkbox" checked={pending} onChange={e => { setPending(e.target.checked); setPv(undefined) }} />Also apply suggestions I have not decided on yet</label>
+        <label className="inline"><input type="checkbox" checked={save} onChange={e => setSave(e.target.checked)} />Save as a new version of this document instead of downloading</label></div>
+      <div className="row wrap"><button className="btn" disabled={busy} onClick={() => wrap(async () => setPv(await api<any>(`/api/documents/${did}/revise/preview`, { json: body })))}>Preview what will change</button>
+        <button className="btn primary" disabled={busy} onClick={() => wrap(async () => {
+          if (save) { const r = await api<any>(`/api/documents/${did}/revise`, { json: body }); setMsg(`Saved as version ${r.version_number} (${r.applied} change${r.applied === 1 ? '' : 's'} applied). It is being re-indexed.`) }
+          else { const r = await downloadPost(`/api/documents/${did}/revise`, body); setMsg(`Downloaded ${r.filename} (${r.applied} change${r.applied === '1' ? '' : 's'} applied).`) }
+        })}>{save ? 'Save revised version' : 'Download'}</button></div>
+      <Err msg={err} />{msg && <div className="badge ok" style={{ justifySelf: 'start' }}>{msg}</div>}
+      {pv && <div className="stack small" style={{ gap: 6 }}>
+        <div><strong>{pv.applied.length}</strong> change{pv.applied.length === 1 ? '' : 's'} will be applied{pv.pending_not_applied > 0 && <> · <span style={{ color: 'var(--warn)' }}>{pv.pending_not_applied} pending suggestion(s) not included</span></>}{!pv.preserves_formatting && <> · <span className="muted">this file type is rebuilt as a new Word document, so its original layout is not preserved</span></>}</div>
+        {pv.skipped.map((s: any) => <div key={s.redline_id} className="err">Skipped {s.label || 'a clause'}: {s.reason}</div>)}
+        {pv.needs_manual_drafting.length > 0 && <div className="card" style={{ background: 'var(--soft)' }}><strong>Recommendations that need new text drafted by you</strong> (the review had no replacement wording for these):
+          <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>{pv.needs_manual_drafting.map((i: any) => <li key={i.id}><RiskBadge r={i.risk} /> {i.title}</li>)}</ul>
+          <div style={{ marginTop: 6 }}><Link to={`/matters/${m.id}/draft`}>Draft the missing provisions →</Link></div></div>}</div>}
+    </div>
+  )
+}
+
 function Redlines({ m }: { m: Matter }) {
   const { data, reload } = useQuery(() => api<any[]>(`/api/matters/${m.id}/redlines`), [m.id], 4000)
   if (!data) return <Loading />
   if (data.length === 0) return <div className="card"><Empty>No redlines yet. Contract reviews create them for issues that have a suggested replacement.</Empty></div>
   const set = async (id: string, status: string) => { await api(`/api/redlines/${id}`, { method: 'PATCH', json: { status } }); reload() }
   return (
-    <div className="stack">{data.map(r => (
+    <div className="stack">{m.my_role !== 'viewer' && <RevisePanel m={m} redlines={data} />}{data.map(r => (
       <div key={r.id} className="card stack" style={{ gap: 8 }}>
         <div className="row between wrap"><div className="row" style={{ gap: 6 }}><strong>{r.clause_label || 'Clause'}</strong><RiskBadge r={r.risk} />
           <span className={`badge ${r.status === 'accepted' ? 'ok' : r.status === 'rejected' ? 'bad' : ''}`}>{r.status}</span></div>

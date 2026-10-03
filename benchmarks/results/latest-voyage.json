@@ -1,0 +1,29 @@
+{
+  "run_at": "2026-10-03T02:12:59.946513+00:00",
+  "embedder": "voyage",
+  "metrics": {
+    "retrieval_hybrid_recall_at_1": 0.8738,
+    "retrieval_hybrid_recall_at_5": 0.9709,
+    "retrieval_hybrid_hard_recall_at_5": 0.9032,
+    "retrieval_lexical_recall_at_1": 0.5243,
+    "retrieval_lexical_recall_at_5": 0.8155,
+    "retrieval_lexical_hard_recall_at_5": 0.4839,
+    "retrieval_semantic_recall_at_1": 0.8932,
+    "retrieval_semantic_recall_at_5": 0.9806,
+    "retrieval_semantic_hard_recall_at_5": 0.9355,
+    "retrieval_recall_at_5": 0.9709,
+    "retrieval_mrr": 0.9158,
+    "retrieval_cases": 103.0,
+    "retrieval_hard_cases": 31.0,
+    "retrieval_easy_recall_at_5": 1.0
+  },
+  "thresholds": {
+    "retrieval_recall_at_5": 0.85,
+    "retrieval_mrr": 0.6,
+    "citation_fabrication_rejected": 1.0,
+    "quote_mutation_detected": 1.0,
+    "valid_quote_accepted": 0.98,
+    "wrong_source_flagged": 0.85,
+    "uncited_claim_flagged": 1.0
+  }
+}

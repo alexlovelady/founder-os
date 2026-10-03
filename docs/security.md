@@ -20,17 +20,26 @@ not an independent penetration test.
 | HTTP hardening | CSP, `X-Frame-Options: DENY`, `nosniff`, no-referrer, HSTS when secure, `no-store` on API, request IDs, access logs without bodies/queries, per-IP rate limits (heavier on uploads and LLM work), request-size caps, API docs hidden outside local | `middleware.py`, `test_hardening.py` |
 | Supply chain | `bandit` (no medium/high findings; one low: jitter in retry backoff), `pip-audit` (only the pip tool itself flagged), `npm audit --omit=dev` (0) | re-run before releases |
 
+## Added in the second hardening pass
+| Area | Control | Where / test |
+|---|---|---|
+| Home network exposure | **Pull mode**: the PC makes outbound HTTPS calls only; no tunnel, no public hostname, no inbound token. Requests are claimed with the node token, results are accepted only from the claiming node, and request rows (prompts, answers) are deleted as soon as they are read | `providers/pull_gpu.py`, `test_pull_gpu.py` |
+| MFA | TOTP (RFC 6238) with encrypted-at-rest secrets, replay-proof codes, hashed single-use recovery codes, a signed 5-minute half-login token, rate limits, admin reset, and "sign out everywhere else". No session exists until the second factor passes | `mfa.py`, `test_mfa.py` |
+| Upload scanning | Built-in: EICAR test file, executables disguised as documents, Office macros/ActiveX, zip path traversal, PDFs with launch actions, JavaScript or embedded files. Optional ClamAV via clamd (`CLAMAV_HOST`), failing closed with `CLAMAV_REQUIRED=true`. Rejections are audited | `scanning.py`, `test_scanning.py` |
+| OCR | Tesseract in the server image; OCR text is flagged everywhere (`ocr_applied`, confidence, a coverage label) because verbatim checks then run against recognized text | `ingestion/ocr.py`, `test_ocr.py` |
+| Backups | Daily verified backups (restore into a scratch DB + every document hash checked), retention, health check on backup age and verification, read-only token for an off-site puller that mirrors database dumps and documents to your own computer | `backup.py`, `test_backup.py` |
+
 ## Known gaps and decisions for you
-* **Malware scanning is a stub** (`storage.scanner`). Fine for a single trusted user; add ClamAV before accepting uploads from others.
+* **ClamAV is optional and not deployed.** It needs roughly 1.5 GB of RAM as another Railway service, which costs real money. The
+  built-in checks are always on; add ClamAV (`docs/railway.md`) before accepting uploads from people you do not trust.
 * **Rate limiting is in-process** (one API instance). Move to Postgres/Redis if you scale out.
-* **Tailscale Funnel makes the gateway reachable from the internet.** It is protected by token + signature, but anyone who learns the
-  token can use your GPU. Rotate `GPU_NODE_TOKEN` (Railway variable + `services/gpu-gateway/.env`) if it ever leaks. A Cloudflare Access
-  service-token policy would add a second layer.
-* **TLS/HSTS** rely on Railway's edge. Set `COOKIE_SECURE=true` and `TRUST_PROXY=true` in production (already done).
-* **No at-rest encryption beyond the platform's.** Railway volumes and Postgres are encrypted by the provider; the app does not add
-  application-level encryption of documents.
-* **Sessions are not bound to a device/IP** and there is no MFA. For a single-user private system behind a strong password this is a
-  reasonable trade-off; add TOTP before multi-user use.
+* **No application-level encryption of documents.** Railway encrypts volumes and Postgres at rest; the app adds none. MFA secrets are
+  the exception (Fernet, key derived from `SESSION_SECRET`: rotating that secret invalidates enrolled authenticators).
+* **Prompts transit Railway's database briefly in pull mode** (until the answer is read; stale rows are purged after a few minutes).
+  Push mode avoids that but needs an inbound tunnel. Neither stores prompts in logs.
+* **Sessions are not bound to a device or IP.** MFA and "sign out everywhere else" cover the common risks.
 * **Audit log is append-only by convention** (no update/delete endpoints), not cryptographically chained.
+* **Off-site backups run only when you schedule `scripts/pull_backup.py`** on your computer. The server-side backups live on the same
+  Railway volume as the data, so they protect against mistakes and corruption but not against losing the volume.
 * **LLM output is never trusted for authorization**, but a compromised model could still produce misleading *text*; the validators reduce,
   not eliminate, that risk. Treat every output as a draft for a lawyer.

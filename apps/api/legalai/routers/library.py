@@ -1,3 +1,4 @@
+import json
 import uuid
 from datetime import date as Date
 from typing import Literal
@@ -9,6 +10,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from ..audit import audit
 from ..corpus.adapters import SourceError, validate_config
+from ..corpus.presets import PRESETS
 from ..corpus.refresh import get_library_matter
 from ..db import get_db
 from ..jobs.queue import enqueue
@@ -22,7 +24,7 @@ TREATMENT_TYPES = ("followed", "affirmed", "distinguished", "questioned", "criti
 
 class SourceIn(BaseModel):
     name: str = Field(min_length=1, max_length=300)
-    adapter: Literal["ecfr", "url"]
+    adapter: Literal["ecfr", "url", "uscode", "courtlistener"]
     config: dict
     jurisdiction: str = Field("", max_length=100)
     authority_type: Literal["statute", "regulation", "court_opinion", "court_rule", "administrative_guidance", "agency_material",
@@ -142,3 +144,52 @@ def set_treatment(doc_id: uuid.UUID, body: TreatmentIn, admin: User = Depends(re
     audit(db, "corpus.treatment_set", user_id=admin.id, matter_id=lib.id, object_type="document", object_id=d.id, count=len(d.treatment))
     db.commit()
     return {"treatment": d.treatment}
+
+
+@router.get("/presets")
+def presets(admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    """Curated one-click starting points (all from official sources) with whether each is already added."""
+    have = {(s.adapter, json.dumps(s.config, sort_keys=True)) for s in db.scalars(select(CorpusSource))}
+    return [{**p, "added": (p["adapter"], json.dumps(p["config"], sort_keys=True)) in have} for p in PRESETS]
+
+
+class ImportEntry(BaseModel):
+    citation: str = Field("", max_length=300)
+    title: str = Field("", max_length=300)
+    type: Literal[TREATMENT_TYPES]  # type: ignore[valid-type]
+    citing: str = Field("", max_length=300)
+    note: str = Field("", max_length=1000)
+    date: Date | None = None
+    source: str = Field("", max_length=500)
+
+
+class ImportBody(BaseModel):
+    entries: list[ImportEntry] = Field(max_length=2000)
+
+
+@router.post("/treatment/import")
+def import_treatment(body: ImportBody, admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
+    """Bulk-load subsequent history (e.g. exported from a citator you license). Entries match library documents by exact
+    citation or title (case-insensitive). Nothing is inferred; unmatched rows are reported back unchanged."""
+    lib = get_library_matter(db)
+    docs = db.scalars(select(Document).where(Document.matter_id == lib.id, Document.deleted_at.is_(None))).all()
+    by_key = {}
+    for d in docs:
+        for k in (d.citation_text, d.title):
+            if k:
+                by_key.setdefault(k.strip().lower(), d)
+    matched, unmatched = 0, []
+    for e in body.entries:
+        d = by_key.get(e.citation.strip().lower()) or by_key.get(e.title.strip().lower())
+        if not d:
+            unmatched.append(e.citation or e.title)
+            continue
+        entry = {"type": e.type, "citing": e.citing, "note": e.note, "date": e.date.isoformat() if e.date else None, "source": e.source}
+        cur = list(d.treatment or [])
+        if not any(x.get("type") == entry["type"] and x.get("citing") == entry["citing"] for x in cur):
+            cur.append(entry)
+            d.treatment = cur
+        matched += 1
+    audit(db, "corpus.treatment_imported", user_id=admin.id, matter_id=lib.id, matched=matched, unmatched=len(unmatched))
+    db.commit()
+    return {"matched": matched, "unmatched": unmatched}

@@ -53,9 +53,16 @@ docs/               Deployment guides
   (`scripts/backup.py`, `docs/backup.md`), benchmark suite with regression baseline (`benchmarks/`), network-guard privacy
   tests, and a security review (`docs/security.md`).
 
-Not yet / honest limits: OCR (scans are flagged `needs_ocr`), malware scanning, MFA, scheduled backups, citator data, and the
-benchmark sets are small (39 retrieval questions, 197 adversarial validator cases) and use a stand-in embedder by default.
-Relevance weights and validator thresholds are tuned only against those sets.
+- Limits pass: **pull-mode GPU** (your PC only makes outbound calls, no tunnel or public hostname), **TOTP MFA** with recovery codes,
+  **upload scanning** (built-in checks always, ClamAV optional), **OCR** for scans (Tesseract, flagged everywhere it is used),
+  **daily verified backups** plus an off-site puller, **document revision** (recreate an uploaded document with accepted
+  recommendations applied, as a clean or tracked-changes Word file, or save it as a new version), U.S. Code and eCFR sources with
+  one-click presets, a treatment bulk-import, and a 103-question / 7-contract retrieval benchmark measured with the real embedders.
+  See `docs/legal-sources.md` for why no model training is needed.
+
+Honest limits: ClamAV is not deployed (RAM cost); CourtListener support is mock-tested only (needs a free token); no citator data
+ships with the system (you record treatment); state codes need per-state sources; the benchmark is small and was tuned on its own
+questions; OCR quality depends on scan quality; backups on the server share the data volume (pull an off-site copy).
 
 ## Local development
 ```bash

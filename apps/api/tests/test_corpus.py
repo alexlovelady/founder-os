@@ -259,3 +259,89 @@ def test_failed_source_records_error_and_retries(make_api, emb, monkeypatch):
     drain()
     src = a.get("/api/library/sources").json()[0]
     assert "HTTP 503" in src["last_status"] and lib_doc(a) is None
+
+
+# ---- more adapters, presets, treatment import -------------------------------------------------------------------
+def test_parse_sections():
+    from legalai.corpus.adapters import parse_sections
+    assert parse_sections("101-103, 201,1030") == ["101", "102", "103", "201", "1030"]
+    for bad in ("", "5-2", "1-500", "abc;rm", "1,,2,x y"):
+        with pytest.raises(SourceError):
+            parse_sections(bad)
+
+
+def test_uscode_adapter_joins_sections_and_skips_missing():
+    from legalai.corpus.adapters import UscodeAdapter
+
+    async def fetch(url, headers=None):
+        sec = url.split("/uscode/17/")[1].split("?")[0]
+        if sec == "104":
+            return Fetched(200, {}, b"<html>error</html>", "https://www.govinfo.gov/error")
+        html = f"<html><body><h1>U.S.C. Title 17</h1><p>§{sec}. Heading {sec}</p><p>Text of section {sec} of the copyright title.</p></body></html>"
+        return Fetched(200, {}, html.encode(), f"https://www.govinfo.gov/content/pkg/USCODE-2024-title17/html/USCODE-2024-title17-chap1-sec{sec}.htm")
+    r = asyncio.run(UscodeAdapter(fetch=fetch, delay=0).run({"title": 17, "sections": "103-105"}))
+    t = r.content.decode()
+    assert t.startswith("§103. Heading 103") and "§105. Heading 105" in t and "104" not in t.split("\n\n")[1][:6]
+    assert r.citation == "17 U.S.C. §§ 103-105 (2024 ed.)" and r.effective_from == date.today()
+
+    async def nothing(url, headers=None):
+        return Fetched(200, {}, b"x", "https://www.govinfo.gov/error")
+    with pytest.raises(SourceError, match="No sections"):
+        asyncio.run(UscodeAdapter(fetch=nothing, delay=0).run({"title": 17, "sections": "1"}))
+
+
+def test_courtlistener_adapter_needs_token_and_never_derives_treatment():
+    import json
+    from legalai.corpus.adapters import CourtListenerAdapter
+    seen = {}
+
+    async def fetch(url, headers=None):
+        seen[url] = headers
+        if "/opinions/" in url:
+            return Fetched(200, {}, json.dumps({"plain_text": "The court held that the clause is enforceable. " * 20, "cluster": "http://www.courtlistener.com/api/rest/v4/clusters/9/",
+                                                "absolute_url": "/opinion/9/smith-v-jones/"}).encode(), url)
+        return Fetched(200, {}, json.dumps({"case_name": "Smith v. Jones", "date_filed": "2019-04-02",
+                                            "citations": [{"volume": 123, "reporter": "A.3d", "page": 456}]}).encode(), url)
+    with pytest.raises(SourceError, match="COURTLISTENER_TOKEN"):
+        asyncio.run(CourtListenerAdapter(fetch=fetch, token="").run({"opinion_id": 9}))
+    r = asyncio.run(CourtListenerAdapter(fetch=fetch, token="tok").run({"opinion_id": 9}))
+    assert r.title == "Smith v. Jones" and r.citation == "123 A.3d 456" and r.effective_from == date(2019, 4, 2)
+    assert r.source_url == "https://www.courtlistener.com/opinion/9/smith-v-jones/"
+    assert all(h == {"Authorization": "Token tok"} for h in seen.values()) and all(u.startswith("https://") for u in seen)
+
+    async def empty(url, headers=None):
+        return Fetched(200, {}, json.dumps({"plain_text": "short"}).encode(), url)
+    with pytest.raises(SourceError, match="no usable text"):
+        asyncio.run(CourtListenerAdapter(fetch=empty, token="t").run({"opinion_id": 1}))
+
+
+def test_presets_are_valid_and_flag_added(make_api, emb, monkeypatch):
+    from legalai.corpus.presets import PRESETS
+    a = make_api("admin@example.com")
+    for p in PRESETS:
+        validate_config(p["adapter"], p["config"])                       # every preset must pass its own adapter's validation
+    assert len({p["id"] for p in PRESETS}) == len(PRESETS) >= 12
+    got = a.get("/api/library/presets").json()
+    assert all(p["added"] is False for p in got)
+    monkeypatch.setattr("legalai.corpus.refresh.build_adapter", lambda name: FakeAdapter(REG_V1, date(2024, 1, 1)))
+    first = PRESETS[0]
+    r = a.post("/api/library/sources", json={"name": first["name"], "adapter": first["adapter"], "config": first["config"]})
+    assert r.status_code == 201
+    assert next(p for p in a.get("/api/library/presets").json() if p["id"] == first["id"])["added"] is True
+    assert make_api("bob@example.com").get("/api/library/presets").status_code == 403
+
+
+def test_treatment_import_matches_by_citation_or_title_and_dedupes(make_api, emb, monkeypatch):
+    a = make_api("admin@example.com")
+    add_source(a, monkeypatch, FakeAdapter(REG_V1, date(2024, 1, 1)))
+    drain()
+    entries = [{"citation": "45 C.F.R. pt. 164", "type": "amended", "citing": "88 Fed. Reg. 1", "date": "2025-01-02", "source": "Federal Register"},
+               {"title": "hipaa breach rule", "type": "questioned", "citing": "Doe v. Roe"},
+               {"citation": "45 C.F.R. pt. 164", "type": "amended", "citing": "88 Fed. Reg. 1"},          # duplicate
+               {"citation": "999 U.S. 1", "type": "overruled", "citing": "X v. Y"}]
+    r = a.post("/api/library/treatment/import", json={"entries": entries}).json()
+    assert r["matched"] == 3 and r["unmatched"] == ["999 U.S. 1"]
+    t = lib_doc(a)["treatment"]
+    assert [x["type"] for x in t] == ["amended", "questioned"]
+    assert make_api("bob@example.com").post("/api/library/treatment/import", json={"entries": entries}).status_code == 403
+    assert a.post("/api/library/treatment/import", json={"entries": [{"citation": "x", "type": "good_law"}]}).status_code == 422

@@ -31,26 +31,37 @@ function Treatment({ doc, onSaved }: { doc: any; onSaved: () => void }) {
 
 function Sources() {
   const { data, reload } = useQuery(() => api<any[]>('/api/library/sources'), [], 10000)
-  const [f, setF] = useState({ name: '', adapter: 'ecfr', title: '', part: '', url: '', jurisdiction: 'United States (Federal)', authority_type: 'regulation', refresh_hours: 24 })
+  const presets = useQuery(() => api<any[]>('/api/library/presets'), [])
+  const [f, setF] = useState({ name: '', adapter: 'ecfr', title: '', part: '', url: '', sections: '', opinion: '', jurisdiction: 'United States (Federal)', authority_type: 'regulation', refresh_hours: 24 })
   const [err, setErr] = useState<string>()
   async function add(e: FormEvent) {
     e.preventDefault(); setErr(undefined)
     try {
       await api('/api/library/sources', { json: { name: f.name, adapter: f.adapter, jurisdiction: f.jurisdiction, authority_type: f.authority_type, refresh_hours: Number(f.refresh_hours),
-        config: f.adapter === 'ecfr' ? { title: Number(f.title), part: Number(f.part) } : { url: f.url } } })
-      setF({ ...f, name: '', title: '', part: '', url: '' }); reload()
+        config: f.adapter === 'ecfr' ? { title: Number(f.title), part: Number(f.part) } : f.adapter === 'uscode' ? { title: Number(f.title), sections: f.sections }
+          : f.adapter === 'courtlistener' ? { opinion_id: Number(f.opinion) } : { url: f.url } } })
+      setF({ ...f, name: '', title: '', part: '', url: '', sections: '', opinion: '' }); reload()
     } catch (e) { setErr((e as Error).message) }
   }
   return (
     <div className="stack">
       <h2>Sources (administrator)</h2>
+      {presets.data && <div className="card stack" style={{ gap: 8 }}><h3>Starting points</h3>
+        <div className="muted small">One click adds an official source and fetches it now. These are examples, not a complete or authoritative selection. Large ones take a while to embed.</div>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>{presets.data.map((p: any) => (
+          <div key={p.id} className="row between" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: '8px 10px', gap: 8 }}>
+            <div><div className="small"><strong>{p.name}</strong></div><div className="muted small">{p.note}</div></div>
+            <button className="btn sm" disabled={p.added} onClick={async () => { try { await api('/api/library/sources', { json: { name: p.name, adapter: p.adapter, config: p.config, jurisdiction: p.jurisdiction, authority_type: p.authority_type, refresh_hours: 24 } }); presets.reload(); reload() } catch (e) { alert((e as Error).message) } }}>{p.added ? 'Added' : 'Add'}</button></div>))}</div></div>}
       <form className="card stack" onSubmit={add}>
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
           <label>Name<input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required placeholder="e.g. FTC Safeguards Rule" /></label>
-          <label>Adapter<select value={f.adapter} onChange={e => setF({ ...f, adapter: e.target.value })}><option value="ecfr">eCFR (Code of Federal Regulations)</option><option value="url">Official https URL</option></select></label>
+          <label>Adapter<select value={f.adapter} onChange={e => setF({ ...f, adapter: e.target.value })}><option value="ecfr">eCFR (Code of Federal Regulations)</option><option value="uscode">U.S. Code sections (govinfo)</option><option value="courtlistener">Court opinion (CourtListener, needs a token)</option><option value="url">Official https URL</option></select></label>
           {f.adapter === 'ecfr' ? <><label>CFR title<input type="number" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} required /></label>
             <label>Part<input type="number" value={f.part} onChange={e => setF({ ...f, part: e.target.value })} required /></label></>
-            : <label style={{ gridColumn: 'span 2' }}>URL (https, public)<input value={f.url} onChange={e => setF({ ...f, url: e.target.value })} required placeholder="https://…" /></label>}
+            : f.adapter === 'uscode' ? <><label>U.S.C. title<input type="number" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} required /></label>
+              <label>Sections<input value={f.sections} onChange={e => setF({ ...f, sections: e.target.value })} required placeholder="e.g. 101-122, 201" /></label></>
+              : f.adapter === 'courtlistener' ? <label>Opinion ID<input type="number" value={f.opinion} onChange={e => setF({ ...f, opinion: e.target.value })} required /></label>
+                : <label style={{ gridColumn: 'span 2' }}>URL (https, public)<input value={f.url} onChange={e => setF({ ...f, url: e.target.value })} required placeholder="https://…" /></label>}
           <label>Jurisdiction<input value={f.jurisdiction} onChange={e => setF({ ...f, jurisdiction: e.target.value })} /></label>
           <label>Type<select value={f.authority_type} onChange={e => setF({ ...f, authority_type: e.target.value })}>{['regulation', 'statute', 'court_opinion', 'court_rule', 'administrative_guidance', 'agency_material', 'official_form', 'constitution', 'treatise'].map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}</select></label>
           <label>Refresh every (hours)<input type="number" min={1} value={f.refresh_hours} onChange={e => setF({ ...f, refresh_hours: Number(e.target.value) })} /></label>
