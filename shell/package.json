@@ -13,7 +13,19 @@
     "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@founderos/sdk": "*",
+    "@founderos/finance": "*",
+    "@founderos/compliance": "*",
+    "@founderos/health": "*",
+    "@founderos/tasks": "*",
+    "@founderos/vault": "*",
+    "@founderos/sops": "*",
+    "@founderos/crm": "*",
+    "@founderos/marketing": "*",
+    "@founderos/founderai": "*",
+    "@founderos/product": "*",
+    "@founderos/competitors": "*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

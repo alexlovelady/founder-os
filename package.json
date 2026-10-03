@@ -1,0 +1,27 @@
+{
+  "name": "founderos",
+  "private": true,
+  "workspaces": [
+    "shell",
+    "modules/sdk",
+    "modules/finance",
+    "modules/compliance",
+    "modules/health",
+    "modules/tasks",
+    "modules/vault",
+    "modules/sops",
+    "modules/crm",
+    "modules/marketing",
+    "modules/founderai",
+    "modules/product",
+    "modules/competitors"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4",
+    "tsx": "^4.20.5"
+  }
+}

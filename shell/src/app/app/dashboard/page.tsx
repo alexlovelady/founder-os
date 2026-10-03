@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/server";
 import { ENTITY_TYPES, OPERATION_QUESTIONS, STAGES, currentBusiness, setModuleLink } from "@/lib/business";
 import { legalSummary, provisionLegal } from "@/lib/legal";
-import { MODULES } from "@/config/modules";
+import { TOOLS } from "@/lib/tools/registry";
+import { buildContext } from "@/lib/tools/context";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,12 @@ export default async function Dashboard() {
     }
   }
   const legal = workspaceId ? await legalSummary(session, workspaceId) : null;
+  const ctx = await buildContext(session);
+  const toolItems = ctx
+    ? (await Promise.all(TOOLS.filter((t) => t.status === "live" && t.attention).map((t) => t.attention!(ctx).catch(() => [])))).flat()
+    : [];
+  const order = { high: 0, review: 1, info: 2 } as const;
+  toolItems.sort((a, b) => order[a.severity] - order[b.severity]);
   const first = session.user.displayName?.split(" ")[0] || "";
   const ops = OPERATION_QUESTIONS.filter((q) => business.operations[q.key]);
 
@@ -41,6 +48,19 @@ export default async function Dashboard() {
             <h2 className="font-medium">Needs attention</h2>
             {legal && <span className="text-xs text-slate-400">{legal.done} of {legal.total} legal basics done</span>}
           </div>
+          {toolItems.length > 0 && (
+            <ul className="mt-3 space-y-3">
+              {toolItems.slice(0, 6).map((i) => (
+                <li key={i.id} className="rounded-lg bg-slate-950 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-medium">{i.title}</div>
+                    {i.href && <Link href={i.href} className="shrink-0 text-xs underline">Open</Link>}
+                  </div>
+                  {i.detail && <div className="mt-0.5 text-xs text-slate-400">{i.detail}</div>}
+                </li>
+              ))}
+            </ul>
+          )}
           {legal ? (
             legal.open.length > 0 ? (
               <ul className="mt-3 space-y-3">
@@ -83,14 +103,14 @@ export default async function Dashboard() {
       <section>
         <h2 className="mb-3 font-medium">Your tools</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {MODULES.map((m) => (
+          {TOOLS.map((m) => (
             <div key={m.id} className="rounded-xl border border-slate-800 bg-slate-900 p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">{m.name}</h3>
                 <span className={`rounded px-1.5 py-0.5 text-[10px] ${m.status === "live" ? "bg-emerald-900 text-emerald-200" : "bg-slate-800 text-slate-400"}`}>{m.status === "live" ? "Live" : "Soon"}</span>
               </div>
-              <p className="mt-2 text-xs text-slate-400">{m.tagline}</p>
-              {m.status === "live" && <Link href={m.route} className="mt-3 inline-block text-xs underline">Open</Link>}
+              <p className="mt-2 text-xs text-slate-400">{m.description}</p>
+              {m.status === "live" && <Link href={`/app/t/${m.id}`} className="mt-3 inline-block text-xs underline">Open</Link>}
             </div>
           ))}
         </div>
