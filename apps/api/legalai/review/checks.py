@@ -119,8 +119,38 @@ TOPICS = {
     "entire_agreement": r"\b(entire agreement|supersede\w*|integration)\b",
     "non_compete_solicit": r"\b(non-?compet\w+|non-?solicit\w*)\b",
     "exclusivity": r"\bexclusiv\w+\b",
+    # startup and small-business agreements
+    "vesting": r"\b(vest\w*|cliff|repurchase right|unvested)\b",
+    "equity_ownership": r"\b(shares?|membership interests?|units?|equity|percentage interest|capitalization)\b",
+    "roles_and_duties": r"\b(duties|responsibilit\w+|devote|full[- ]time|officer|title|reports? to)\b",
+    "management_and_voting": r"\b(manager|managing member|board of (?:directors|managers)|vote|voting|majority|unanimous|quorum)\b",
+    "capital_contributions": r"\b(capital contribution\w*|additional capital|capital call|initial contribution)\b",
+    "distributions": r"\b(distribut\w+|allocation|profits? and losses|tax distribution)\b",
+    "transfer_restrictions": r"\b(right of first refusal|rofr|transfer restrictions?|co-sale|tag[- ]along|drag[- ]along|lock-?up|permitted transferee)\b",
+    "departure_and_buyout": r"\b(buy-?sell|buyout|call right|good leaver|bad leaver|departure|withdraw\w*|resign\w*|fair market value)\b",
+    "dissolution": r"\b(dissol\w+|winding up|liquidat\w+)\b",
+    "deadlock": r"\b(deadlock|impasse|mediation|buy-?sell)\b",
+    "conversion": r"\b(convert\w*|conversion|equity financing|qualified financing|liquidity event|change of control)\b",
+    "valuation_cap_discount": r"\b(valuation cap|post-money|pre-money|discount rate|discount)\b",
+    "investor_rights": r"\b(pro rata|most favored nation|mfn|information rights?|anti-dilution|preemptive)\b",
+    "fiduciary_and_indemnity": r"\b(fiduciary|duty of loyalty|exculpat\w+|indemnif\w+ (?:the )?(?:manager|member|officer|director))\b",
+    "tax_matters": r"\b(partnership representative|tax matters|83\(b\)|section 83|k-1|tax status)\b",
+    "background_ip_assignment": r"\b(assigns?|assignment of (?:all )?(?:inventions|intellectual property|work product)|work made for hire|prior inventions)\b",
 }
 EXPECTED = {
+    "founders_agreement": ["equity_ownership", "vesting", "roles_and_duties", "management_and_voting", "background_ip_assignment",
+                           "confidentiality", "departure_and_buyout", "deadlock", "governing_law_forum"],
+    "operating_agreement": ["equity_ownership", "capital_contributions", "distributions", "management_and_voting", "transfer_restrictions",
+                            "departure_and_buyout", "dissolution", "fiduciary_and_indemnity", "tax_matters", "governing_law_forum"],
+    "safe": ["valuation_cap_discount", "conversion", "investor_rights", "dissolution", "governing_law_forum"],
+    "convertible_note": ["conversion", "valuation_cap_discount", "term_and_renewal", "payment", "governing_law_forum"],
+    "stock_purchase": ["equity_ownership", "vesting", "transfer_restrictions", "tax_matters", "warranties", "governing_law_forum"],
+    "offer_letter": ["payment", "roles_and_duties", "termination", "equity_ownership", "confidentiality", "background_ip_assignment"],
+    "contractor": ["roles_and_duties", "payment", "term_and_renewal", "termination", "background_ip_assignment", "confidentiality",
+                   "governing_law_forum"],
+    "ip_assignment": ["background_ip_assignment", "warranties", "confidentiality", "governing_law_forum"],
+    "privacy_policy": ["data_protection", "notices"],
+    "terms_of_service": ["limitation_of_liability", "intellectual_property", "warranties", "governing_law_forum", "termination", "dispute_resolution"],
     "contract": ["term_and_renewal", "termination", "payment", "limitation_of_liability", "confidentiality",
                  "governing_law_forum", "assignment", "notices", "entire_agreement"],
     "nda": ["confidentiality", "term_and_renewal", "governing_law_forum", "notices", "entire_agreement"],
@@ -140,8 +170,25 @@ def missing_topics(full_text: str, agreement_type: str = "contract", extra: list
     return [t for t in dict.fromkeys(want) if t not in present]
 
 
+AGREEMENT_PATTERNS = [
+    ("safe", r"simple agreement for future equity|\bsafe\b.*(?:post-money|pre-money|valuation cap)"),
+    ("convertible_note", r"convertible (?:promissory )?note"),
+    ("founders_agreement", r"founders?['\u2019]? (?:agreement|collaboration|stock)|co-?founder"),
+    ("operating_agreement", r"operating agreement|limited liability company agreement|llc agreement"),
+    ("stock_purchase", r"(?:restricted )?stock purchase agreement"),
+    ("offer_letter", r"offer letter|offer of employment"),
+    ("ip_assignment", r"(?:intellectual property|invention|ip) assignment|assignment of inventions"),
+    ("contractor", r"independent contractor|consulting agreement|contractor agreement"),
+    ("privacy_policy", r"privacy (?:policy|notice)"),
+    ("terms_of_service", r"terms of (?:service|use)|user agreement"),
+]
+
+
 def detect_agreement_type(text: str) -> str:
     h = text[:3000].lower()
+    for name, pat in AGREEMENT_PATTERNS:
+        if re.search(pat, h):
+            return name
     if re.search(r"non-?disclosure|confidentiality agreement|mutual nda", h):
         return "nda"
     if re.search(r"employment agreement|offer of employment|employee", h):

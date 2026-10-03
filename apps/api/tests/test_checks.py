@@ -74,3 +74,25 @@ def test_key_figures():
 def test_generic_phrases_starting_with_common_words_are_not_flagged_as_undefined():
     t = "This Agreement applies. This Agreement ends. The Parties agree. The Parties sign. Each Party acts. Each Party signs."
     assert undefined_terms(t) == []
+
+
+def test_startup_agreement_types_are_recognized():
+    from legalai.review.checks import detect_agreement_type as d
+    cases = {"FOUNDERS AGREEMENT between Ann and Bo": "founders_agreement", "Operating Agreement of Acme LLC": "operating_agreement",
+             "SAFE (Simple Agreement for Future Equity) with a post-money valuation cap": "safe", "Convertible Promissory Note": "convertible_note",
+             "Independent Contractor Agreement": "contractor", "Offer Letter": "offer_letter", "Restricted Stock Purchase Agreement": "stock_purchase",
+             "Invention Assignment Agreement": "ip_assignment", "Privacy Policy": "privacy_policy", "Terms of Service": "terms_of_service",
+             "Master Services Agreement": "contract"}
+    for text, want in cases.items():
+        assert d(text) == want, text
+
+
+def test_startup_missing_topics():
+    from legalai.review.checks import missing_topics
+    founders = "FOUNDERS AGREEMENT. Each founder owns 50% of the shares. Governed by Delaware law."
+    m = missing_topics(founders, "founders_agreement")
+    assert {"vesting", "background_ip_assignment", "departure_and_buyout", "deadlock"} <= set(m) and "equity_ownership" not in m
+    full = founders + " Shares vest over four years with a one year cliff. Each founder assigns all inventions to the company. A departing founder's shares are subject to a buy-sell. Deadlock goes to mediation. Duties: each founder shall devote full time. A majority vote decides. Information is confidential."
+    assert missing_topics(full, "founders_agreement") == []
+    assert "valuation_cap_discount" in missing_topics("SAFE. Governed by Delaware law.", "safe")
+    assert "tax_matters" in missing_topics("Operating Agreement. Members contribute capital and receive distributions.", "operating_agreement")

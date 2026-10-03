@@ -150,7 +150,7 @@ def _para_text(p) -> str:
 
 class _Html(HTMLParser):
     BLOCK = {"p", "div", "li", "tr", "br", "section", "article", "blockquote", "pre", "table", "ul", "ol"}
-    SKIP = {"script", "style", "head", "noscript", "template"}
+    SKIP = {"script", "style", "head", "noscript", "template", "nav", "footer", "aside"}
 
     def __init__(self):
         super().__init__(convert_charrefs=True)

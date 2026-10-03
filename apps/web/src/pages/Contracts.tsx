@@ -58,7 +58,7 @@ function ReviewDetail({ id, m }: { id: string; m: Matter }) {
   return (
     <div className="stack" style={{ gap: 14 }}>
       <div className="row wrap" style={{ gap: 6 }}>
-        <span className="badge">{cap(r.agreement_type)}</span><span className="badge">{r.perspective} perspective</span>{r.playbook && <span className="badge accent">Playbook: {r.playbook}</span>}
+        <span className="badge">{cap(r.agreement_type)}</span><span className="badge">{r.perspective} perspective</span>{r.playbook && <span className="badge accent" title={r.playbook_auto ? 'Matched to the document type automatically' : ''}>Playbook: {r.playbook}{r.playbook_auto ? ' (auto)' : ''}</span>}
         {Object.entries(rc).filter(([, n]) => n > 0).map(([k, n]) => <span key={k} className={`badge ${RISK_CLS[k] ?? ''}`}>{n} {k}</span>)}
         <span className="badge">{r.obligation_count} obligations extracted</span>
       </div>

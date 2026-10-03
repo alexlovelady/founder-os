@@ -45,3 +45,23 @@ twice (Voyage and the local model) so private matters can search it, which costs
   that is old or missing.
 * It never says a case is good law. If no treatment is recorded it says "No treatment data".
 * The library is **public text only**. Your private documents never go into it.
+
+## Small businesses and startups: what to load instead of training
+Founder agreements, operating agreements, SAFEs and similar documents are well served by knowledge, not training:
+
+* **Built-in checklists.** The review recognizes these document types and applies a matching checklist automatically: founders
+  agreement (vesting and cliff, IP assignment, roles, decision rules, departure and buyout, deadlock), LLC operating agreement
+  (capital contributions, distributions and tax distributions, management, transfer restrictions, buy-sell, fiduciary duties, tax
+  matters, dissolution), SAFE and convertible note (valuation cap and discount, conversion, pro rata, dissolution), contractor and
+  IP assignment (present-tense assignment, originality warranty, open source). They also drive the "missing provision" findings.
+  Edit them or write your own on the Playbooks list; they are starting positions for a lawyer's judgment, not advice.
+* **Your approved templates.** Upload your firm's or company's own templates as documents (authority type "template") in a matter;
+  drafting retrieves them as reference material. Widely published free forms are good additions: the Y Combinator SAFE, the NVCA
+  model documents, Cooley GO and Series Seed forms. Check each form's terms of use before adding it; the system will not fetch
+  them for you.
+* **Startup law in the library.** One-click presets: Regulation D (Rules 501-508), Rule 701 (employee equity), Rule 144, the
+  Section 83 / 83(b) regulations, the Delaware LLC Act and DGCL core subchapters, and the North Carolina LLC Act and Business
+  Corporation Act (all from official sites). Tell me which other states your clients use and I will add their entity statutes.
+* **What is not covered.** State securities ("blue sky") rules, tax code beyond the Section 83 regulations, and case law
+  (Delaware Chancery decisions matter a lot for founders) are not in the library yet. Court opinions need the CourtListener
+  token, and "is this still good law" needs treatment data from a citator you license.

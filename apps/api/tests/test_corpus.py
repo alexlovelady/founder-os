@@ -69,7 +69,7 @@ def test_ecfr_adapter_extracts_sections_and_detects_unchanged():
     r = asyncio.run(a.run({"title": 45, "part": 164}))
     text = r.content.decode()
     assert "164.404 Notification to individuals." in text and "60 calendar days" in text
-    assert r.effective_from == date(2025, 2, 1) and r.citation == "45 C.F.R. pt. 164" and r.etag == "45:164:2025-02-01"
+    assert r.effective_from == date(2025, 2, 1) and r.citation == "45 C.F.R. pt. 164" and r.etag == "45:164::2025-02-01"
     assert r.source_url == "https://www.ecfr.gov/current/title-45/part-164" and r.filename.endswith(".txt")
     again = asyncio.run(a.run({"title": 45, "part": 164}, etag=r.etag))
     assert again.unchanged and len(calls) == 3                      # second run only asked for the title index
@@ -318,13 +318,14 @@ def test_courtlistener_adapter_needs_token_and_never_derives_treatment():
 def test_presets_are_valid_and_flag_added(make_api, emb, monkeypatch):
     from legalai.corpus.presets import PRESETS
     a = make_api("admin@example.com")
-    for p in PRESETS:
-        validate_config(p["adapter"], p["config"])                       # every preset must pass its own adapter's validation
+    for p in PRESETS:                                                    # every preset must pass its own adapter's validation
+        for cfg in ([i["config"] for i in p["items"]] if p.get("items") else [p["config"]]):
+            validate_config(p["adapter"], cfg)
     assert len({p["id"] for p in PRESETS}) == len(PRESETS) >= 12
     got = a.get("/api/library/presets").json()
     assert all(p["added"] is False for p in got)
     monkeypatch.setattr("legalai.corpus.refresh.build_adapter", lambda name: FakeAdapter(REG_V1, date(2024, 1, 1)))
-    first = PRESETS[0]
+    first = next(p for p in PRESETS if not p.get("items"))
     r = a.post("/api/library/sources", json={"name": first["name"], "adapter": first["adapter"], "config": first["config"]})
     assert r.status_code == 201
     assert next(p for p in a.get("/api/library/presets").json() if p["id"] == first["id"])["added"] is True
@@ -345,3 +346,44 @@ def test_treatment_import_matches_by_citation_or_title_and_dedupes(make_api, emb
     assert [x["type"] for x in t] == ["amended", "questioned"]
     assert make_api("bob@example.com").post("/api/library/treatment/import", json={"entries": entries}).status_code == 403
     assert a.post("/api/library/treatment/import", json={"entries": [{"citation": "x", "type": "good_law"}]}).status_code == 422
+
+
+def test_ecfr_sections_mode_fetches_each_section_and_validates_config():
+    seen = []
+
+    async def fetch(url, headers=None):
+        seen.append(url)
+        if url.endswith("titles.json"):
+            return Fetched(200, {}, json.dumps({"titles": [{"number": 17, "up_to_date_as_of": "2026-09-30"}]}).encode(), url)
+        sec = url.split("section=")[1]
+        xml = (f'<?xml version="1.0"?><DIV8 N="{sec}"><HEAD>\u00a7 {sec} Heading</HEAD><P>Text of rule {sec}. This is long enough to count as regulatory text.</P></DIV8>').encode()
+        return Fetched(200, {}, xml, url)
+    r = asyncio.run(EcfrAdapter(fetch=fetch).run({"title": 17, "sections": "230.506, 230.701"}))
+    t = r.content.decode()
+    assert "230.506 Heading" in t and "230.701 Heading" in t and r.citation == "17 C.F.R. \u00a7\u00a7 230.506, 230.701"
+    assert [u.split("section=")[1] for u in seen if "section=" in u] == ["230.506", "230.701"]
+    assert asyncio.run(EcfrAdapter(fetch=fetch).run({"title": 17, "sections": "230.506, 230.701"}, etag=r.etag)).unchanged
+    assert validate_config("ecfr", {"title": 17, "sections": "230.506,230.701"})["sections"] == "230.506, 230.701"
+    for bad in ({"title": 17}, {"title": 17, "sections": "not-a-section"}, {"title": 99, "sections": "1.1"}):
+        with pytest.raises(SourceError):
+            validate_config("ecfr", bad)
+
+
+def test_grouped_presets_count_as_added_only_when_every_item_exists(make_api, emb, monkeypatch):
+    a = make_api("admin@example.com")
+    monkeypatch.setattr("legalai.corpus.refresh.build_adapter", lambda name: FakeAdapter(REG_V1, date(2024, 1, 1)))
+    group = next(p for p in __import__("legalai.corpus.presets", fromlist=["PRESETS"]).PRESETS if p.get("items"))
+    assert len(group["items"]) >= 5 and next(p for p in a.get("/api/library/presets").json() if p["id"] == group["id"])["added"] is False
+    for it in group["items"][:-1]:
+        assert a.post("/api/library/sources", json={"name": it["name"], "adapter": group["adapter"], "config": it["config"]}).status_code == 201
+    assert next(p for p in a.get("/api/library/presets").json() if p["id"] == group["id"])["added"] is False
+    last = group["items"][-1]
+    a.post("/api/library/sources", json={"name": last["name"], "adapter": group["adapter"], "config": last["config"]})
+    assert next(p for p in a.get("/api/library/presets").json() if p["id"] == group["id"])["added"] is True
+
+
+def test_html_navigation_chrome_is_not_indexed():
+    from legalai.ingestion.parsers import parse_html
+    html = b"<html><body><nav>Home About Contact</nav><h1>Section 18-101</h1><p>Definitions apply here.</p><footer>Copyright</footer></body></html>"
+    t = parse_html(html).text
+    assert "Home About" not in t and "Copyright" not in t and "Definitions apply here." in t

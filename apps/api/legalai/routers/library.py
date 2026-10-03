@@ -150,7 +150,10 @@ def set_treatment(doc_id: uuid.UUID, body: TreatmentIn, admin: User = Depends(re
 def presets(admin: User = Depends(require_admin), db: DbSession = Depends(get_db)):
     """Curated one-click starting points (all from official sources) with whether each is already added."""
     have = {(s.adapter, json.dumps(s.config, sort_keys=True)) for s in db.scalars(select(CorpusSource))}
-    return [{**p, "added": (p["adapter"], json.dumps(p["config"], sort_keys=True)) in have} for p in PRESETS]
+    def present(p):
+        cfgs = [i["config"] for i in p["items"]] if p.get("items") else [p["config"]]
+        return all((p["adapter"], json.dumps(c, sort_keys=True)) in have for c in cfgs)
+    return [{**p, "added": present(p)} for p in PRESETS]
 
 
 class ImportEntry(BaseModel):

@@ -51,7 +51,9 @@ function Sources() {
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>{presets.data.map((p: any) => (
           <div key={p.id} className="row between" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: '8px 10px', gap: 8 }}>
             <div><div className="small"><strong>{p.name}</strong></div><div className="muted small">{p.note}</div></div>
-            <button className="btn sm" disabled={p.added} onClick={async () => { try { await api('/api/library/sources', { json: { name: p.name, adapter: p.adapter, config: p.config, jurisdiction: p.jurisdiction, authority_type: p.authority_type, refresh_hours: 24 } }); presets.reload(); reload() } catch (e) { alert((e as Error).message) } }}>{p.added ? 'Added' : 'Add'}</button></div>))}</div></div>}
+            <button className="btn sm" disabled={p.added} onClick={async () => { try {
+              for (const it of (p.items ?? [{ name: p.name, config: p.config }])) await api('/api/library/sources', { json: { name: it.name, adapter: p.adapter, config: it.config, jurisdiction: p.jurisdiction, authority_type: p.authority_type, refresh_hours: 24 } })
+              presets.reload(); reload() } catch (e) { alert((e as Error).message) } }}>{p.added ? 'Added' : 'Add'}</button></div>))}</div></div>}
       <form className="card stack" onSubmit={add}>
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
           <label>Name<input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required placeholder="e.g. FTC Safeguards Rule" /></label>

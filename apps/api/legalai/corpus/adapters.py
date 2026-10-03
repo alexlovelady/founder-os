@@ -31,12 +31,21 @@ class FetchResult:
 def validate_config(adapter: str, cfg: dict) -> dict:
     if adapter == "ecfr":
         try:
-            title, part = int(cfg["title"]), int(cfg["part"])
+            title = int(cfg["title"])
+            part = int(cfg["part"]) if cfg.get("part") not in (None, "") else None
         except (KeyError, TypeError, ValueError):
-            raise SourceError("ecfr needs integer title and part")
-        if not (1 <= title <= 50 and 1 <= part <= 9999):
-            raise SourceError("title/part out of range")
-        return {"title": title, "part": part}
+            raise SourceError("ecfr needs an integer title and a part or a list of sections")
+        secs = [s.strip() for s in str(cfg.get("sections", "")).split(",") if s.strip()]
+        if not (1 <= title <= 50) or (part is None and not secs) or (part is not None and not 1 <= part <= 9999):
+            raise SourceError("ecfr needs a title (1-50) and either a part or a list of sections like 230.501, 230.502")
+        if any(not re.fullmatch(r"\d+\.[\w.-]+", s) for s in secs) or len(secs) > 40:
+            raise SourceError("Sections must look like 230.506 (at most 40)")
+        out = {"title": title}
+        if part is not None:
+            out["part"] = part
+        if secs:
+            out["sections"] = ", ".join(secs)
+        return out
     if adapter == "uscode":
         try:
             title = int(cfg["title"])
@@ -93,7 +102,9 @@ class EcfrAdapter:
         self.fetch = fetch
 
     async def run(self, cfg: dict, etag: str | None = None) -> FetchResult:
-        title, part = int(cfg["title"]), int(cfg["part"])
+        title = int(cfg["title"])
+        part = int(cfg["part"]) if cfg.get("part") else None
+        secs = [s.strip() for s in str(cfg.get("sections", "")).split(",") if s.strip()]
         meta = await self.fetch(f"{ECFR}/titles.json")
         if meta.status != 200:
             raise SourceError(f"eCFR titles endpoint returned HTTP {meta.status}")
@@ -102,17 +113,33 @@ class EcfrAdapter:
         if not entry:
             raise SourceError(f"eCFR title {title} not found")
         as_of = entry.get("up_to_date_as_of") or entry.get("latest_issue_date")
-        if etag and etag == f"{title}:{part}:{as_of}":
+        key = f"{title}:{part or ''}:{','.join(secs)}:{as_of}"
+        if etag and etag == key:
             return FetchResult(unchanged=True, etag=etag)
-        r = await self.fetch(f"{ECFR}/full/{as_of}/title-{title}.xml?part={part}")
-        if r.status != 200:
-            raise SourceError(f"eCFR returned HTTP {r.status} for title {title} part {part}")
-        text = _ecfr_text(r.content)
+        if secs:
+            pieces = []
+            for sec in secs:
+                r = await self.fetch(f"{ECFR}/full/{as_of}/title-{title}.xml?section={sec}")
+                if r.status != 200:
+                    raise SourceError(f"eCFR returned HTTP {r.status} for {title} CFR {sec}")
+                t = _ecfr_text(r.content)
+                if len(t) >= 40:
+                    pieces.append(t)
+            text = "\n\n".join(pieces)
+            label = f"{title} CFR \u00a7\u00a7 {', '.join(secs)}"
+            cite = f"{title} C.F.R. \u00a7\u00a7 {', '.join(secs)}"
+            url = f"https://www.ecfr.gov/current/title-{title}"
+        else:
+            r = await self.fetch(f"{ECFR}/full/{as_of}/title-{title}.xml?part={part}")
+            if r.status != 200:
+                raise SourceError(f"eCFR returned HTTP {r.status} for title {title} part {part}")
+            text = _ecfr_text(r.content)
+            label, cite = f"{title} CFR Part {part}", f"{title} C.F.R. pt. {part}"
+            url = f"https://www.ecfr.gov/current/title-{title}/part-{part}"
         if len(text) < 100:
-            raise SourceError("eCFR returned no text for that title/part")
-        return FetchResult(content=text.encode(), filename=f"{title}-cfr-part-{part}.txt", title=f"{title} CFR Part {part}",
-                           citation=f"{title} C.F.R. pt. {part}", effective_from=date.fromisoformat(as_of),
-                           source_url=f"https://www.ecfr.gov/current/title-{title}/part-{part}", etag=f"{title}:{part}:{as_of}",
+            raise SourceError("eCFR returned no text for that selection")
+        return FetchResult(content=text.encode(), filename=f"{title}-cfr-{part or 'sections'}.txt", title=cfg.get("title_text") or label,
+                           citation=cite, effective_from=date.fromisoformat(as_of), source_url=url, etag=key,
                            retrieved_at=datetime.now(timezone.utc))
 
 

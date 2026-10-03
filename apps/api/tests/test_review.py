@@ -264,3 +264,21 @@ def test_redline_generation_job_and_status(make_api, emb):
     assert apply_ops(rl["ops"], "a") == original and apply_ops(rl["ops"], "b") == rl["proposed"]
     assert a.patch(f"/api/redlines/{rl['id']}", json={"status": "accepted"}).json()["status"] == "accepted"
     assert a.patch(f"/api/redlines/{rl['id']}", json={"status": "weird"}).status_code == 422
+
+
+def test_startup_document_gets_its_matching_playbook_automatically(make_api, emb):
+    founders = ("FOUNDERS AGREEMENT\n\n1. Ownership. Ann and Bo each own 50% of the shares.\n\n2. Governing Law. Delaware law applies.\n\n"
+                "3. Confidentiality. Each founder keeps the company's information confidential.")
+    a = make_api("admin@example.com")
+    m = mk_matter(a, "standard")
+    d = upload(a, m["id"], "founders.txt", founders.encode())
+    drain()
+    rv = run_review(a, d, ReviewLLM())
+    r = rv["result"]
+    assert r["agreement_type"] == "founders_agreement" and r["playbook_auto"] is True and r["playbook"].startswith("Founders agreement")
+    assert {"vesting", "background_ip_assignment", "departure_and_buyout"} <= set(r["missing_terms"])
+    assert any(i["basis"] == "missing_term" and "vesting" in i["title"] for i in r["issues"])
+    explicit = run_review(a, d, ReviewLLM(), playbook_id="builtin:balanced-commercial")["result"]
+    assert explicit["playbook_auto"] is False and explicit["playbook"].startswith("Balanced")
+    names = [p["id"] for p in a.get("/api/playbooks").json() if p["builtin"]]
+    assert {"builtin:founders-agreement", "builtin:operating-agreement", "builtin:safe-note", "builtin:contractor-ip"} <= set(names)

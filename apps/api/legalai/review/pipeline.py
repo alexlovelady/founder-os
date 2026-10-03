@@ -43,7 +43,60 @@ BUILTIN_PLAYBOOKS = {
         {"topic": "intellectual_property", "preferred": "Each party keeps pre-existing IP; ownership of deliverables stated explicitly",
          "fallback": "", "red_flags": "Broad assignment of background IP", "severity": "high"},
     ]},
+    "builtin:founders-agreement": {"name": "Founders agreement checklist (built-in)", "perspective": "neutral", "rules": [
+        {"topic": "vesting", "preferred": "Founder equity vests over four years with a one-year cliff, starting from the real start date",
+         "fallback": "Credit for prior service on part of the grant", "red_flags": "Fully vested on signing with no repurchase right if a founder leaves early", "severity": "high"},
+        {"topic": "equity_ownership", "preferred": "Exact share or percentage splits stated, with a capitalization table and a note on how splits were decided",
+         "fallback": "", "red_flags": "Splits left vague or described as 'equal' with no numbers", "severity": "high"},
+        {"topic": "background_ip_assignment", "preferred": "Every founder assigns all relevant IP and prior inventions to the company, with a schedule of excluded prior work",
+         "fallback": "", "red_flags": "No IP assignment; IP stays with individual founders", "severity": "critical"},
+        {"topic": "roles_and_duties", "preferred": "Titles, time commitment and areas of authority stated for each founder", "fallback": "",
+         "red_flags": "No time commitment; undefined roles", "severity": "medium"},
+        {"topic": "management_and_voting", "preferred": "Clear decision rules: what needs a majority, what needs everyone, who is the tie-breaker",
+         "fallback": "", "red_flags": "No decision process", "severity": "medium"},
+        {"topic": "departure_and_buyout", "preferred": "What happens to a departing founder's shares: repurchase of unvested shares and a defined price for vested shares",
+         "fallback": "Company or remaining founders have a right of first refusal", "red_flags": "A departing founder keeps all shares with no repurchase right", "severity": "high"},
+        {"topic": "deadlock", "preferred": "A deadlock process such as mediation then a buy-sell mechanism", "fallback": "", "red_flags": "No way to break a 50/50 deadlock", "severity": "medium"},
+        {"topic": "confidentiality", "preferred": "Mutual confidentiality that survives departure", "fallback": "", "red_flags": "", "severity": "medium"},
+    ]},
+    "builtin:operating-agreement": {"name": "LLC operating agreement checklist (built-in)", "perspective": "neutral", "rules": [
+        {"topic": "capital_contributions", "preferred": "Initial contributions listed with amounts, and a rule for additional capital (voluntary, or required only by supermajority)",
+         "fallback": "", "red_flags": "Open-ended obligation to contribute more capital", "severity": "high"},
+        {"topic": "distributions", "preferred": "Clear distribution waterfall and tax distributions so members can pay tax on allocated income", "fallback": "",
+         "red_flags": "No tax distributions: members owe tax on profits they never receive", "severity": "high"},
+        {"topic": "management_and_voting", "preferred": "Member-managed or manager-managed stated, with a list of major decisions needing member approval", "fallback": "",
+         "red_flags": "Silent on management; unilateral power over major decisions", "severity": "high"},
+        {"topic": "transfer_restrictions", "preferred": "Right of first refusal, consent for transfers, and permitted-transferee carve-outs for estate planning", "fallback": "",
+         "red_flags": "Members can sell to outsiders freely", "severity": "high"},
+        {"topic": "departure_and_buyout", "preferred": "Buy-sell triggers (death, disability, divorce, departure) with a valuation method", "fallback": "",
+         "red_flags": "No exit mechanism or valuation method", "severity": "high"},
+        {"topic": "fiduciary_and_indemnity", "preferred": "Duties of managers described or limited as the law allows, with indemnification and exculpation", "fallback": "",
+         "red_flags": "Silent on duties", "severity": "medium"},
+        {"topic": "tax_matters", "preferred": "Tax classification, a named partnership representative and allocation rules", "fallback": "", "red_flags": "", "severity": "medium"},
+        {"topic": "dissolution", "preferred": "Events that trigger dissolution and the order in which proceeds are paid", "fallback": "", "red_flags": "", "severity": "medium"},
+    ]},
+    "builtin:safe-note": {"name": "SAFE / convertible note checklist (built-in)", "perspective": "neutral", "rules": [
+        {"topic": "valuation_cap_discount", "preferred": "Valuation cap stated as pre-money or post-money, with the discount rate if any", "fallback": "",
+         "red_flags": "No cap and no discount: the investor may get no price protection (or the company may be exposed to an uncapped conversion)", "severity": "high"},
+        {"topic": "conversion", "preferred": "Conversion triggers (priced round, liquidity event, dissolution) and the share class received are defined", "fallback": "",
+         "red_flags": "Ambiguous conversion mechanics", "severity": "high"},
+        {"topic": "investor_rights", "preferred": "Pro rata and information rights, and any most-favored-nation clause, stated clearly", "fallback": "", "red_flags": "", "severity": "medium"},
+        {"topic": "dissolution", "preferred": "Payout order on a dissolution or change of control before conversion", "fallback": "", "red_flags": "", "severity": "medium"},
+    ]},
+    "builtin:contractor-ip": {"name": "Contractor / IP assignment checklist (built-in)", "perspective": "customer", "rules": [
+        {"topic": "background_ip_assignment", "preferred": "Present-tense assignment of work product ('hereby assigns') with a carve-out schedule for the contractor's prior tools",
+         "fallback": "Assignment on payment in full", "red_flags": "'Will assign' only, or no assignment at all", "severity": "critical"},
+        {"topic": "payment", "preferred": "Fixed fee or rate, milestones, invoice timing and expense policy", "fallback": "", "red_flags": "", "severity": "medium"},
+        {"topic": "roles_and_duties", "preferred": "Scope of work and acceptance criteria", "fallback": "", "red_flags": "Open-ended scope", "severity": "medium"},
+        {"topic": "warranties", "preferred": "Originality and non-infringement warranties, and an open-source disclosure rule", "fallback": "", "red_flags": "", "severity": "high"},
+        {"topic": "termination", "preferred": "Termination for convenience on short notice with payment for accepted work", "fallback": "", "red_flags": "", "severity": "low"},
+    ]},
 }
+
+
+AUTO_PLAYBOOK = {"founders_agreement": "builtin:founders-agreement", "operating_agreement": "builtin:operating-agreement",
+                 "safe": "builtin:safe-note", "convertible_note": "builtin:safe-note", "contractor": "builtin:contractor-ip",
+                 "ip_assignment": "builtin:contractor-ip"}
 
 
 def _parse_deadline(text: str) -> date | None:
@@ -113,6 +166,9 @@ async def run_review(review_id: uuid.UUID, provider: LLMProvider, settings: Sett
         doc_id, ver_id, doc_title, create_by = doc.id, ver.id, doc.title, rv.created_by
 
     agreement_type = detect_agreement_type(full_text)
+    playbook_auto = False
+    if pb is None and agreement_type in AUTO_PLAYBOOK:  # a recognized startup document type gets its matching checklist
+        pb, playbook_auto = BUILTIN_PLAYBOOKS[AUTO_PLAYBOOK[agreement_type]], True
     perspective = perspective if perspective != "neutral" or not pb else pb.get("perspective", "neutral")
     by_id = {c["id"]: c for c in clauses}
 
@@ -205,7 +261,7 @@ async def run_review(review_id: uuid.UUID, provider: LLMProvider, settings: Sett
         critic = await run_critic(provider, settings, usage, kind="contract review (issue list)", output_text=text or "(no issues)",
                                   evidence=[{"cite_id": c["id"], "title": c["section"] or c["id"], "text": c["text"], "flags": [], "jurisdiction": ""} for c in clauses])
     counts = {r: sum(1 for i in issues if i["risk"] == r) for r in RISKS}
-    result = {"agreement_type": agreement_type, "perspective": perspective, "playbook": pb["name"] if pb else None, "clauses": out_clauses,
+    result = {"agreement_type": agreement_type, "perspective": perspective, "playbook": pb["name"] if pb else None, "playbook_auto": playbook_auto, "clauses": out_clauses,
               "issues": issues, "missing_terms": missing, "undefined_terms": undef, "unused_definitions": unused,
               "broken_cross_references": broken, "figures": asdict(figs), "risk_counts": counts, "warnings": warnings,
               "obligation_count": len(obligations), "critic": critic}
