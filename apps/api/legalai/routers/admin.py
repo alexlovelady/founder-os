@@ -48,6 +48,20 @@ def health(admin: User = Depends(require_admin), db: DbSession = Depends(get_db)
     n = db.get(GpuNode, s.gpu_node_id)
     fresh = bool(n and n.last_heartbeat_at and (datetime.now(timezone.utc) - n.last_heartbeat_at).total_seconds() < s.gpu_heartbeat_stale_s)
     checks["gpu"] = {"ok": fresh, "optional": True, "status": n.status if n else "never seen"}
+    from ..backup import latest_backup
+    from pathlib import Path
+    import json as _json
+    last = latest_backup(Path(s.backup_root())) if s.backup_enabled else None
+    if s.backup_enabled:
+        man = _json.loads((last / "manifest.json").read_text()) if last else None
+        age_h = None
+        if man:
+            age_h = round((datetime.now(timezone.utc) - datetime.fromisoformat(man["created_at"])).total_seconds() / 3600, 1)
+        fresh = bool(man) and age_h is not None and age_h < s.backup_interval_hours * 2 + 1 and not man.get("verify_problems")
+        checks["backup"] = {"ok": fresh, "last_backup_hours_ago": age_h, "verified": bool(man and man.get("verified_at")),
+                            "problems": (man or {}).get("verify_problems", [])}
+    else:
+        checks["backup"] = {"ok": False, "optional": True, "status": "scheduled backups are disabled"}
     oldest = db.scalar(select(func.min(Job.created_at)).where(Job.state.in_(["QUEUED", "WAITING_FOR_GPU", "RETRYABLE"])))
     checks["queue"] = {"ok": True, "oldest_waiting_minutes": round((datetime.now(timezone.utc) - oldest).total_seconds() / 60, 1) if oldest else 0}
     required_ok = all(c["ok"] for k, c in checks.items() if not c.get("optional"))

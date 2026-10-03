@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     run_worker: bool = True  # embed the job worker in the API process
     storage_dir: str = "./data/storage"
     max_upload_mb: int = 50
+    backup_enabled: bool = False  # scheduled in-app backups (needs pg_dump in the image)
+    backup_dir: str = ""  # default: <storage_dir parent>/backups
+    backup_interval_hours: int = 24
+    backup_include_storage: bool = False  # also tar documents into the backup (doubles volume use)
+    backup_verify: bool = True
+    backup_token: str = ""  # lets the off-site puller read backups without an admin session
     ocr_enabled: bool = True
     ocr_lang: str = "eng"
     ocr_dpi: int = 200
@@ -67,6 +73,10 @@ class Settings(BaseSettings):
     currentness_days: int = 30    # external authority older than this is reported as 'currentness not verified'
 
     default_privacy_mode: str = "private"
+
+    def backup_root(self) -> str:
+        import os
+        return self.backup_dir or os.path.join(os.path.dirname(os.path.abspath(self.storage_dir)), "backups")
 
     def model_for_role(self, role: str) -> str:
         m = {

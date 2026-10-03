@@ -42,6 +42,12 @@ async def ingest_document(job: Job, provider, settings: Settings) -> dict:
     return ingest_version(uuid.UUID(job.payload["version_id"]), settings)
 
 
+async def backup(job: Job, provider, settings: Settings) -> dict:
+    import asyncio
+    from ..backup_job import run_backup
+    return await asyncio.to_thread(run_backup, settings)
+
+
 async def ocr_document(job: Job, provider, settings: Settings) -> dict:
     return await ocr_version(uuid.UUID(job.payload["version_id"]), settings)
 
@@ -74,5 +80,5 @@ async def compare_summary(job: Job, provider: LLMProvider, settings: Settings) -
     return await run_compare_summary(uuid.UUID(job.payload["comparison_id"]), provider, settings)
 
 
-HANDLERS = {"ocr_document": ocr_document, "corpus_refresh": corpus_refresh, "contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
+HANDLERS = {"backup": backup, "ocr_document": ocr_document, "corpus_refresh": corpus_refresh, "contract_review": contract_review, "draft": draft, "redline_generation": redline_generation,
             "compare_summary": compare_summary, "research": research, "llm_complete": llm_complete, "ingest_document": ingest_document, "embed_document": embed_document}

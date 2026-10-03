@@ -5,6 +5,7 @@ import time
 
 from .config import get_settings
 from .corpus.refresh import enqueue_due_refreshes
+from .backup_job import enqueue_due_backups
 from .providers.pull_gpu import purge_stale_requests
 from .jobs.runner import mark_stale_nodes, process_one
 
@@ -23,6 +24,7 @@ async def main(stop: "threading.Event | None" = None) -> None:
                 last_sched = time.monotonic()
                 enqueue_due_refreshes(s)
                 purge_stale_requests(s)
+                enqueue_due_backups(s)
             mark_stale_nodes(s)
             worked = await process_one(s)
         except Exception:  # noqa: BLE001
