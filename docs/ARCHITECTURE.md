@@ -26,10 +26,18 @@ A module exposes, under its own base URL:
 * The module may be shown in the shell as an embedded page (iframe or route) or called via API from shell pages.
 * Usage events (`ai_requests`, tokens, documents) are reported back so the shell can enforce plan limits and show cost.
 
-## Identity and tenancy (target)
-Shell authenticates the user (Firebase Auth per spec), stores users/businesses/memberships, and mints module tokens. LegalAI today has
-its own users and "matters"; the adapter work (Phase 2 of the roadmap) maps a shell business to a LegalAI workspace and accepts shell
-tokens, keeping its existing login for standalone use.
+## Identity and tenancy
+**Current (interim):** the shell signs users in with LegalAI's existing accounts (email, password, optional two-step). The shell hides this
+behind `IdentityProvider` (`shell/src/lib/auth/provider.ts`), so pages never depend on it. The shell proxies LegalAI under `/legal-ui`
+(see `shell/next.config.ts`), which means the browser sees one origin: one sign-in cookie, and LegalAI pages embed in a same-origin
+frame. LegalAI frames itself only for its own origin plus anything in `EMBED_ORIGINS`.
+The shell gate runs on the server (`getSession`), not in the browser.
+
+**Target:** a shell-owned identity (Firebase Auth per the spec) with users, businesses and memberships, and signed per-business module
+tokens (see Module contract). Swap the `IdentityProvider` and add token verification to LegalAI; pages stay unchanged.
+
+Known limits of the interim setup: one global user table owned by LegalAI, no businesses or roles in the shell yet, accounts are created
+by the LegalAI administrator.
 
 ## AI tiers
 `free/founder` use the private GPU, `pro+` may use cloud models or a customer-supplied key. Implemented as configuration in the shell

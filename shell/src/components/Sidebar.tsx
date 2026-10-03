@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MODULES } from "@/config/modules";
+import SignOut from "./SignOut";
 
 const link = (active: boolean) =>
   `flex items-center justify-between rounded-lg px-3 py-2 text-sm ${active ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800/60"}`;
 
-export default function Sidebar() {
+export default function Sidebar({ email }: { email: string }) {
   const path = usePathname();
   return (
     <aside className="flex w-60 shrink-0 flex-col gap-1 border-r border-slate-800 bg-slate-900 p-3">
@@ -22,6 +23,10 @@ export default function Sidebar() {
           </span>
         ),
       )}
+      <div className="mt-auto space-y-1 px-3 py-2 text-xs text-slate-400">
+        <div className="truncate">{email}</div>
+        <SignOut />
+      </div>
     </aside>
   );
 }

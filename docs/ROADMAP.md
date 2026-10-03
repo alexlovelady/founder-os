@@ -11,7 +11,7 @@ Phases follow docs/FounderOS_Build_Spec.md section 75. One phase at a time: plan
 
 Open item: LegalAI's landmark case list is partial (CourtListener rate limits); re-run `modules/legal/scripts/resolve_cases.py` later.
 
-Status note (2026-10-03): the shell has a module registry, landing page, sidebar layout, dashboard preview and an embedded LegalAI page
-(`shell/`). Sign-in, businesses and onboarding are NOT built; they need a Firebase project (see ARCHITECTURE). LegalAI can be framed
-only by origins listed in its `EMBED_ORIGINS` setting; its login cookie will not work inside a cross-site frame, so real embedding
-waits for shell-issued tokens (Phase 2).
+Status note (2026-10-03): the shell has a module registry, landing page, sign-in (interim: LegalAI accounts), server-side route gate,
+sidebar layout, dashboard, and LegalAI embedded same-origin through a proxy (`shell/`). Not built: businesses, onboarding, roles, billing,
+plan-based AI tiers. Firebase is deferred; swap in via `IdentityProvider` when ready. The shell is not deployed anywhere yet; it runs
+locally (`cd shell && npm run build && npm start`, with LegalAI on :8000 or `LEGAL_URL` set).

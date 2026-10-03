@@ -27,6 +27,9 @@ export type AuditEv = { id: string; at: string; user_id: string | null; action: 
 export type Providers = { primary: string; fallback: string; external_llm_monthly_budget_usd: number; embedding_provider: string; embedding_model: string; models: Record<string, string> }
 
 let csrf = ''
+/** When this UI is served inside the FounderOS shell it lives under /legal-ui; standalone it lives at the root. */
+export const ROOT = typeof location !== 'undefined' && location.pathname.startsWith('/legal-ui') ? '/legal-ui' : ''
+
 export const setCsrf = (t: string) => { csrf = t }
 
 export class ApiError extends Error {
@@ -41,7 +44,7 @@ export async function api<T = unknown>(path: string, opts: { method?: string; js
   if (opts.json !== undefined) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(opts.json) }
   if (opts.form) body = opts.form
   if (method !== 'GET') headers['X-CSRF-Token'] = csrf
-  const r = await fetch(path, { method, headers, body, credentials: 'same-origin' })
+  const r = await fetch(ROOT + path, { method, headers, body, credentials: 'same-origin' })
   if (!r.ok) {
     let msg = r.statusText
     try {
@@ -55,7 +58,7 @@ export async function api<T = unknown>(path: string, opts: { method?: string; js
 
 /** POST JSON and download the binary response as a file (used for generated documents). */
 export async function downloadPost(path: string, json: unknown): Promise<{ filename: string; applied: string | null }> {
-  const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(json), credentials: 'same-origin' })
+  const r = await fetch(ROOT + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(json), credentials: 'same-origin' })
   if (!r.ok) {
     let msg = r.statusText
     try { const d = await r.json(); msg = typeof d.detail === 'string' ? d.detail : msg } catch { /* not JSON */ }
@@ -72,7 +75,7 @@ export async function downloadPost(path: string, json: unknown): Promise<{ filen
 
 /** GET a binary response and download it as a file. Returns the filename. */
 export async function downloadBlob(path: string): Promise<string> {
-  const r = await fetch(path, { credentials: 'same-origin' })
+  const r = await fetch(ROOT + path, { credentials: 'same-origin' })
   if (!r.ok) {
     let msg = r.statusText
     try { const d = await r.json(); msg = typeof d.detail === 'string' ? d.detail : msg } catch { /* not JSON */ }

@@ -18,7 +18,7 @@ def test_security_headers_and_request_id(make_api):
     a = make_api("admin@example.com")
     r = a.get("/api/auth/me")
     h = r.headers
-    assert h["x-content-type-options"] == "nosniff" and h["x-frame-options"] == "DENY" and h["cache-control"] == "no-store"
+    assert h["x-content-type-options"] == "nosniff" and h["x-frame-options"] == "SAMEORIGIN" and h["cache-control"] == "no-store"
     assert h["referrer-policy"] == "no-referrer" and re.fullmatch(r"[0-9a-f]{16}", h["x-request-id"])
     assert a.c.get("/api/auth/me", headers={"x-request-id": "trace123"}).headers["x-request-id"] == "trace123"
     assert a.c.get("/api/auth/me", headers={"x-request-id": "bad id\r\ninjected"}).headers["x-request-id"] != "bad id\r\ninjected"
@@ -214,8 +214,8 @@ def test_framing_is_denied_unless_the_shell_origin_is_allowed(make_api, monkeypa
     from legalai.config import get_settings
     a = make_api("admin@example.com")
     r = a.get("/")
-    assert "frame-ancestors 'none'" in r.headers["content-security-policy"] and r.headers["x-frame-options"] == "DENY"
+    assert r.headers["content-security-policy"].endswith("frame-ancestors 'self'") and r.headers["x-frame-options"] == "SAMEORIGIN"
     monkeypatch.setattr(get_settings(), "embed_origins", "https://shell.example.com, http://evil.test")
     r = a.get("/")
-    assert "frame-ancestors https://shell.example.com" in r.headers["content-security-policy"] and "evil.test" not in r.headers["content-security-policy"]
+    assert "frame-ancestors 'self' https://shell.example.com" in r.headers["content-security-policy"] and "evil.test" not in r.headers["content-security-policy"]
     assert "x-frame-options" not in r.headers

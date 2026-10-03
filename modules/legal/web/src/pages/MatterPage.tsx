@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState, type FormEvent } from 'react'
 import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom'
-import { api, AUTHORITY_TYPES, fmtBytes, fmtTime, PRIVACY_HELP, useQuery, type AuditEv, type Authority, type Doc, type Job, type Matter, type Version } from '../api'
+import { api, AUTHORITY_TYPES, fmtBytes, fmtTime, PRIVACY_HELP, useQuery, type AuditEv, type Authority, type Doc, type Job, type Matter, type Version, ROOT } from '../api'
 import { Empty, Err, JobBadge, Loading, Md, PrivacyBadge, icons } from '../ui'
 import { JobTable } from './JobsPage'
 import { PrivacyPicker } from './Matters'
@@ -158,7 +158,7 @@ function Documents({ m }: { m: Matter }) {
                   {canEdit && <button className="btn sm" onClick={() => { versionFor.current = d.id; input.current?.click() }}>New version</button>}
                   {canEdit && <button className="btn sm" onClick={() => setEdit(edit === d.id ? undefined : d.id)}>Details</button>}
                   <button className="btn sm" onClick={() => setOpen(open === d.id ? undefined : d.id)}>History</button>
-                  {v && <a className="btn sm" href={`/api/documents/${d.id}/versions/${v.id}/download`}>Download</a>}</div></td>
+                  {v && <a className="btn sm" href={`${ROOT}/api/documents/${d.id}/versions/${v.id}/download`}>Download</a>}</div></td>
               </tr>
               {edit === d.id && <tr><td colSpan={5} style={{ background: 'var(--soft)' }}><AuthorityEditor d={d} onSaved={() => { setEdit(undefined); reload() }} /></td></tr>}
               {open === d.id && <tr><td colSpan={5} style={{ background: 'var(--soft)' }}><Versions docId={d.id} /></td></tr>}
@@ -217,7 +217,7 @@ function Versions({ docId }: { docId: string }) {
   if (!data) return <span className="spin" />
   return <div className="stack" style={{ gap: 6 }}>{data.map(v => (
     <div key={v.id} className="row between small wrap"><span><strong>v{v.version_number}</strong> · {v.filename} · {fmtBytes(v.size_bytes)} · {fmtTime(v.created_at)}</span>
-      <span className="row"><span className="mono muted">{v.sha256.slice(0, 20)}…</span><a href={`/api/documents/${docId}/versions/${v.id}/download`}>Download</a></span></div>))}</div>
+      <span className="row"><span className="mono muted">{v.sha256.slice(0, 20)}…</span><a href={`${ROOT}/api/documents/${docId}/versions/${v.id}/download`}>Download</a></span></div>))}</div>
 }
 
 function Chat({ m }: { m: Matter }) {

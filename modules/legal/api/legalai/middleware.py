@@ -18,9 +18,9 @@ CSP = ("default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inlin
 
 
 def frame_ancestors() -> str:
-    """Pages may be framed only by origins listed in EMBED_ORIGINS (the FounderOS shell); otherwise never."""
+    """Pages may be framed by their own origin (the FounderOS shell proxies this app) and by origins listed in EMBED_ORIGINS; never by others."""
     origins = [o.strip() for o in get_settings().embed_origins.split(",") if o.strip().startswith(("https://", "http://localhost"))]
-    return "frame-ancestors " + (" ".join(origins) if origins else "'none'")
+    return "frame-ancestors " + " ".join(["'self'", *origins])
 
 general_limiter = RateLimiter(limit=600, window_s=60)
 heavy_limiter = RateLimiter(limit=60, window_s=60)      # uploads and anything that queues LLM/GPU work
@@ -62,7 +62,7 @@ class HardeningMiddleware(BaseHTTPMiddleware):
         resp.headers["X-Request-Id"] = rid
         resp.headers["X-Content-Type-Options"] = "nosniff"
         if not get_settings().embed_origins.strip():
-            resp.headers["X-Frame-Options"] = "DENY"
+            resp.headers["X-Frame-Options"] = "SAMEORIGIN"
         resp.headers["Referrer-Policy"] = "no-referrer"
         resp.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         resp.headers["Cross-Origin-Opener-Policy"] = "same-origin"

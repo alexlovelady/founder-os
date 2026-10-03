@@ -18,7 +18,7 @@ export const MODULES: ModuleDef[] = [
     tagline: "Review contracts, draft documents, and ask legal questions with sources.",
     route: "/app/legal",
     status: "live",
-    baseUrl: process.env.NEXT_PUBLIC_LEGAL_URL ?? "https://api-production-1ae3f.up.railway.app",
+    baseUrl: process.env.LEGAL_URL ?? "http://localhost:8000",
   },
   { id: "compliance", name: "Compliance", tagline: "Deadlines, filings and licenses for your business.", route: "/app/compliance", status: "planned" },
   { id: "finance", name: "Finance tools", tagline: "Runway, break-even, pricing and tax-reserve calculators.", route: "/app/finance", status: "planned" },

@@ -6,7 +6,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-4xl space-y-8 p-8">
       <div>
         <h1 className="text-2xl font-semibold">Your business workspace</h1>
-        <p className="mt-1 text-slate-400">Sign-in and business profiles are not connected yet, so this is a preview of the layout. Tools marked live are real.</p>
+        <p className="mt-1 text-slate-400">Business profiles are not built yet. Tools marked live are real.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {MODULES.map((m) => (
