@@ -2,7 +2,7 @@
 
 Source: docs/FounderOS_Build_Spec.md and docs/ROADMAP.md. Updated 2026-10-03.
 
-## Being built now (no input needed from the owner)
+## Done (no input was needed from the owner)
 | Area | Spec sections | Owner folder(s) |
 |---|---|---|
 | Audit log, privacy controls (export / delete), admin portal, feature flags, feedback, product analytics | 40, 41, 45, 46, 73, 74 | shell/src/lib/platform, shell/src/app/admin, api/admin, api/privacy, migration 0003 |

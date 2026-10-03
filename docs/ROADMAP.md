@@ -11,12 +11,11 @@ Phases follow docs/FounderOS_Build_Spec.md section 75. One phase at a time: plan
 
 Open item: LegalAI's landmark case list is partial (CourtListener rate limits); re-run `modules/legal/scripts/resolve_cases.py` later.
 
-Status note (2026-10-03): all planned tools are built and deployed: Finance, Compliance, Business Health, Tasks, Document Vault, SOPs and
-business documents, CRM, Marketing, Ask FounderOS (read-only assistant), Product Scan (GitHub/GitLab) and Competitor Research, plus LegalAI.
-They share one business context, cross-tool links and global search (Ctrl+K). 409 tool tests pass against real Postgres.
+Status note (2026-10-03, later): everything in docs/PLAN.md "Being built now" is done and deployed: audit log, privacy export/delete, platform
+admin portal, feature flags, feedback, product analytics, notifications + daily scheduler + weekly brief + system automations, plans/usage/
+quotas and Stripe (inactive until keys), team invites and roles, public site with free tools and trust pages (legal pages are DRAFT),
+Vault text extraction/search/classification/AI summary and hand-off to LegalAI, assistant actions with confirmation, mobile layout, CI.
+740 shell/tool tests and 190 LegalAI tests pass. LegalAI landmark cases: all 24 verified.
 
-Not yet verified end to end in a browser: AI-driven features (they run on the private GPU through LegalAI's queue), file upload in the
-Vault, and the GitHub scan from the UI. Known gaps (see each tool's README): assistant cannot act yet (actions contract proposed in
-modules/founderai/README.md), Vault has no text extraction or virus scanning, no email reminders, no team invites or roles beyond owner,
-no billing or plan-based AI tiers, identity is still LegalAI accounts (swap via `IdentityProvider`).
-Environment: set `FOUNDEROS_SECRET_KEY` (done on Railway) for stored repo tokens; `SEARCH_API_KEY` (Brave) is optional for competitor discovery.
+With Stripe not configured, every business runs on the Business plan limits (so the owner is never throttled); limits switch on automatically
+when STRIPE_SECRET_KEY is set. What still needs the owner is listed in docs/PLAN.md.
