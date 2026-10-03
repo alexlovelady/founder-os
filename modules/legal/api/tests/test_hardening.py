@@ -208,3 +208,14 @@ def test_private_matter_default_stays_local_and_gpu_outage_never_goes_external(m
     a.post("/api/inference", json={"matter_id": std["id"], "messages": [{"role": "user", "content": "hello"}]})
     drain(down)
     assert "llm.external.test" in netguard
+
+
+def test_framing_is_denied_unless_the_shell_origin_is_allowed(make_api, monkeypatch):
+    from legalai.config import get_settings
+    a = make_api("admin@example.com")
+    r = a.get("/")
+    assert "frame-ancestors 'none'" in r.headers["content-security-policy"] and r.headers["x-frame-options"] == "DENY"
+    monkeypatch.setattr(get_settings(), "embed_origins", "https://shell.example.com, http://evil.test")
+    r = a.get("/")
+    assert "frame-ancestors https://shell.example.com" in r.headers["content-security-policy"] and "evil.test" not in r.headers["content-security-policy"]
+    assert "x-frame-options" not in r.headers

@@ -14,7 +14,13 @@ from .security import RateLimiter
 log = logging.getLogger("legalai.access")
 
 CSP = ("default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; "
-       "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
+       "connect-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'")
+
+
+def frame_ancestors() -> str:
+    """Pages may be framed only by origins listed in EMBED_ORIGINS (the FounderOS shell); otherwise never."""
+    origins = [o.strip() for o in get_settings().embed_origins.split(",") if o.strip().startswith(("https://", "http://localhost"))]
+    return "frame-ancestors " + (" ".join(origins) if origins else "'none'")
 
 general_limiter = RateLimiter(limit=600, window_s=60)
 heavy_limiter = RateLimiter(limit=60, window_s=60)      # uploads and anything that queues LLM/GPU work
@@ -55,12 +61,13 @@ class HardeningMiddleware(BaseHTTPMiddleware):
             resp = await call_next(request)
         resp.headers["X-Request-Id"] = rid
         resp.headers["X-Content-Type-Options"] = "nosniff"
-        resp.headers["X-Frame-Options"] = "DENY"
+        if not get_settings().embed_origins.strip():
+            resp.headers["X-Frame-Options"] = "DENY"
         resp.headers["Referrer-Policy"] = "no-referrer"
         resp.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         resp.headers["Cross-Origin-Opener-Policy"] = "same-origin"
         if not path.startswith("/api/"):
-            resp.headers.setdefault("Content-Security-Policy", CSP)
+            resp.headers.setdefault("Content-Security-Policy", f"{CSP}; {frame_ancestors()}")
         if path.startswith("/api/"):
             resp.headers["Cache-Control"] = "no-store"
         if s.cookie_secure:

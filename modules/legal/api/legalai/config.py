@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     app_env: str = "local"
     app_base_url: str = "http://localhost:8000"
+    embed_origins: str = ""     # comma-separated https origins allowed to frame this app (the FounderOS shell); empty = never
     database_url: str = "postgresql+psycopg://legalai:legalai-dev@localhost:5442/legalai"
     session_secret: str = ""
     cookie_secure: bool = False
