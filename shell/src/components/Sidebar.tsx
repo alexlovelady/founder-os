@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import SearchBox from "./SearchBox";
 import SignOut from "./SignOut";
 
 export interface NavTool {
@@ -26,6 +27,7 @@ export default function Sidebar({ email, tools }: { email: string; tools: NavToo
   return (
     <aside className="flex w-60 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-slate-800 bg-slate-900 p-3">
       <Link href="/" className="mb-3 px-3 py-2 text-lg font-semibold text-white">FounderOS</Link>
+      <div className="mb-2"><SearchBox /></div>
       <Link href="/app/dashboard" className={link(path === "/app/dashboard")}>Dashboard</Link>
       {GROUPS.map((g) => {
         const items = tools.filter((t) => t.group === g.id);

@@ -25,6 +25,17 @@ Each service is selected by its own `RAILWAY_DOCKERFILE_PATH` variable (`shell/D
 Data ownership: business and account profile data lives in the shell's database (`shell/migrations`). When a business is created or edited,
 the shell pushes the relevant profile into each module (`shell/src/lib/legal.ts`), so tools never disagree with the dashboard.
 
+## Tools share one business context
+Every tool receives the same `ToolContext`, which carries:
+* `ctx.context()`: the whole business in one object: profile, every tool's `facts()`, a plain-English `describe()` paragraph from each
+  tool (plus LegalAI's checklist), and combined "needs attention" items. `asText()` produces a block ready for an AI prompt, so any
+  tool's AI features start from the real business and what every other tool knows.
+* `ctx.links`: generic links between records in any two tools (`entity_links` table). Tools address records as `(tool, id)`; the owning
+  tool's `resolve()` supplies the title and URL, and both ends are verified to belong to the same business. `<LinkedItems />` in
+  `@founderos/sdk/ui` is the drop-in UI.
+* `ctx.search()`: one query across every tool's `search()`; powers the Ctrl+K search and the assistant.
+Tools still never import each other. See docs/TOOLS.md for the rules and checklist.
+
 ## Folders
 | Folder | What | Stack | Deploys as |
 |---|---|---|---|

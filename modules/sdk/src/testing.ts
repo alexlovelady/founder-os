@@ -69,6 +69,7 @@ export async function makeTestEnv(tools: ToolDef[], opts: { role?: Role; facts?:
 }
 
 /** Call a tool's api handler like the shell does. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- tests read arbitrary JSON
 export async function call(tool: ToolDef, ctx: ToolContext, method: string, path: string, body?: unknown): Promise<{ status: number; data: any }> {
   const req = new Request(`http://test/api/tools/${tool.id}/${path}`, { method, headers: { "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
   const res = await tool.api!(ctx, req, path.split("?")[0].split("/").filter(Boolean));

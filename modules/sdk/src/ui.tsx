@@ -1,8 +1,12 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { EntityRef, LinkedItem } from "./index";
 
-interface Group { tool: string; toolName: string; hits: { id: string; title: string; snippet?: string }[] }
+interface Group {
+  tool: string;
+  toolName: string;
+  hits: { id: string; title: string; snippet?: string }[];
+}
 
 /**
  * Drop-in "Linked items" box for any record page: shows what this record is linked to in other tools, and lets the user link more.
@@ -10,36 +14,49 @@ interface Group { tool: string; toolName: string; hits: { id: string; title: str
  */
 export function LinkedItems({ tool, id, canWrite }: EntityRef & { canWrite: boolean }) {
   const [items, setItems] = useState<LinkedItem[]>([]);
+  const [version, setVersion] = useState(0); // bump to reload
   const [adding, setAdding] = useState(false);
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<Group[]>([]);
+  const [found, setFound] = useState<Group[]>([]);
   const [error, setError] = useState<string>();
 
-  const load = useCallback(async () => {
-    const r = await fetch(`/api/links?tool=${encodeURIComponent(tool)}&id=${encodeURIComponent(id)}`);
-    if (r.ok) setItems((await r.json()).links);
-  }, [tool, id]);
-  useEffect(() => { void load(); }, [load]);
-
   useEffect(() => {
-    if (!adding || q.trim().length < 2) { setResults([]); return; }
-    const t = setTimeout(async () => {
-      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      if (r.ok) setResults((await r.json()).results);
+    let live = true;
+    fetch(`/api/links?tool=${encodeURIComponent(tool)}&id=${encodeURIComponent(id)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (live && d) setItems(d.links); })
+      .catch(() => undefined);
+    return () => { live = false; };
+  }, [tool, id, version]);
+
+  const searching = adding && q.trim().length >= 2;
+  useEffect(() => {
+    if (!searching) return;
+    let live = true;
+    const t = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(q)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (live && d) setFound(d.results); })
+        .catch(() => undefined);
     }, 250);
-    return () => clearTimeout(t);
-  }, [q, adding]);
+    return () => { live = false; clearTimeout(t); };
+  }, [q, searching]);
+  const results = searching ? found : [];
 
   async function link(to: EntityRef) {
     setError(undefined);
     const r = await fetch("/api/links", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ from: { tool, id }, to }) });
-    if (!r.ok) { setError((await r.json().catch(() => ({}))).error ?? "Could not link"); return; }
-    setAdding(false); setQ(""); setResults([]);
-    await load();
+    if (!r.ok) {
+      setError((await r.json().catch(() => ({}))).error ?? "Could not link");
+      return;
+    }
+    setAdding(false);
+    setQ("");
+    setVersion((v) => v + 1);
   }
   async function unlink(linkId: string) {
     await fetch(`/api/links?id=${linkId}`, { method: "DELETE" });
-    await load();
+    setVersion((v) => v + 1);
   }
 
   return (
