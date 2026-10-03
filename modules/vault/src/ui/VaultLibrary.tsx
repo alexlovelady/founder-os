@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CATEGORIES } from "../facts";
-import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, readError, Snippet, type DocDto } from "./shared";
+import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, PlanLink, readError, Snippet, type DocDto } from "./shared";
 
 export default function VaultLibrary({ initial, canWrite }: { initial: DocDto[]; canWrite: boolean }) {
   const [docs, setDocs] = useState(initial);
@@ -102,7 +102,7 @@ export default function VaultLibrary({ initial, canWrite }: { initial: DocDto[];
           </div>
         </section>
       )}
-      {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}</p>}
+      {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}<PlanLink msg={error} /></p>}
       {message && <p role="status" className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-2 text-sm text-emerald-300">{message}</p>}
 
       <div className="flex flex-col gap-4 md:flex-row">

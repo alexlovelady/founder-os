@@ -13,6 +13,11 @@ Add competitors (name and website). FounderOS reads their public pages politely 
 - **Cross-competitor report** (async): comparison matrix and "where you could stand out", built only from stored sourced claims; the stand-out ideas are labelled AI opinion.
 - **Discovery**: with `SEARCH_API_KEY` the Brave Search API is used (fixed host `api.search.brave.com`; results are shown as web results to check). Without it the AI may suggest names from general knowledge, always labelled "Unverified suggestion, check the website", with no URLs.
 
+## Plan limits
+- **Competitors**: adding one calls `ctx.useQuota("competitors")` before the insert (stock limit, checked against the real count, not recorded). At the limit: 402 with the plan message. Duplicates still answer 409.
+- **AI**: discovery without a search key, a competitor analysis and the report each call `ctx.useQuota("ai_request")` once, just before the job starts (after input checks, so a refused request creates no row). Fetching pages is not AI and is not counted.
+- **Feature flag**: when `ctx.plan.features.competitorResearch` is `false`, adding, adding pages, fetching, analysing, the report and discovery answer 402 "not included in your plan" and the page shows a notice; existing data stays readable. Plans that omit the flag keep the feature.
+
 ## Tables
 `competitors_items`, `competitors_pages` (url, excerpt capped at 12,000 characters, content_hash, fetched_at, prev_hash, changed), `competitors_analyses` (result jsonb with sources, claims and rejected claims; ai_summary; ai_job_id), `competitors_reports`, `competitors_discoveries`, `competitors_fetch_log` (request counts only, no URLs; rows older than a day are pruned). All carry `business_id`; everything cascades from the business and from the competitor.
 

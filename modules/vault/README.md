@@ -15,6 +15,10 @@ files and tells other tools what exists. It reads the plain text of files so the
 * `vault_legal_links`: `document_id, version, legal_document_id, legal_review_id, perspective, created_at`: each hand-off to LegalAI.
 * Categories: Formation, Legal, Contracts, Taxes, Finance, Insurance, Employees, Contractors, Customers, Vendors, Policies, SOPs, Marketing, Other.
 
+## Plan limits
+- **Storage**: a new document and a new version each call `ctx.useQuota("storage_bytes", size)` after the file is validated and before it is stored. It is a stock limit: the real total of stored files plus this upload is checked against the plan's storage (not recorded). At the limit: 402 with the plan message, nothing is stored, and the page shows it with a link to the billing page. Downloads and reads are never metered.
+- **AI summary**: calls `ctx.useQuota("ai_request")` once per summary request, before the job starts (this is the name the shell records usage under when billing is off; the older `aiRequestsPerMonth` name checked the limit but was not recorded without Stripe).
+
 ## Files
 * Allowed: pdf, docx, doc, xlsx, csv, txt, md, png, jpg, jpeg, webp. Everything else is refused (415) with a message.
 * 15 MB per file (413 above that). Filenames are sanitized (path, control and odd characters removed); the user's name is never used for storage.

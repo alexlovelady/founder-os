@@ -10,7 +10,7 @@ export default async function Onboarding() {
   if (!session) redirect("/login");
   if (await currentBusiness(session.user.id)) redirect("/app/dashboard");
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-8">
+    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-8">
       <div>
         <h1 className="text-2xl font-semibold">Set up your business</h1>
         <p className="mt-1 text-slate-400">A few questions so FounderOS can tailor your checklist and fill in your documents. You can change any of this later.</p>

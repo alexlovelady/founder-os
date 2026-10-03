@@ -7,6 +7,8 @@ const LEGAL = process.env.LEGAL_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // proxy.ts buffers request bodies; the vault accepts files up to 15 MB, so the default 10 MB would silently truncate uploads.
+  experimental: { proxyClientMaxBodySize: "16mb" },
   // Tools are TypeScript packages in /modules, compiled by the shell.
   transpilePackages: ["@founderos/sdk", "@founderos/finance", "@founderos/compliance", "@founderos/health", "@founderos/tasks", "@founderos/vault", "@founderos/sops", "@founderos/crm", "@founderos/marketing", "@founderos/founderai", "@founderos/product", "@founderos/competitors"],
   outputFileTracingRoot: new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"),
@@ -16,6 +18,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       { source: "/assets/:path*", destination: `${LEGAL}/assets/:path*` },
+      // The shell's own server calls this; it must never be reachable from a browser through the proxy.
+      { source: "/legal-ui/api/internal/:path*", destination: "/404" },
       { source: "/legal-ui", destination: `${LEGAL}/` },
       { source: "/legal-ui/:path*", destination: `${LEGAL}/:path*` },
     ];

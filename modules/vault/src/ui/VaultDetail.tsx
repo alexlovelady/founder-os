@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { LinkedItems } from "@founderos/sdk/ui";
 import { CATEGORIES } from "../facts";
 import { ExtractionPanel, LegalPanel, SuggestionChip, SummaryBox } from "./DetailPanels";
-import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, readError, type DetailDto } from "./shared";
+import { ACCEPT, BASE, ExpiryBadge, formatSize, NOTE, PlanLink, readError, type DetailDto } from "./shared";
 
 export default function VaultDetail({ initial, canWrite }: { initial: DetailDto; canWrite: boolean }) {
   const [doc, setDoc] = useState(initial.document);
@@ -83,7 +83,7 @@ export default function VaultDetail({ initial, canWrite }: { initial: DetailDto;
         </div>
       </header>
       <p className="text-xs text-slate-500">{NOTE}</p>
-      {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}</p>}
+      {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}<PlanLink msg={error} /></p>}
       {message && <p role="status" className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-2 text-sm text-emerald-300">{message}</p>}
 
       {suggestion && <SuggestionChip key={`${suggestion.category}-${suggestion.docType}`} docId={doc.id} suggestion={suggestion} canWrite={canWrite} onApplied={(a) => { setDoc({ ...doc, category: a.category, docType: a.docType }); setDocType(a.docType); setSuggestion(null); setMessage("Saved."); }} />}

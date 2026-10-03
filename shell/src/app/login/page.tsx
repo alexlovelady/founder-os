@@ -1,5 +1,6 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { legalAuth } from "@/lib/auth/legalai";
 
@@ -11,6 +12,19 @@ export default function Login() {
   const [mfaToken, setMfaToken] = useState<string>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [canSignUp, setCanSignUp] = useState(false);
+  const [created, setCreated] = useState(false);
+
+  useEffect(() => {
+    const wasCreated = new URLSearchParams(window.location.search).get("created") === "1";
+    fetch("/api/signup/status", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { mode?: string; available?: boolean } | null) => {
+        setCreated(wasCreated);
+        setCanSignUp(Boolean(d && d.mode !== "closed" && d.available));
+      })
+      .catch(() => setCreated(wasCreated));
+  }, []);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -64,6 +78,11 @@ export default function Login() {
             </label>
           </>
         )}
+        {created && !error && (
+          <div role="status" className="rounded-lg bg-emerald-950 px-3 py-2 text-sm text-emerald-200">
+            Account created. Sign in with your new email and password.
+          </div>
+        )}
         {error && (
           <div role="alert" className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-200">
             {error}
@@ -73,6 +92,11 @@ export default function Login() {
           {mfaToken ? "Verify" : "Sign in"}
         </button>
         <p className="text-xs text-slate-500">Accounts are managed by the administrator for now.</p>
+        {canSignUp && !mfaToken && (
+          <p className="text-sm text-slate-400">
+            New here? <Link href="/signup" className="underline">Create an account</Link>
+          </p>
+        )}
       </form>
     </main>
   );

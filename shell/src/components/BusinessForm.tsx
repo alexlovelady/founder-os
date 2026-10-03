@@ -47,7 +47,7 @@ export default function BusinessForm({ business }: { business?: Business }) {
         setSaved(true);
         router.refresh();
       } else {
-        router.replace("/app/dashboard");
+        router.replace("/app/welcome");
         router.refresh();
       }
     } catch (err) {

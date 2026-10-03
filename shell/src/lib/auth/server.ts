@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { db } from "../db";
+import { isSuspended } from "../admin/suspensions";
 import type { SessionUser } from "./provider";
 
 const LEGAL = process.env.LEGAL_URL ?? "http://localhost:8000";
@@ -23,6 +25,8 @@ export async function getSession(): Promise<Session | null> {
     const r = await fetch(`${LEGAL}/api/auth/me`, { headers: { cookie }, cache: "no-store" });
     if (!r.ok) return null;
     const { user, csrf_token } = await r.json();
+    // A platform admin can suspend a user here; their LegalAI session may still be valid, so the shell refuses it.
+    if (await isSuspended(db(), user.id)) return null;
     return { user: { id: user.id, email: user.email, displayName: user.display_name, role: user.role }, cookie, csrf: csrf_token };
   } catch {
     return null;

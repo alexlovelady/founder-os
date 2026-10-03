@@ -26,7 +26,7 @@ To add a page: create `(site)/<path>/page.tsx` with `export const metadata = pag
 `/`, `/features`, `/pricing`, `/legal-ai`, `/business-health`, `/security`, `/contact`, `/terms`, `/privacy`, `/ai-disclosure`, `/tools`, and tools `/tools/runway-calculator`, `/break-even-calculator`, `/pricing-calculator`, `/contractor-vs-employee`, `/tax-reserve`, `/startup-checklist`, `/business-health-check`.
 
 ## Free tools
-All client-side; nothing is sent anywhere. Each ends with "Save this and track it in FounderOS: sign in" and a not-advice note. Not built: NDA generator and contract checker (they need the AI backend), plus the other SEO pages in spec section 80 (`/contract-review`, `/contractor-agreement`, `/sop-generator`).
+All client-side; nothing is sent anywhere. Each ends with "Save this and track it in FounderOS: sign in" and a not-advice note. Not built: an NDA generator form and a free contract checker (they need the AI backend). The informational SEO pages `/contract-review`, `/contractor-agreement`, `/nda-generator` and `/sop-generator` exist (they explain and point to the signed-in app).
 
 ## Copy rules
 No certifications, customer counts, testimonials, ratings or results. Never present the product as a law firm, accountant or adviser. Describe only features that exist. A test greps the site files for a deny-list ("SOC 2", "HIPAA compliant", "PCI compliant", "bank-grade", "guarantee", "certified").

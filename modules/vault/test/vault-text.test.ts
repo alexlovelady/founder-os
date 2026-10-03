@@ -177,7 +177,7 @@ describe("vault text extraction, search, classification and summaries (database)
       const start = await call(tool, env.ctx, "POST", `documents/${id}/summary`);
       expect(start.status).toBe(202);
       expect(start.data).toMatchObject({ state: "running", truncated: true });
-      expect(quota).toHaveBeenCalledWith("aiRequestsPerMonth");
+      expect(quota).toHaveBeenCalledWith("ai_request");
       const sent = ai.calls.at(-1)!;
       expect(sent.prompt).toContain("Test Co A"); // business context
       expect(sent.prompt).toContain("SECTION ONE");

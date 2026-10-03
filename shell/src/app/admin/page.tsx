@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { loadHeadlines } from "@/lib/admin/overview";
 import { db } from "@/lib/db";
 import { adminOverview } from "@/lib/platform/admin";
 import { requireAdminPage } from "@/lib/platform/http";
@@ -8,6 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminOverview() {
   await requireAdminPage();
   const o = await adminOverview(db(), TOOLS.map((t) => t.id));
+  const h = await loadHeadlines(db());
   const stats: [string, number][] = [
     ["Users with a business", o.users], ["Businesses", o.businesses], ["Audit events (7 days)", o.auditLast7Days],
     ["Product events (7 days)", o.analyticsLast7Days], ["New feedback", o.newFeedback],
@@ -22,6 +25,20 @@ export default async function AdminOverview() {
             <div className="text-2xl font-semibold">{n}</div>
             <div className="text-xs text-slate-400">{label}</div>
           </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        {([
+          ["/admin/revenue", `$${h.mrr.toLocaleString("en-US")}`, h.billingEnabled ? "Estimated MRR" : "Estimated MRR (billing off)"],
+          ["/admin/revenue", String(h.payingSubscribers), "Paying subscribers (estimated)"],
+          ["/admin/usage", h.aiRequestsThisMonth.toLocaleString("en-US"), "AI requests this month"],
+          ["/admin/users", String(h.suspended), "Suspended users"],
+          ["/admin/feedback", String(h.unhandledFeedback), "Unhandled feedback"],
+        ] as [string, string, string][]).map(([href, v, label]) => (
+          <Link key={label} href={href} className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-slate-600">
+            <div className="text-2xl font-semibold">{v}</div>
+            <div className="text-xs text-slate-400">{label}</div>
+          </Link>
         ))}
       </div>
       <section>

@@ -182,6 +182,7 @@ export default function Chat({ initialConversations, initialId, aiAvailable }: {
                   {m.status === "failed" && (
                     <div className="rounded-lg border border-red-800 bg-red-950/40 p-3 text-red-200" role="alert">
                       <p>{m.error ?? "This answer could not be completed."}</p>
+                      {/plan/i.test(m.error ?? "") && <a className="mt-1 inline-block text-xs underline" href="/app/billing">See plans and usage</a>}
                       <button className="mt-2 rounded border border-red-700 px-2 py-1 text-xs hover:bg-red-900/50" onClick={() => void retry(m.id)}>Retry</button>
                     </div>
                   )}

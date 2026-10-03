@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BASE, readError, type DetailDto, type ExtractionDto, type LegalLinkDto, type SuggestionDto, type SummaryDto } from "./shared";
+import { BASE, PlanLink, readError, type DetailDto, type ExtractionDto, type LegalLinkDto, type SuggestionDto, type SummaryDto } from "./shared";
 
 const card = "space-y-2 rounded-xl border border-slate-800 bg-slate-900 p-4";
 
@@ -60,7 +60,7 @@ export function ExtractionPanel({ docId, extraction, canWrite, onDetail }: { doc
           {extraction.needsOcr ? "This looks like a scanned image with no text layer. Send it to LegalAI, which runs OCR, to read it." : extraction.error}
         </p>
       )}
-      {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-300">{error}<PlanLink msg={error} /></p>}
       {extraction.status === "ready" && (
         <details onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
           <summary className="cursor-pointer text-xs text-slate-400">Preview the first 5,000 characters</summary>
@@ -102,7 +102,7 @@ export function SuggestionChip({ docId, suggestion, canWrite, onApplied }: { doc
         )}
       </div>
       {suggestion.evidence.length > 0 && <p className="mt-1 text-xs text-slate-500">Because it contains: {suggestion.evidence.join(", ")}. This is a keyword guess, not a legal reading.</p>}
-      {error && <p role="alert" className="mt-1 text-xs text-red-300">{error}</p>}
+      {error && <p role="alert" className="mt-1 text-xs text-red-300">{error}<PlanLink msg={error} /></p>}
     </section>
   );
 }
@@ -150,7 +150,7 @@ export function SummaryBox({ docId, initial, pending, canWrite, hasText }: { doc
         {canWrite && <button type="button" disabled={busy || !hasText} onClick={() => void start()} className="text-xs underline disabled:opacity-50">{busy ? "Summarizing…" : summary ? "Summarize again" : "Summarize with AI"}</button>}
       </div>
       {busy && <p role="status" className="flex items-center gap-2 text-sm text-slate-300"><span className="inline-block h-2 w-2 animate-pulse rounded-full bg-sky-400" aria-hidden />{state === "waiting" && message ? message : "Writing the summary…"}</p>}
-      {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-300">{error}<PlanLink msg={error} /></p>}
       {!hasText && !summary && <p className="text-xs text-slate-500">A summary needs readable text; this file has none yet.</p>}
       {summary && (
         <div>
@@ -226,7 +226,7 @@ export function LegalPanel({ docId, docName, canWrite, initial }: { docId: strin
               </label>
             ))}
           </fieldset>
-          {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}</p>}
+          {error && <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-300">{error}<PlanLink msg={error} /></p>}
           {notice && <p role="status" className="text-sm text-emerald-300">{notice}</p>}
           <div className="flex justify-end gap-3">
             <button type="button" onClick={() => dialog.current?.close()} className="rounded-lg border border-slate-700 px-4 py-1.5 text-sm">Cancel</button>

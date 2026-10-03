@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { withPlatform, type AiClient, type ToolContext, type ToolDef } from "@founderos/sdk";
 import { FakeAi, call, makeTestEnv, type TestEnv } from "@founderos/sdk/testing";
 import { tool } from "../src/index";
+import { withPlan } from "./limited";
 import { buildPrompt, extractKeywords, MAX_PROMPT_CHARS, numberTokens, rankSources, SYSTEM_PROMPT, unsupportedClaims, validateCitations } from "../src/rag";
 
 // A second tool defined inside the test, standing in for "the rest of the business".
@@ -215,6 +216,34 @@ describe("AI availability and failure", () => {
     expect((await post(env.ctx, "hi", "not-a-uuid")).status).toBe(400);
     expect((await post(env.ctx, "hi", "00000000-0000-0000-0000-000000000000")).status).toBe(404);
     expect((await poll(env.ctx, "nope")).status).toBe(404);
+  });
+});
+
+describe("plan limits", () => {
+  it("counts one AI request per question and per retry, and a 402 saves the question with the plan message and starts no AI job", async () => {
+    const { ctx, calls } = withPlan(env.ctx, { limits: { aiRequestsPerMonth: 2 } });
+    expect((await post(ctx, "First question")).data.assistantMessage.status).toBe("pending");
+    const second = await post(ctx, "Second question");
+    expect(second.data.assistantMessage.status).toBe("pending");
+    const third = await post(ctx, "Third question");
+    expect(third.status).toBe(201);
+    expect(third.data.assistantMessage.status).toBe("failed");
+    expect(third.data.assistantMessage.error).toMatch(/AI requests a month/);
+    expect(third.data.userMessage.content).toBe("Third question");
+    expect(ai.calls).toHaveLength(2);
+    expect(calls.filter(([m]) => m === "ai_request")).toHaveLength(3);
+    // The retry is blocked the same way and is not recorded as usage when refused.
+    const retry = await call(tool, ctx, "POST", `messages/${third.data.assistantMessage.id}/retry`);
+    expect(retry.data.message.status).toBe("failed");
+    expect(retry.data.message.error).toMatch(/plan/i);
+    expect(ai.calls).toHaveLength(2);
+  });
+
+  it("does not count a question when AI is unavailable", async () => {
+    const { ctx, calls } = withPlan(env.ctx, { limits: { aiRequestsPerMonth: 1 } });
+    ai.available = false;
+    await post(ctx, "Anyone there?");
+    expect(calls).toHaveLength(0);
   });
 });
 

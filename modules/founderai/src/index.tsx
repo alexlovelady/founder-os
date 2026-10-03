@@ -94,6 +94,13 @@ async function launch(ctx: ToolContext, assistantId: string, question: string, h
   });
   let jobId: string;
   try {
+    // One AI request per question (and per retry). A plan limit (402) stops the work and the plain message is shown on the answer.
+    await ctx.useQuota("ai_request");
+  } catch (e) {
+    if (e instanceof HttpError) return fail(ctx, assistantId, e.message);
+    throw e;
+  }
+  try {
     ({ jobId } = await ctx.ai.start({ system: built.system, prompt: built.prompt, tier: "deep" }));
   } catch {
     return fail(ctx, assistantId, "The AI service could not take this question. It is saved; try again in a moment.");

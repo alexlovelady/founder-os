@@ -2,6 +2,8 @@ import { z } from "zod";
 import { HttpError, json, readJson, requireWrite, route, UUID_RE, uuidParam, type AttentionItem, type ToolContext, type ToolDef } from "@founderos/sdk";
 import { CATEGORIES, dueState, isValidDate, nextDue, nextRuleDeadline, planSync, RECURRENCES, STATUSES, toYmd, type Category, type ItemStatus, type Recurrence } from "./engine";
 import { RULES, RULES_VERSION, rulesForBusiness } from "./seed";
+import { loadPublishedRules } from "./admin-rules";
+import { ADMIN_RULES_MIGRATION } from "./admin-migration";
 import { summarize } from "./summary";
 import type { ItemDto, ListDto } from "./types";
 import ComplianceCenter from "./ui/ComplianceCenter";
@@ -78,7 +80,8 @@ function sortItems(items: ItemDto[]): ItemDto[] {
 export async function syncChecklist(ctx: ToolContext): Promise<{ inserted: number; refreshed: number; removed: number }> {
   requireWrite(ctx);
   const now = today();
-  const matches = rulesForBusiness(ctx.business, RULES);
+  // Code seed rules plus the rules a platform admin has published (global content; the items created from them are still this business's own).
+  const matches = rulesForBusiness(ctx.business, [...RULES, ...(await loadPublishedRules(ctx.sql))]);
   const existing = await ctx.sql<Row[]>`SELECT ${COLS(ctx.sql)} FROM compliance_items WHERE business_id = ${ctx.businessId} AND rule_id IS NOT NULL`;
   const plan = planSync(matches, existing.map((e) => ({ id: e.id, ruleId: e.rule_id, ruleVersion: e.rule_version, status: e.status, userEdited: e.user_edited, uncertain: e.uncertain })));
   let inserted = 0;
@@ -149,6 +152,7 @@ export const tool: ToolDef = {
       CREATE UNIQUE INDEX compliance_items_rule ON compliance_items (business_id, rule_id) WHERE rule_id IS NOT NULL;
       CREATE INDEX compliance_items_due ON compliance_items (business_id, due_date);`,
     },
+    ADMIN_RULES_MIGRATION,
   ],
 
   api: route({
@@ -167,10 +171,12 @@ export const tool: ToolDef = {
       return json({ ...result, ...(await listAll(ctx)) });
     },
     "GET rules": async (ctx) => {
-      const matches = rulesForBusiness(ctx.business, RULES);
+      const published = await loadPublishedRules(ctx.sql);
+      const matches = rulesForBusiness(ctx.business, [...RULES, ...published]);
       return json({
         version: RULES_VERSION,
-        totalRules: RULES.length,
+        totalRules: RULES.length + published.length,
+        adminRules: published.length,
         applicable: matches.map((m) => ({ id: m.rule.id, title: m.rule.title, certainty: m.certainty, source: m.rule.source })),
       });
     },

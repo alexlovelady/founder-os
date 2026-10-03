@@ -26,6 +26,9 @@ adviser, and the UI and the system prompt both say so.
 `GET conversations`, `GET conversations/:id`, `DELETE conversations/:id`, `POST messages {conversationId?, content}`,
 `GET messages/:id`, `POST messages/:id/retry`, `POST proposals/:id/confirm`, `POST proposals/:id/dismiss`. One unanswered question per conversation (409), 100 messages per conversation, 200 per user.
 
+## Plan limits
+Each question (and each retry) calls `ctx.useQuota("ai_request")` once, just before the AI job starts. At the plan limit the question is still saved, the answer shows the plan message (HTTP 402 text, with a link to the billing page) and no AI job is started; Retry works after the limit resets or the plan changes. A question asked while AI is unavailable is not counted. With billing off every business has the Business plan limits and usage is only recorded.
+
 ## Tables
 `founderai_conversations` (business_id, user_id, title, timestamps) and `founderai_messages` (business_id, conversation_id, seq, role
 `user|assistant`, content, sources jsonb, status `pending|done|failed`, ai_job_id, error, meta jsonb, created_at). `meta` holds the pending

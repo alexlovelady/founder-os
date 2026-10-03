@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
+import PlanOverrideForm from "@/components/admin/PlanOverrideForm";
 import FlagOverrideForm from "@/components/platform/FlagOverrideForm";
+import { PLANS } from "@/config/plans";
+import { resolvePlan } from "@/lib/billing";
+import { METRICS } from "@/lib/billing/metrics";
 import { db } from "@/lib/db";
 import { adminBusinessDetail } from "@/lib/platform/admin";
 import { recordAudit } from "@/lib/platform/audit";
@@ -18,7 +22,8 @@ export default async function AdminBusiness({ params }: { params: Promise<{ id: 
   const d = await adminBusinessDetail(sql, id, TOOLS.map((t) => t.id));
   if (!d) notFound();
   await recordAudit(sql, { businessId: id, userId: session.user.id, action: "admin.business.view", resource: { tool: "platform", id } });
-  const [flags, effective] = await Promise.all([listFlags(sql), flagsFor(sql, id)]);
+  const [flags, effective, resolved] = await Promise.all([listFlags(sql), flagsFor(sql, id), resolvePlan(sql, id)]);
+  const ov = resolved.override;
   return (
     <>
       <h1 className="text-2xl font-semibold">{String(d.profile.name)}</h1>
@@ -41,6 +46,28 @@ export default async function AdminBusiness({ params }: { params: Promise<{ id: 
       <section>
         <h2 className="mb-2 font-medium">Row counts</h2>
         <table className="w-full max-w-lg text-left text-sm"><tbody>{d.counts.map((c) => <tr key={c.table} className="border-t border-slate-800"><td className="py-1 font-mono">{c.table}</td><td className="text-right">{c.rows}</td></tr>)}</tbody></table>
+      </section>
+      <section className="space-y-2">
+        <h2 className="font-medium">Plan and override</h2>
+        <p className="text-sm">
+          Effective plan: <strong>{resolved.plan.name}</strong>{" "}
+          <span className="text-slate-400">
+            (from {resolved.source === "override" ? "an admin override" : resolved.source === "subscription" ? `the subscription, status ${resolved.status}` : "the default free plan"}
+            {resolved.graceExpired ? "; payment failed and the grace period has ended" : ""})
+          </span>
+        </p>
+        {ov && <p className="text-xs text-slate-400">Override set by <span className="font-mono">{ov.set_by}</span> on {ov.created_at.toISOString().slice(0, 10)}: {ov.reason || "no reason recorded"}</p>}
+        <p className="text-xs text-slate-500">An override wins over any Stripe subscription until cleared, and is not counted in estimated revenue. Every change is audited.</p>
+        <PlanOverrideForm
+          businessId={id}
+          plans={PLANS.map((p) => ({ id: p.id, name: p.name }))}
+          limits={METRICS.map((m) => ({
+            key: m.key, label: m.label,
+            byPlan: Object.fromEntries(PLANS.map((p) => [p.id, p.limits[m.key] ?? null])),
+            current: ov?.limits && m.key in ov.limits ? (ov.limits[m.key] === null ? "unlimited" : String(ov.limits[m.key])) : "",
+          }))}
+          current={ov ? { plan: ov.plan, reason: ov.reason } : null}
+        />
       </section>
       <section className="space-y-2">
         <h2 className="font-medium">Feature flags for this business</h2>

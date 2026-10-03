@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { monthLabel, type FinanceMonth } from "../insights";
 import { breakEven, HIRE_NOTE, hireCompare, pricing, runway, TAX_NOTE, taxReserve, type Kind } from "../calc";
 
 export interface Saved { id: string; kind: Kind; name: string; inputs: unknown; results: unknown; createdAt: string }
@@ -93,11 +94,24 @@ const CALCS: Calc[] = [
 
 const input = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-slate-400";
 
-function Calculator({ calc, canWrite, onSaved }: { calc: Calc; canWrite: boolean; onSaved: (s: Saved) => void }) {
+function Calculator({ calc, canWrite, onSaved, latest }: { calc: Calc; canWrite: boolean; onSaved: (s: Saved) => void; latest?: FinanceMonth | null }) {
   const [v, setV] = useState<Record<string, number>>(calc.defaults);
   const [name, setName] = useState("");
   const [msg, setMsg] = useState<string>();
   const [busy, setBusy] = useState(false);
+
+  // Prefill the runway form from the latest entered month. Revenue goes in "other" because the entered figure is not split into recurring and other.
+  function useLatest() {
+    if (!latest) return;
+    setV({
+      ...v,
+      monthlyRecurringRevenue: 0,
+      otherMonthlyRevenue: latest.revenueCents / 100,
+      monthlyExpenses: latest.expensesCents / 100,
+      ...(latest.cashEndCents != null ? { cash: Math.max(0, latest.cashEndCents / 100) } : {}),
+    });
+    setMsg(`Filled from ${monthLabel(latest.month)} (entered by you).${latest.cashEndCents == null ? " That month has no cash balance, so cash was not changed." : ""} Revenue is in the other revenue field; split it if you know the recurring part.`);
+  }
 
   async function save() {
     setBusy(true);
@@ -120,6 +134,9 @@ function Calculator({ calc, canWrite, onSaved }: { calc: Calc; canWrite: boolean
     <div className="grid gap-6 rounded-xl border border-slate-800 bg-slate-900 p-5 md:grid-cols-2">
       <div className="space-y-3">
         <p className="text-sm text-slate-400">{calc.blurb}</p>
+        {calc.kind === "runway" && latest && (
+          <button type="button" onClick={useLatest} className="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-100">Use my latest figures ({monthLabel(latest.month)})</button>
+        )}
         {calc.fields.map((f) => (
           <label key={f.key} className="block text-sm text-slate-300">
             {f.label}
@@ -150,7 +167,7 @@ function Calculator({ calc, canWrite, onSaved }: { calc: Calc; canWrite: boolean
   );
 }
 
-export default function Calculators({ initial, canWrite }: { initial: Saved[]; canWrite: boolean }) {
+export default function Calculators({ initial, canWrite, latest }: { initial: Saved[]; canWrite: boolean; latest?: FinanceMonth | null }) {
   const [tab, setTab] = useState<Kind>("runway");
   const [saved, setSaved] = useState(initial);
   const calc = CALCS.find((c) => c.kind === tab)!;
@@ -170,7 +187,7 @@ export default function Calculators({ initial, canWrite }: { initial: Saved[]; c
           </button>
         ))}
       </div>
-      <Calculator key={tab} calc={calc} canWrite={canWrite} onSaved={(s) => setSaved([s, ...saved])} />
+      <Calculator key={tab} calc={calc} canWrite={canWrite} latest={latest} onSaved={(s) => setSaved([s, ...saved])} />
       <section>
         <h2 className="mb-2 font-medium">Saved calculations</h2>
         {saved.length === 0 ? <p className="text-sm text-slate-500">Nothing saved yet.</p> : (

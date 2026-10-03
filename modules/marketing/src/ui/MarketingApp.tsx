@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { Flag } from "../guard";
 import { KIND_LABEL, KINDS, TONES, type Brand, type ItemKind } from "../prompts";
+import { TEMPLATE_TONES } from "../templates";
 import { api, btn, btn2, input, JobStatus, useAiJob, Warnings, type Item } from "./shared";
 
 type Tab = "brand" | "create" | "library" | "calendar";
@@ -89,7 +90,26 @@ function Create({ canWrite, aiAvailable, brandSaved }: { canWrite: boolean; aiAv
   const [body, setBody] = useState("");
   const [warn, setWarn] = useState<{ flags: Flag[]; warning: string | null }>({ flags: [], warning: null });
   const [err, setErr] = useState<string>();
-  const { job, start, busy } = useAiJob((d) => { setBody(d.text); setWarn({ flags: d.flags, warning: d.warning }); setTitle((t) => t || `${KIND_LABEL[kind]}: ${topic.slice(0, 60)}`); });
+  const [made, setMade] = useState<{ method: "ai" | "template"; label: string }>();
+  const { job, start, busy } = useAiJob((d) => { setBody(d.text); setMade({ method: "ai", label: "AI draft, review before use" }); setWarn({ flags: d.flags, warning: d.warning }); setTitle((t) => t || `${KIND_LABEL[kind]}: ${topic.slice(0, 60)}`); });
+  const [offer, setOffer] = useState("");
+  const [audience, setAudience] = useState("");
+  const [tone, setTone] = useState("");
+  const [keyPoints, setKeyPoints] = useState("");
+  const [cta, setCta] = useState("");
+  const [tplBusy, setTplBusy] = useState(false);
+  async function fromTemplate() {
+    setErr(undefined); setTplBusy(true);
+    const r = await api<{ text?: string; label?: string; flags?: Flag[]; warning?: string | null; error?: string }>("template", "POST", {
+      kind, offer: offer || (kind === "review_reply" ? "" : topic), audience, tone: tone || undefined, keyPoints, cta, channel,
+      reviewText: kind === "review_reply" ? topic : "", rating: kind === "review_reply" ? rating : "", weeks: kind === "content_calendar" ? weeks : undefined,
+    });
+    setTplBusy(false);
+    if (!r.ok || r.data.text === undefined) { setErr(r.data.error ?? "Could not fill the template"); return; }
+    setBody(r.data.text); setMade({ method: "template", label: r.data.label ?? "Template draft, review before use" });
+    setWarn({ flags: r.data.flags ?? [], warning: r.data.warning ?? null });
+    setTitle((t) => t || `${KIND_LABEL[kind]}: ${(offer || topic).slice(0, 60)}`);
+  }
 
   const review = kind === "review_reply";
   async function save() {
@@ -119,13 +139,28 @@ function Create({ canWrite, aiAvailable, brandSaved }: { canWrite: boolean; aiAv
         </label>
         <button className={btn} disabled={!canWrite || !aiAvailable || busy || topic.trim().length < 3}
           onClick={() => start("generate", { kind, topic, channel: channel || undefined, details: details || undefined, rating: review ? rating || undefined : undefined, reviewText: review ? topic : undefined, weeks: kind === "content_calendar" ? weeks : undefined })}>
-          Write a draft with AI
+          Draft with AI
         </button>
-        {!aiAvailable && <p className="text-xs text-slate-500">AI is not available right now. You can still write copy in the box below and save it.</p>}
+        {!aiAvailable && <p className="text-xs text-slate-500">AI is not available right now. Use the template questions below, or write copy in the box and save it.</p>}
         <JobStatus job={job} />
+        <fieldset className="space-y-3 rounded-lg border border-slate-800 p-3">
+          <legend className="px-1 text-sm">Or answer a few plain questions (no AI, instant, never counts against your AI limit)</legend>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="block text-sm">{review ? "What the business offers (optional)" : "What are you offering?"}<input className={input} value={offer} onChange={(e) => setOffer(e.target.value)} placeholder={review ? "" : "Leave empty to use the topic above"} /></label>
+            <label className="block text-sm">Who is it for?<input className={input} value={audience} onChange={(e) => setAudience(e.target.value)} /></label>
+            <label className="block text-sm">Tone
+              <select className={input} value={tone} onChange={(e) => setTone(e.target.value)}>
+                <option value="">From my brand voice</option>{TEMPLATE_TONES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+            <label className="block text-sm">Call to action<input className={input} value={cta} onChange={(e) => setCta(e.target.value)} placeholder="e.g. Call us to book" /></label>
+          </div>
+          <label className="block text-sm">Key points (one per line)<textarea className={`${input} h-20`} value={keyPoints} onChange={(e) => setKeyPoints(e.target.value)} /></label>
+          <button className={btn2} disabled={!canWrite || tplBusy || (topic.trim().length < 3 && offer.trim().length < 3)} onClick={() => void fromTemplate()}>Write it for me (templates)</button>
+        </fieldset>
       </section>
       <section className="space-y-2 rounded-xl border border-slate-800 bg-slate-900 p-4" aria-label="Draft">
-        {job.state === "done" && <p className="text-xs font-medium text-amber-300">AI draft, review before use. Nothing is saved or posted until you save it.</p>}
+        {made && <p className="text-xs font-medium text-amber-300" role="status">{made.method === "ai" ? "Made with AI" : "Made from a template (no AI)"}: {made.label}. Nothing is saved or posted until you save it.</p>}
         <Warnings flags={warn.flags} warning={warn.warning} />
         <label className="block text-sm">Title<input className={input} value={title} onChange={(e) => setTitle(e.target.value)} /></label>
         <label className="block text-sm">Draft<textarea className={`${input} h-64`} value={body} onChange={(e) => setBody(e.target.value)} /></label>

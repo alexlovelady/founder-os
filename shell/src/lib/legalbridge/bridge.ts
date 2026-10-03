@@ -174,7 +174,7 @@ export async function reviewInLegal(input: BridgeInput, deps: BridgeDeps = {}): 
 
     // 4. Start the review. This is the costly AI step, so it is counted against the plan first.
     try {
-      await ctx.useQuota("aiRequestsPerMonth");
+      await ctx.useQuota("ai_request");
     } catch (e) {
       const s = (e as { status?: unknown }).status;
       return fail(typeof s === "number" ? s : 402, e instanceof Error && e.message ? e.message : "Your plan's AI limit has been reached.");

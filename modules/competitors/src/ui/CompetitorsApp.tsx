@@ -28,10 +28,19 @@ const STATUS_LABEL: Record<string, string> = { new: "Not read yet", fetched: "Pa
 
 interface DetailData { competitor: Comp; pages: PageInfo[]; latest: Analysis | null }
 
-export default function CompetitorsApp({ competitorId, canWrite, aiAvailable, searchEnabled, businessName, initialList, initialReports, initialDetail }: { competitorId?: string; canWrite: boolean; aiAvailable: boolean; searchEnabled: boolean; businessName: string; initialList?: Comp[]; initialReports?: Report[]; initialDetail?: DetailData }) {
-  return competitorId && initialDetail
-    ? <Detail id={competitorId} initial={initialDetail} canWrite={canWrite} aiAvailable={aiAvailable} />
-    : <Home initialList={initialList ?? []} initialReport={initialReports?.[0] ?? null} canWrite={canWrite} aiAvailable={aiAvailable} searchEnabled={searchEnabled} businessName={businessName} />;
+function PlanLink({ msg }: { msg?: string }) {
+  return msg && /plan/i.test(msg) ? <a className="ml-2 underline" href="/app/billing">See plans and usage</a> : null;
+}
+
+export default function CompetitorsApp({ competitorId, canWrite, aiAvailable, searchEnabled, businessName, initialList, initialReports, initialDetail, researchIncluded = true }: { competitorId?: string; canWrite: boolean; aiAvailable: boolean; searchEnabled: boolean; businessName: string; initialList?: Comp[]; initialReports?: Report[]; initialDetail?: DetailData; researchIncluded?: boolean }) {
+  return (
+    <>
+      {!researchIncluded && <p role="status" className="mx-auto max-w-4xl p-4 text-sm text-amber-200">Competitor research is not included in your plan. <a className="underline" href="/app/billing">See plans and usage</a></p>}
+      {competitorId && initialDetail
+        ? <Detail id={competitorId} initial={initialDetail} canWrite={canWrite && researchIncluded} aiAvailable={aiAvailable} />
+        : <Home initialList={initialList ?? []} initialReport={initialReports?.[0] ?? null} canWrite={canWrite && researchIncluded} aiAvailable={aiAvailable} searchEnabled={searchEnabled} businessName={businessName} />}
+    </>
+  );
 }
 
 /** Re-runs `step` every 3 seconds while `active` is true. `tick` changes after each step so the next one is scheduled. */
@@ -129,7 +138,7 @@ function Home({ initialList, initialReport, canWrite, aiAvailable, searchEnabled
           </ul>
         </section>
       )}
-      {msg && <p role="status" className="text-sm text-amber-200">{msg}</p>}
+      {msg && <p role="status" className="text-sm text-amber-200">{msg}<PlanLink msg={msg} /></p>}
       {list.length === 0 ? <p className="text-sm text-slate-400">No competitors added yet.</p> : (
         <ul className="space-y-3">
           {list.map((c) => (
@@ -196,7 +205,7 @@ function Detail({ id, initial, canWrite, aiAvailable }: { id: string; initial: D
         <p className="text-sm text-slate-400"><a className="underline" href={comp.url} rel="noreferrer noopener">{comp.url}</a> · {STATUS_LABEL[comp.status] ?? comp.status} · last checked {comp.lastFetchedAt ? new Date(comp.lastFetchedAt).toLocaleString() : "never"}</p>
         {comp.source === "ai_suggestion" && <p className="mt-1 text-xs text-amber-200">This name began as an unverified AI suggestion. Check the website is the right company.</p>}
       </header>
-      {msg && <p role="status" className="text-sm text-amber-200">{msg}</p>}
+      {msg && <p role="status" className="text-sm text-amber-200">{msg}<PlanLink msg={msg} /></p>}
 
       {canWrite && (
         <section className={`${card} space-y-3`} aria-label="Actions">

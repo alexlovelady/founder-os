@@ -53,7 +53,12 @@ export function useAiJob(onDone?: (job: Extract<JobState, { state: "done" }>) =>
 
 export function JobStatus({ job }: { job: JobState }) {
   if (job.state === "idle" || job.state === "done") return null;
-  if (job.state === "failed") return <p className="text-sm text-red-300" role="alert">{job.error}</p>;
+  if (job.state === "failed") return (
+    <>
+      <p className="text-sm text-red-300" role="alert">{job.error}</p>
+      {/plan|limit/i.test(job.error) && <a className="text-sm underline" href="/app/billing">See plans and usage</a>}
+    </>
+  );
   return (
     <p className="text-sm text-slate-300" role="status" aria-live="polite">
       {job.state === "waiting" ? `Waiting in the AI queue${job.message ? `: ${job.message}` : ""}` : "The AI is writing"}... this can take a few minutes on the private GPU. You can keep working.

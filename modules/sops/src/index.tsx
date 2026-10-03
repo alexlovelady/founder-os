@@ -209,6 +209,7 @@ export const tool: ToolDef = {
       if (b.action === "draft_sop" && !b.process?.trim()) throw new HttpError(400, "process: describe the process to draft");
       if (b.action !== "draft_sop" && !b.body?.trim()) throw new HttpError(400, "body: there is nothing to work on yet");
       const bc = await ctx.context();
+      await ctx.useQuota("ai_request");
       const { jobId } = await ctx.ai.start({
         system: AI_SYSTEM,
         prompt: buildPrompt(b.action, bc.asText(), { process: b.process, notes: b.notes, body: b.body, kind: b.kind ? KIND_LABEL[b.kind] : undefined }),

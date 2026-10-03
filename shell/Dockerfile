@@ -33,6 +33,10 @@ COPY modules/competitors modules/competitors
 # The rewrites in next.config.ts are fixed at build time: the address of the LegalAI service on Railway's private network.
 ARG LEGAL_URL=http://localhost:8000
 ENV LEGAL_URL=$LEGAL_URL
+# Public settings are read at build time (canonical URLs, contact address).
+ARG NEXT_PUBLIC_APP_URL=
+ARG NEXT_PUBLIC_CONTACT_EMAIL=
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL NEXT_PUBLIC_CONTACT_EMAIL=$NEXT_PUBLIC_CONTACT_EMAIL
 RUN npm run build --workspace shell
 
 FROM node:22-slim

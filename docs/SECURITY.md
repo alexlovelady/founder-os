@@ -8,7 +8,7 @@ Written from the code on 2026-10-03. If a control is not listed as "exists", ass
   Login attempts are rate limited in LegalAI (10 per 5 minutes).
 * The shell checks the session on the server for every page and API route (`getSession()` in `shell/src/lib/auth/server.ts` calls LegalAI `/api/auth/me`).
   Nothing relies on hiding things in the browser.
-* **Gaps.** Accounts are created by the LegalAI administrator (no self sign-up, no password reset flow in the shell). The target is a shell-owned
+* **Gaps.** Accounts are created by the LegalAI administrator, or by invite-code / open signup when `SIGNUP_MODE` is enabled (default `closed`; see docs/SIGNUP.md). There is no email verification and no password reset anywhere yet, so keep `open` signup off. The target is a shell-owned
   identity (see docs/ARCHITECTURE.md). Account deletion is not possible from the shell (`POST /api/privacy/delete-account` returns 501).
 
 ## Tenant isolation and roles

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { HttpError, json, readJson, requireWrite, route, UUID_RE, uuidParam, type AttentionItem, type ToolContext, type ToolDef } from "@founderos/sdk";
 import { checkClaims, FLAG_NOTE } from "./guard";
+import { renderTemplate, TEMPLATE_LABEL, TEMPLATE_TONES, templateSources, toneFromBrand, type TemplateTone } from "./templates";
 import { buildBrandPrompt, buildGenerationPrompt, cleanAiText, DEFAULT_TONE, EMPTY_BRAND, KIND_LABEL, KINDS, parseBrandSuggestion, SYSTEM, TONES, userSources, type Brand, type GenInput, type ItemKind } from "./prompts";
 import MarketingApp from "./ui/MarketingApp";
 import ItemEditor from "./ui/ItemEditor";
@@ -16,6 +17,11 @@ const BrandBody = z.object({
 const GenBody = z.object({
   kind: z.enum(KINDS), topic: z.string().trim().min(3).max(1000), channel: Str(100).optional(), details: Str(4000).optional(),
   reviewText: Str(3000).optional(), rating: Str(10).optional(), weeks: z.number().int().min(1).max(12).optional(),
+});
+const TemplateBody = z.object({
+  kind: z.enum(KINDS), offer: Str(1000).default(""), audience: Str(1000).default(""), tone: z.enum(TEMPLATE_TONES as [string, ...string[]]).optional(),
+  keyPoints: Str(3000).default(""), cta: Str(300).default(""), channel: Str(100).default(""), location: Str(100).default(""),
+  reviewText: Str(3000).default(""), rating: Str(10).default(""), weeks: z.number().int().min(1).max(12).optional(), senderName: Str(100).default(""),
 });
 const SuggestBody = z.object({ notes: Str(2000).default("") });
 const ItemBody = z.object({
@@ -53,6 +59,8 @@ function sourceTexts(ctx: ToolContext, brand: Brand | null, userInput: string): 
 async function startJob(ctx: ToolContext, kind: string, input: string, prompt: (businessText: string) => string, tier: "fast" | "deep") {
   if (!ctx.ai.available) throw new HttpError(503, "AI is not available right now. You can still write and save copy by hand.");
   const bc = await ctx.context();
+  // One AI request per start; a plan limit throws 402 with the plan message before any work is queued.
+  await ctx.useQuota("ai_request");
   const { jobId } = await ctx.ai.start({ system: SYSTEM, prompt: prompt(bc.asText()), tier });
   const [row] = await ctx.sql<{ id: string }[]>`INSERT INTO marketing_jobs (business_id, ai_job_id, kind, input, created_by) VALUES (${ctx.businessId}, ${jobId}, ${kind}, ${input}, ${ctx.userId}) RETURNING id`;
   return row.id;
@@ -137,6 +145,16 @@ export const tool: ToolDef = {
       const id = await startJob(ctx, b.kind, userSources(input), (bt) => buildGenerationPrompt(bt, brand, input), b.kind === "landing_copy" || b.kind === "content_calendar" || b.kind === "blog_outline" ? "deep" : "fast");
       return json({ id }, 202);
     },
+    // No AI: fills a template from the owner's answers. Not metered and works when AI is off or the plan's AI limit is used up.
+    "POST template": async (ctx, req) => {
+      requireWrite(ctx);
+      const b = await readJson(req, TemplateBody);
+      const brand = (await loadBrand(ctx)) ?? EMPTY_BRAND;
+      const input = { ...b, tone: (b.tone as TemplateTone | undefined) ?? toneFromBrand(brand.tone), businessName: ctx.business.name };
+      const text = renderTemplate(input);
+      const flags = checkClaims(text, sourceTexts(ctx, brand, templateSources(input)));
+      return json({ state: "done", method: "template", text, kind: b.kind, label: TEMPLATE_LABEL, flags, warning: flags.length ? FLAG_NOTE : null });
+    },
     "GET jobs/:id": async (ctx, _req, p) => {
       const [job] = await ctx.sql<{ ai_job_id: string; kind: string; input: string }[]>`SELECT ai_job_id, kind, input FROM marketing_jobs WHERE id = ${uuidParam(p.id)} AND business_id = ${ctx.businessId}`;
       if (!job) throw new HttpError(404, "Not found");
@@ -145,7 +163,7 @@ export const tool: ToolDef = {
       const text = cleanAiText(s.text);
       const flags = checkClaims(text, sourceTexts(ctx, await loadBrand(ctx), job.input));
       return json({
-        state: "done", text, kind: job.kind, label: "AI draft, review before use", flags, warning: flags.length ? FLAG_NOTE : null,
+        state: "done", text, kind: job.kind, method: "ai", label: "AI draft, review before use", flags, warning: flags.length ? FLAG_NOTE : null,
         ...(job.kind === "brand_suggest" ? { suggestion: parseBrandSuggestion(text) } : {}),
       });
     },

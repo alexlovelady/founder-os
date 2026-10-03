@@ -111,6 +111,11 @@ async function repoDetail(ctx: ToolContext, id: string) {
   return { repo: repoOut(repo), scans: scans.map(scanBrief), latest: scans[0] ? scanOut(scans[0]) : null };
 }
 
+/** Plan feature gate: a plan without it gets a plain 402 (the page shows the message). Plans that omit the flag keep the feature. */
+function requireFeature(ctx: ToolContext) {
+  if (ctx.plan.features.productScan === false) throw new HttpError(402, "Repository scanning is not included in your plan. See your plan and upgrade options on the billing page.");
+}
+
 export const tool: ToolDef = {
   id: "product",
   name: "Product Scan",
@@ -151,16 +156,19 @@ export const tool: ToolDef = {
   ],
 
   api: route({
-    "GET status": async (ctx) => json({ aiAvailable: ctx.ai.available, tokenStorage: getSecretKey() != null }),
+    "GET status": async (ctx) => json({ aiAvailable: ctx.ai.available, tokenStorage: getSecretKey() != null, scanIncluded: ctx.plan.features.productScan !== false }),
 
     "GET repos": async (ctx) => json({ repos: await listRepos(ctx) }),
 
     "POST repos": async (ctx, req) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const body = await readJson(req, AddBody);
       const ref = parseUrl(body.url);
       const [exists] = await ctx.sql`SELECT id FROM product_repos WHERE business_id = ${ctx.businessId} AND url = ${ref.url}`;
       if (exists) throw new HttpError(409, "This repository is already linked");
+      // Stock limit: checked against the real number of linked repositories (not recorded). 402 with the plan message when full.
+      await ctx.useQuota("product_repos");
       const key = getSecretKey();
       const [created] = await ctx.sql<RepoRow[]>`
         INSERT INTO product_repos (business_id, url, provider, owner, name, created_by) VALUES (${ctx.businessId}, ${ref.url}, ${ref.provider}, ${ref.owner}, ${ref.name}, ${ctx.userId})
@@ -189,6 +197,7 @@ export const tool: ToolDef = {
 
     "POST repos/:id/scan": async (ctx, req, p) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const repo = await getRepo(ctx, p.id);
       const body = await readJson(req, ScanBody);
       if (repo.last_scanned_at && deps.now().getTime() - repo.last_scanned_at.getTime() < deps.minRescanMs) throw new HttpError(429, "This repository was scanned moments ago. Wait a little before scanning again.");
@@ -235,6 +244,7 @@ export const tool: ToolDef = {
       const scan = await getScan(ctx, repo.id, p.sid);
       if (!ctx.ai.available) throw new HttpError(503, "AI is not available for this business right now. The scan results above are still valid.");
       const bc = await ctx.context();
+      await ctx.useQuota("ai_request");
       const { jobId } = await ctx.ai.start({ tier: "deep", system: SYSTEM_PROMPT, prompt: buildPrompt(scan.result, bc.asText()) });
       await ctx.sql`UPDATE product_scans SET ai_job_id = ${jobId}, ai_state = 'running', ai_error = NULL WHERE id = ${scan.id} AND business_id = ${ctx.businessId}`;
       return json({ state: "running" }, 202);
@@ -258,7 +268,7 @@ export const tool: ToolDef = {
   }),
 
   async Page({ ctx, path }) {
-    const common = { canWrite: ctx.canWrite, aiAvailable: ctx.ai.available, tokenStorage: getSecretKey() != null };
+    const common = { canWrite: ctx.canWrite, aiAvailable: ctx.ai.available, tokenStorage: getSecretKey() != null, scanIncluded: ctx.plan.features.productScan !== false };
     if (path[0]) {
       if (!UUID_RE.test(path[0])) return <p className="p-6 text-slate-300">Not found.</p>;
       const [r] = await ctx.sql<{ id: string }[]>`SELECT id FROM product_repos WHERE id = ${path[0]} AND business_id = ${ctx.businessId}`;

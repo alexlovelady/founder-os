@@ -131,6 +131,11 @@ async function listReports(ctx: ToolContext) {
   return rows.map(reportOut);
 }
 
+/** Plan feature gate: a plan without competitor research gets a plain 402 (the page shows the message). Plans that omit the flag keep it. */
+function requireFeature(ctx: ToolContext) {
+  if (ctx.plan.features.competitorResearch === false) throw new HttpError(402, "Competitor research is not included in your plan. See your plan and upgrade options on the billing page.");
+}
+
 export const tool: ToolDef = {
   id: "competitors",
   name: "Competitor Research",
@@ -214,16 +219,19 @@ export const tool: ToolDef = {
   ],
 
   api: route({
-    "GET status": async (ctx) => json({ aiAvailable: ctx.ai.available, searchEnabled: searchKey() != null, maxPages: MAX_PAGES }),
+    "GET status": async (ctx) => json({ aiAvailable: ctx.ai.available, searchEnabled: searchKey() != null, maxPages: MAX_PAGES, researchIncluded: ctx.plan.features.competitorResearch !== false }),
 
     "GET competitors": async (ctx) => json({ competitors: await listCompetitors(ctx) }),
 
     "POST competitors": async (ctx, req) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const b = await readJson(req, AddBody);
       const url = cleanUrl(b.url);
       const [exists] = await ctx.sql`SELECT id FROM competitors_items WHERE business_id = ${ctx.businessId} AND url = ${url}`;
       if (exists) throw new HttpError(409, "This competitor is already listed");
+      // Stock limit: checked against the real number of tracked competitors (not recorded). 402 with the plan message when full.
+      await ctx.useQuota("competitors");
       const [row] = await ctx.sql<Item[]>`
         INSERT INTO competitors_items (business_id, name, url, notes, source, created_by) VALUES (${ctx.businessId}, ${b.name}, ${url}, ${b.notes ?? ""}, ${b.source}, ${ctx.userId})
         RETURNING id, name, url, notes, source, status, last_error, last_fetched_at, created_at`;
@@ -249,6 +257,7 @@ export const tool: ToolDef = {
 
     "POST competitors/:id/pages": async (ctx, req, p) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const item = await getItem(ctx, p.id);
       const b = await readJson(req, PageBody);
       const url = cleanUrl(b.url);
@@ -271,6 +280,7 @@ export const tool: ToolDef = {
 
     "POST competitors/:id/fetch": async (ctx, _req, p) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const item = await getItem(ctx, p.id);
       if (item.last_fetched_at && deps.now().getTime() - item.last_fetched_at.getTime() < deps.cooldownMs) throw new HttpError(429, "This competitor was checked moments ago. Wait a little before checking again.");
       await checkRate(ctx);
@@ -299,6 +309,7 @@ export const tool: ToolDef = {
 
     "POST competitors/:id/analyze": async (ctx, _req, p) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const item = await getItem(ctx, p.id);
       if (!ctx.ai.available) throw new HttpError(503, "AI is not available for this business right now. You can still read the fetched pages.");
       const pages = await ctx.sql<{ url: string; title: string; text_excerpt: string; content_hash: string; fetched_at: Date; status: string }[]>`
@@ -308,6 +319,7 @@ export const tool: ToolDef = {
       const failed = pages.filter((x) => x.status !== "ok").map((x) => `${x.url} (${x.status === "blocked_robots" ? "skipped: robots.txt" : "could not be fetched"})`);
       const bc = await ctx.context();
       const facts = (await ctx.facts()).product ?? {};
+      await ctx.useQuota("ai_request");
       const sources: Source[] = ok.map((x) => ({ url: x.url, fetched_at: x.fetched_at.toISOString(), hash: x.content_hash, title: x.title, text: x.text_excerpt.slice(0, 6000) }));
       const { jobId } = await ctx.ai.start({
         tier: "deep", system: ANALYSIS_SYSTEM,
@@ -341,6 +353,7 @@ export const tool: ToolDef = {
 
     "POST report": async (ctx) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       if (!ctx.ai.available) throw new HttpError(503, "AI is not available for this business right now.");
       const rows = await ctx.sql<(AnalysisRow & { name: string; url: string })[]>`
         SELECT DISTINCT ON (a.competitor_id) a.id, a.competitor_id, a.result, a.ai_summary, a.ai_job_id, a.ai_state, a.ai_error, a.created_at, i.name, i.url
@@ -350,6 +363,7 @@ export const tool: ToolDef = {
       if (usable.length === 0) throw new HttpError(409, "Analyse at least one competitor first. The report only uses sourced claims.");
       const items: AnalysisForReport[] = usable.map((r) => ({ name: r.name, url: r.url, analysedAt: r.created_at.toISOString(), claims: r.result.claims as Claim[], comparison: r.result.comparison ?? null }));
       const bc = await ctx.context();
+      await ctx.useQuota("ai_request");
       const { jobId } = await ctx.ai.start({ tier: "deep", system: REPORT_SYSTEM, prompt: reportPrompt(bc.asText(), (await ctx.facts()).product ?? {}, items) });
       const result = { competitors: usable.map((r) => ({ id: r.competitor_id, name: r.name, analysisId: r.id, analysedAt: r.created_at.toISOString() })) };
       const [row] = await ctx.sql<{ id: string }[]>`INSERT INTO competitors_reports (business_id, result, ai_job_id, ai_state) VALUES (${ctx.businessId}, ${ctx.sql.json(result as never)}, ${jobId}, 'running') RETURNING id`;
@@ -373,6 +387,7 @@ export const tool: ToolDef = {
 
     "POST discover": async (ctx, req) => {
       requireWrite(ctx);
+      requireFeature(ctx);
       const b = await readJson(req, DiscoverBody);
       const subject = ctx.business.name;
       const query = b.query || `alternatives to ${subject}`;
@@ -399,6 +414,7 @@ export const tool: ToolDef = {
       }
       if (!ctx.ai.available) throw new HttpError(503, "No search service is configured and AI is not available, so suggestions cannot be made. You can still add competitors yourself.");
       const bc = await ctx.context();
+      await ctx.useQuota("ai_request");
       const { jobId } = await ctx.ai.start({ tier: "fast", prompt: discoverPrompt(bc.asText(), query) });
       const [row] = await ctx.sql<{ id: string }[]>`INSERT INTO competitors_discoveries (business_id, query, ai_job_id) VALUES (${ctx.businessId}, ${query}, ${jobId}) RETURNING id`;
       return json({ source: "ai", discoveryId: row.id, state: "running" }, 202);
@@ -426,7 +442,7 @@ export const tool: ToolDef = {
   }),
 
   async Page({ ctx, path }) {
-    const common = { canWrite: ctx.canWrite, aiAvailable: ctx.ai.available, searchEnabled: searchKey() != null, businessName: ctx.business.name };
+    const common = { canWrite: ctx.canWrite, aiAvailable: ctx.ai.available, searchEnabled: searchKey() != null, businessName: ctx.business.name, researchIncluded: ctx.plan.features.competitorResearch !== false };
     if (path[0]) {
       if (!UUID_RE.test(path[0])) return <p className="p-6 text-slate-300">Not found.</p>;
       const [r] = await ctx.sql<{ id: string }[]>`SELECT id FROM competitors_items WHERE id = ${path[0]} AND business_id = ${ctx.businessId}`;

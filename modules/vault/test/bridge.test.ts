@@ -79,7 +79,7 @@ describe("vault to LegalAI bridge", () => {
     expect(review.headers).toMatchObject({ cookie: session.cookie, "x-csrf-token": session.csrf, "content-type": "application/json" });
     expect(JSON.parse(review.body as string)).toEqual({ document_id: LEGAL_DOC, perspective: "vendor" });
     expect(quota).toHaveBeenCalledTimes(1);
-    expect(quota).toHaveBeenCalledWith("aiRequestsPerMonth");
+    expect(quota).toHaveBeenCalledWith("ai_request");
 
     const detail = (await call(tool, env.ctx, "GET", `documents/${docId}`)).data;
     expect(detail.legalLink).toMatchObject({ legalDocumentId: LEGAL_DOC, legalReviewId: REVIEW, perspective: "vendor", version: 1 });

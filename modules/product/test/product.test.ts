@@ -6,6 +6,7 @@ import { parseRepoUrl, RepoUrlError } from "../src/repo-url";
 import { chooseFiles, LIMITS, scanRepository, type ScanDeps } from "../src/scanner";
 import { decryptToken, encryptToken, getSecretKey } from "../src/token-crypto";
 import { deps, tool } from "../src/index";
+import { withPlan } from "./limited";
 
 // ---------- a fake GitHub / GitLab (no network) ----------
 
@@ -494,5 +495,69 @@ describe("product tool (database)", () => {
     expect((await call(tool, env.ctx, "DELETE", `repos/${repoId}`)).status).toBe(200);
     const [{ n }] = await env.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM product_scans WHERE repo_id = ${repoId}`;
     expect(n).toBe(0);
+  });
+});
+
+describe("product plan limits and features", () => {
+  let env: TestEnv;
+  let log: { url: string; auth?: string | null }[] = [];
+  const stock = (e: TestEnv) => async (k: string) => (k === "productRepos" ? (await e.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM product_repos WHERE business_id = ${e.ctx.businessId}`)[0].n : 0);
+
+  beforeAll(async () => {
+    deps.now = fixedNow;
+    deps.minRescanMs = 0;
+    log = [];
+    deps.fetch = fakeGithub(SAMPLE, log);
+    env = await makeTestEnv([tool], { ai: new FakeAi(["SUMMARY: one.", "SUMMARY: two."]) });
+  });
+  afterAll(async () => {
+    await env.cleanup();
+  });
+
+  it("refuses a repository over the plan limit with a 402 before reading anything, and allows one again after a delete", async () => {
+    const { ctx, calls } = withPlan(env.ctx, { limits: { productRepos: 1 }, stock: stock(env) });
+    const first = await call(tool, ctx, "POST", "repos", { url: "https://github.com/acme/app" });
+    expect(first.status).toBe(201);
+    const fetched = log.length;
+    const second = await call(tool, ctx, "POST", "repos", { url: "https://github.com/acme/other" });
+    expect(second.status).toBe(402);
+    expect(second.data.error).toMatch(/product repositories/);
+    expect(log.length).toBe(fetched);
+    expect(calls.map(([m]) => m)).toEqual(["product_repos", "product_repos"]);
+    const [{ n }] = await env.sql`SELECT count(*)::int AS n FROM product_repos WHERE business_id = ${env.ctx.businessId}`;
+    expect(n).toBe(1);
+    expect((await call(tool, ctx, "DELETE", `repos/${first.data.repo.id}`)).status).toBe(200);
+    expect((await call(tool, ctx, "POST", "repos", { url: "https://github.com/acme/app" })).status).toBe(201);
+  });
+
+  it("counts one ai_request per analysis start and refuses with a 402 when the limit is used", async () => {
+    const [repo] = await env.sql<{ id: string }[]>`SELECT id FROM product_repos WHERE business_id = ${env.ctx.businessId}`;
+    const [scan] = await env.sql<{ id: string }[]>`SELECT id FROM product_scans WHERE repo_id = ${repo.id} ORDER BY created_at DESC LIMIT 1`;
+    const { ctx, calls } = withPlan(env.ctx, { limits: { aiRequestsPerMonth: 1 } });
+    expect((await call(tool, ctx, "POST", `repos/${repo.id}/scans/${scan.id}/ai`)).status).toBe(202);
+    const blocked = await call(tool, ctx, "POST", `repos/${repo.id}/scans/${scan.id}/ai`);
+    expect(blocked.status).toBe(402);
+    expect(blocked.data.error).toMatch(/AI requests a month/);
+    expect(env.ai.calls).toHaveLength(1);
+    expect(calls).toEqual([["ai_request", 1], ["ai_request", 1]]);
+    // The scan itself is not AI and is not counted.
+    expect((await call(tool, ctx, "POST", `repos/${repo.id}/scan`, {})).status).toBe(200);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("returns 402 with a plain message when the plan has no product scan, still reads existing data, and the page flag is exposed", async () => {
+    const { ctx } = withPlan(env.ctx, { features: { productScan: false } });
+    const [repo] = await env.sql<{ id: string }[]>`SELECT id FROM product_repos WHERE business_id = ${env.ctx.businessId}`;
+    const before = log.length;
+    const add = await call(tool, ctx, "POST", "repos", { url: "https://github.com/acme/app2" });
+    expect(add.status).toBe(402);
+    expect(add.data.error).toMatch(/not included in your plan/);
+    const scan = await call(tool, ctx, "POST", `repos/${repo.id}/scan`, {});
+    expect(scan.status).toBe(402);
+    expect(scan.data.error).toMatch(/not included in your plan/);
+    expect(log.length).toBe(before);
+    expect((await call(tool, ctx, "GET", "repos")).status).toBe(200);
+    expect((await call(tool, ctx, "GET", "status")).data.scanIncluded).toBe(false);
+    expect((await call(tool, env.ctx, "GET", "status")).data.scanIncluded).toBe(true);
   });
 });

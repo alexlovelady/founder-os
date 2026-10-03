@@ -16,6 +16,11 @@ Link a GitHub or GitLab repository and FounderOS works out what the product is, 
 - The browser only ever learns `hasToken: true/false`. Tokens are never logged, never put in error messages, never sent to any host except the fixed API host, and can be deleted at any time.
 - Rotating the key makes stored tokens unreadable; users paste them again.
 
+## Plan limits
+- **Repositories**: adding one calls `ctx.useQuota("product_repos")` before anything is read or stored (stock limit: checked against the real number of linked repositories, not recorded). At the limit: 402 with the plan message.
+- **AI**: starting an AI analysis calls `ctx.useQuota("ai_request")` once, before the job starts. Scanning itself is not AI and is not counted.
+- **Feature flag**: when `ctx.plan.features.productScan` is `false`, adding a repository and re-scanning answer 402 "not included in your plan", the page shows a notice instead of the form, and existing data stays readable. Plans that omit the flag keep the feature.
+
 ## Tables
 `product_repos` (url, provider, owner, name, `token_enc`, last_scanned_at, status, last_error) and `product_scans` (repo_id, `result` jsonb, ai_summary, ai_job_id, ai_state, created_at). Every row carries `business_id`; scans cascade-delete with their repo.
 

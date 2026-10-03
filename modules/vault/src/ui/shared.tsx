@@ -111,3 +111,8 @@ export function Snippet({ html }: { html: string }) {
     </span>
   );
 }
+
+/** A link to the billing page, shown after a plan-limit message (HTTP 402) from the server. */
+export function PlanLink({ msg }: { msg?: string }) {
+  return msg && /plan/i.test(msg) ? <a className="ml-2 underline" href="/app/billing">See plans and usage</a> : null;
+}

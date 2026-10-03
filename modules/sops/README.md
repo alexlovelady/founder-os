@@ -8,6 +8,9 @@ Keeps the business's processes and everyday documents. Works fully without AI; A
 - **Editor**: markdown textarea + live preview (own tiny parser in `src/markdown.ts`; renders React elements, never raw HTML, all exports escaped), version history with restore, review cycle (none/quarterly/yearly) and "mark reviewed", download `.md`, Word (`.doc`, HTML that Word opens; no DOCX library), print/save as PDF, LinkedItems.
 - **Checklist and tasks**: "Turn into a checklist" rewrites the steps as `- [ ]` items. "Create tasks from these steps" POSTs from the browser to `/api/tools/tasks/from-source` with `{ source: { tool: "sops", id }, title, items: [{ title }] }`; a 404 shows "Tasks tool not available yet". The tasks package is not imported.
 
+## Plan limits
+`POST ai` calls `ctx.useQuota("ai_request")` once per AI job start (after validation, before the job starts); at the limit it answers 402 with the plan message and the editor shows it with a link to the billing page. The SOP builder, document templates and everything else work without AI and are never metered.
+
 ## Tables
 `sops_documents` (title, kind, body, status, owner, review_frequency, last_reviewed, version) and `sops_versions` (one row per saved revision). Both carry `business_id` and cascade on business delete.
 

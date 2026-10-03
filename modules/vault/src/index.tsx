@@ -340,6 +340,8 @@ export const tool: ToolDef = {
       requireWrite(ctx);
       const { form, filename, bytes } = await readUpload(req);
       const f = parseUploadFields(form);
+      // Stock limit: the real total of stored files plus this upload against the plan's storage (checked, not recorded). 402 with the plan message.
+      await ctx.useQuota("storage_bytes", bytes.length);
       const dot = filename.lastIndexOf(".");
       const display = f.name ?? (dot > 0 ? filename.slice(0, dot) : filename);
       const id = randomUUID();
@@ -388,6 +390,7 @@ export const tool: ToolDef = {
       requireWrite(ctx);
       const id = uuidParam(p.id);
       const { filename, bytes } = await readUpload(req);
+      await ctx.useQuota("storage_bytes", bytes.length);
       const digest = sha(bytes);
       const ext = filename.slice(filename.lastIndexOf(".") + 1).toLowerCase();
       let newVersion = 0;
@@ -446,7 +449,7 @@ export const tool: ToolDef = {
       }
       if (!r.excerpt.trim()) throw new HttpError(409, "There is no readable text for this document yet, so it cannot be summarized.");
       if (!ctx.ai.available) throw new HttpError(503, "AI is not set up for this business yet, so summaries are unavailable.");
-      await ctx.useQuota("aiRequestsPerMonth");
+      await ctx.useQuota("ai_request");
       const about = (await ctx.context()).asText().slice(0, 2500);
       const truncated = r.chars > SUMMARY_INPUT_CHARS;
       const prompt = `About the business:\n${about}\n\nDocument name: ${r.name}\n${truncated ? `(Only the first ${SUMMARY_INPUT_CHARS} characters of ${r.chars} are shown.)\n` : ""}<<<DOCUMENT TEXT\n${r.excerpt}\nDOCUMENT TEXT>>>\n\nSummarize the document.`;
