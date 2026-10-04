@@ -19,7 +19,9 @@ afterAll(async () => {
 
 const rnd = () => Math.random().toString(36).slice(2, 10);
 const TOKEN = "x".repeat(40);
-const E = (mode: string, extra: Record<string, string> = {}) => ({ SIGNUP_MODE: mode, INTERNAL_PROVISION_TOKEN: TOKEN, LEGAL_URL: "http://legal.test", ...extra });
+// Email settings are present so `open` mode (which now requires email verification) is available; nothing is ever sent (noFlush).
+const E = (mode: string, extra: Record<string, string> = {}) => ({ SIGNUP_MODE: mode, INTERNAL_PROVISION_TOKEN: TOKEN, LEGAL_URL: "http://legal.test", RESEND_API_KEY: "re_test_key", EMAIL_FROM: "FounderOS <no-reply@example.test>", APP_URL: "https://app.example.test", ...extra });
+const noFlush = async () => {};
 const newCodeRow = async (o: { maxUses?: number; expiresInDays?: number | null } = {}) => {
   const r = await createCode(env.sql, { actorId: "admin-1", label: "t", ...o });
   if (!r.ok) throw new Error(r.message);
@@ -128,7 +130,7 @@ describe("rate limiting", () => {
     const ip = ipFor();
     const email = `${rnd()}@example.com`;
     const legal = fakeLegal();
-    await signup(form({ email }), { sql: env.sql, fetch: legal.f, env: E("open"), ip });
+    await signup(form({ email }), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("open"), ip });
     const rows = await env.sql`SELECT * FROM signup_attempts WHERE ip_hash = ${hashId("ip", ip, E("open"))}`;
     expect(rows).toHaveLength(1);
     const dump = JSON.stringify(rows);
@@ -152,16 +154,16 @@ describe("mode gating", () => {
 
   it("closed: refuses and never calls LegalAI", async () => {
     const legal = fakeLegal();
-    const r = await signup(form(), { sql: env.sql, fetch: legal.f, env: E("closed"), ip: ipFor() });
+    const r = await signup(form(), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("closed"), ip: ipFor() });
     expect(r).toMatchObject({ ok: false, status: 403 });
     expect(legal.calls).toHaveLength(0);
   });
 
   it("503 when the provisioning token is not configured (and no call is made)", async () => {
     const legal = fakeLegal();
-    const r = await signup(form(), { sql: env.sql, fetch: legal.f, env: { SIGNUP_MODE: "open" }, ip: ipFor() });
+    const r = await signup(form(), { sql: env.sql, flush: noFlush, fetch: legal.f, env: { SIGNUP_MODE: "open" }, ip: ipFor() });
     expect(r).toMatchObject({ ok: false, status: 503 });
-    const r2 = await signup(form(), { sql: env.sql, fetch: legal.f, env: E("open", { INTERNAL_PROVISION_TOKEN: "short" }), ip: ipFor() });
+    const r2 = await signup(form(), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("open", { INTERNAL_PROVISION_TOKEN: "short" }), ip: ipFor() });
     expect(r2).toMatchObject({ ok: false, status: 503 });
     expect(legal.calls).toHaveLength(0);
   });
@@ -169,10 +171,10 @@ describe("mode gating", () => {
   it("invite: requires a code; a good code creates the account and is used up", async () => {
     const ip = ipFor();
     const legal = fakeLegal();
-    expect(await signup(form(), { sql: env.sql, fetch: legal.f, env: E("invite"), ip })).toMatchObject({ ok: false, status: 400 });
+    expect(await signup(form(), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("invite"), ip })).toMatchObject({ ok: false, status: 400 });
     expect(legal.calls).toHaveLength(0);
     const { code, summary } = await newCodeRow();
-    const r = await signup(form({ code: code.toLowerCase() }), { sql: env.sql, fetch: legal.f, env: E("invite"), ip });
+    const r = await signup(form({ code: code.toLowerCase() }), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("invite"), ip });
     expect(r).toEqual({ ok: true, next: "/login?created=1" });
     expect(await useCount(summary.id)).toBe(1);
     expect(legal.calls).toHaveLength(1);
@@ -180,7 +182,7 @@ describe("mode gating", () => {
     expect(legal.calls[0].headers["x-internal-token"]).toBe(TOKEN);
     expect(Object.keys(legal.calls[0].body).sort()).toEqual(["display_name", "email", "password"]);
     // the same code cannot be used again
-    const r2 = await signup(form({ code }), { sql: env.sql, fetch: legal.f, env: E("invite"), ip: ipFor() });
+    const r2 = await signup(form({ code }), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("invite"), ip: ipFor() });
     expect(r2).toMatchObject({ ok: false, status: 400 });
     expect(legal.calls).toHaveLength(1);
   });
@@ -188,7 +190,7 @@ describe("mode gating", () => {
   it("invite: a wrong code is refused without calling LegalAI and the attempt is recorded", async () => {
     const ip = ipFor();
     const legal = fakeLegal();
-    const r = await signup(form({ code: "FOS-AAAAA-BBBBB-CCCCC-DDDDD" }), { sql: env.sql, fetch: legal.f, env: E("invite"), ip });
+    const r = await signup(form({ code: "FOS-AAAAA-BBBBB-CCCCC-DDDDD" }), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("invite"), ip });
     expect(r).toMatchObject({ ok: false, status: 400 });
     expect(legal.calls).toHaveLength(0);
     const [a] = await env.sql<{ outcome: string }[]>`SELECT outcome FROM signup_attempts WHERE ip_hash = ${hashId("ip", ip, E("invite"))}`;
@@ -197,13 +199,13 @@ describe("mode gating", () => {
 
   it("open: no code needed; a code, if sent, is ignored", async () => {
     const legal = fakeLegal();
-    const r = await signup(form(), { sql: env.sql, fetch: legal.f, env: E("open"), ip: ipFor() });
+    const r = await signup(form(), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("open"), ip: ipFor() });
     expect(r.ok).toBe(true);
   });
 
   it("validates input: terms, password length, email, name", async () => {
     const legal = fakeLegal();
-    const d = (o: Record<string, unknown>) => signup(form(o), { sql: env.sql, fetch: legal.f, env: E("open"), ip: ipFor() });
+    const d = (o: Record<string, unknown>) => signup(form(o), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("open"), ip: ipFor() });
     expect(await d({ acceptTerms: false })).toMatchObject({ ok: false, status: 400 });
     expect(await d({ acceptTerms: undefined })).toMatchObject({ ok: false, status: 400 });
     expect(await d({ password: "short" })).toMatchObject({ ok: false, status: 400 });
@@ -228,25 +230,25 @@ describe("rollback when LegalAI does not create the account", () => {
   for (const [name, mk, status] of cases) {
     it(`restores the code use: ${name}`, async () => {
       const { code, summary } = await newCodeRow({ maxUses: 1 });
-      const r = await signup(form({ code }), { sql: env.sql, fetch: mk(), env: E("invite"), ip: ipFor() });
+      const r = await signup(form({ code }), { sql: env.sql, flush: noFlush, fetch: mk(), env: E("invite"), ip: ipFor() });
       expect(r).toMatchObject({ ok: false, status });
       expect(await useCount(summary.id)).toBe(0);
       // and the code still works afterwards
-      const ok = await signup(form({ code }), { sql: env.sql, fetch: fakeLegal().f, env: E("invite"), ip: ipFor() });
+      const ok = await signup(form({ code }), { sql: env.sql, flush: noFlush, fetch: fakeLegal().f, env: E("invite"), ip: ipFor() });
       expect(ok.ok).toBe(true);
       expect(await useCount(summary.id)).toBe(1);
     });
   }
 
   it("the failure message does not leak the token, password or internal detail", async () => {
-    const r = await signup(form(), { sql: env.sql, fetch: fakeLegal(500).f, env: E("open"), ip: ipFor() });
+    const r = await signup(form(), { sql: env.sql, flush: noFlush, fetch: fakeLegal(500).f, env: E("open"), ip: ipFor() });
     expect(JSON.stringify(r)).not.toMatch(new RegExp(`${TOKEN}|a long enough passphrase|legal\\.test`));
   });
 
   it("concurrent signups on a single-use code create exactly one account", async () => {
     const { code, summary } = await newCodeRow({ maxUses: 1 });
     const legal = fakeLegal();
-    const rs = await Promise.all(Array.from({ length: 4 }, () => signup(form({ code }), { sql: env.sql, fetch: legal.f, env: E("invite"), ip: ipFor() })));
+    const rs = await Promise.all(Array.from({ length: 4 }, () => signup(form({ code }), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("invite"), ip: ipFor() })));
     expect(rs.filter((r) => r.ok)).toHaveLength(1);
     expect(legal.calls).toHaveLength(1);
     expect(await useCount(summary.id)).toBe(1);
@@ -256,7 +258,7 @@ describe("rollback when LegalAI does not create the account", () => {
     const email = `${rnd()}@example.com`;
     const legal = fakeLegal(409);
     const rs = [];
-    for (let i = 0; i < 4; i++) rs.push(await signup(form({ email }), { sql: env.sql, fetch: legal.f, env: E("open"), ip: ipFor() }));
+    for (let i = 0; i < 4; i++) rs.push(await signup(form({ email }), { sql: env.sql, flush: noFlush, fetch: legal.f, env: E("open"), ip: ipFor() }));
     expect(rs.map((r) => (r.ok ? 200 : r.status))).toEqual([409, 409, 409, 429]);
     await env.sql`DELETE FROM signup_attempts WHERE email_hash = ${hashId("email", email, E("open"))}`;
   });

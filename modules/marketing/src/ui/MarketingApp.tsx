@@ -14,7 +14,6 @@ export default function MarketingApp({ brand, brandSaved, items, canWrite, aiAva
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-4">
       <header>
-        <h1 className="text-xl font-semibold">Marketing</h1>
         <p className="text-sm text-slate-400">Drafts that sound like your business. This tool writes copy only: it does not post anywhere and does not track results.</p>
       </header>
       <div role="tablist" className="flex flex-wrap gap-2">

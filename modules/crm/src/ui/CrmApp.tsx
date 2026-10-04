@@ -104,7 +104,7 @@ export function ContactsView({ initial, canWrite }: { initial: Contact[]; canWri
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Contacts</h1>
+          <h2 className="text-xl font-semibold">Contacts</h2>
           <p className="text-sm text-slate-400">{contacts.length} shown</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -307,7 +307,7 @@ export function ContactDetail({ contact: initial, opportunities: initialOpps, ti
       <div className={`${card} space-y-3`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold">{contact.name}</h1>
+            <h2 className="text-xl font-semibold">{contact.name}</h2>
             <p className="text-sm text-slate-400">{[contact.company, contact.type, contact.status].filter(Boolean).join(" · ")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -468,7 +468,7 @@ export function OpportunityDetail({ opportunity: initial, timeline: initialTl, c
       <div className={`${card} space-y-3`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold">{opp.title}</h1>
+            <h2 className="text-xl font-semibold">{opp.title}</h2>
             <p className="text-sm text-slate-400">{stageLabel(opp.stage)} · {formatUsd(opp.valueCents)}{opp.expectedClose && ` · expected close ${opp.expectedClose}`}</p>
             {opp.stage === "lost" && opp.lostReason && <p className="text-sm text-slate-400">Lost because: {opp.lostReason}</p>}
           </div>
@@ -541,7 +541,7 @@ export function PipelineView({ initial, canWrite }: { initial: PipelineData; can
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Pipeline</h1>
+          <h2 className="text-xl font-semibold">Pipeline</h2>
           <p className="text-sm text-slate-400">Open deals {formatUsd(openTotal)} · flagged stale after {data.staleDays} days without activity</p>
         </div>
         {canWrite && <button className={btnPrimary} onClick={openAdd} aria-expanded={adding}>{adding ? "Close" : "Add opportunity"}</button>}

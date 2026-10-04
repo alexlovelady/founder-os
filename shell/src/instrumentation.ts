@@ -10,5 +10,23 @@ export async function register() {
   const { setBriefEnabledHook } = await import("./lib/notify/hooks");
   const { planFor } = await import("./lib/tools/plan");
   setBriefEnabledHook(async (businessId) => (await planFor(db(), businessId)).features.weeklyBrief !== false);
+  // operations jobs: verified database backup and error retention purge (docs/BACKUPS.md)
+  const { registerJobs } = await import("./lib/notify/scheduler");
+  const { OPS_JOBS } = await import("./lib/ops/jobs");
+  registerJobs(OPS_JOBS);
   (await import("./lib/notify/scheduler")).startScheduler();
+}
+
+/**
+ * Server errors (render, route handlers, server actions) land in error_events and, when SENTRY_DSN is set, in Sentry.
+ * Only the route pattern is used (never the URL with its query string); headers and bodies are not read. Never throws.
+ */
+export async function onRequestError(err: unknown, request: { path: string; method: string }, context: { routePath?: string; routeType?: string }) {
+  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  try {
+    const { captureError } = await import("./lib/ops/errors");
+    await captureError(err, { route: context?.routePath || request?.path, method: request?.method, status: context?.routeType });
+  } catch {
+    /* an error reporter must not raise errors */
+  }
 }

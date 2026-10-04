@@ -65,7 +65,6 @@ export default function ComplianceCenter({ initial, canWrite, focusId, profileSt
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 text-slate-100">
       <header>
-        <h1 className="text-2xl font-semibold">Compliance Center</h1>
         <p className="mt-1 text-sm text-slate-400">
           A checklist of obligations that may apply to your business, built from a rule set and each rule&apos;s official source. It is a prompt to check, not legal advice: confirm anything important at the source or with a professional.
         </p>

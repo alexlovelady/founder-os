@@ -14,6 +14,23 @@ export const LIMITS = {
   upload: 30,
 } as const;
 
+/**
+ * Account lifecycle routes (password reset, email verification, account deletion). Strict per client IP, in addition to the general rules and
+ * to the per-hashed-IP and per-hashed-email limits kept in the database (lib/lifecycle/limits.ts). Separate from LIMITS on purpose.
+ */
+const TEN_MINUTES = 10 * MINUTE;
+export const ACCOUNT_LIMITS = { mail: 5, token: 10, sensitive: 5, admin: 20, page: 30 } as const;
+const ACCOUNT_API: Record<string, RateRule> = {
+  "/api/account/forgot": { bucket: "acct-mail", limit: ACCOUNT_LIMITS.mail, windowMs: TEN_MINUTES },
+  "/api/account/resend-verification": { bucket: "acct-mail", limit: ACCOUNT_LIMITS.mail, windowMs: TEN_MINUTES },
+  "/api/account/reset": { bucket: "acct-token", limit: ACCOUNT_LIMITS.token, windowMs: TEN_MINUTES },
+  "/api/account/verify": { bucket: "acct-token", limit: ACCOUNT_LIMITS.token, windowMs: TEN_MINUTES },
+  "/api/account/delete": { bucket: "acct-sensitive", limit: ACCOUNT_LIMITS.sensitive, windowMs: TEN_MINUTES },
+  "/api/account/admin-reset-link": { bucket: "acct-admin", limit: ACCOUNT_LIMITS.admin, windowMs: TEN_MINUTES },
+};
+/** The public pages of the same flows. NOTE: src/proxy.ts only sees them if its matcher lists /forgot, /reset/:path* and /verify/:path*. */
+const isAccountPage = (p: string): boolean => p === "/forgot" || p === "/verify" || p.startsWith("/reset/") || p.startsWith("/verify/");
+
 /** Methods that change state. */
 export const isMutating = (method: string): boolean => !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
 
@@ -40,8 +57,11 @@ export function classifyRequest(method: string, rawPathname: string): RateRule[]
     // One shared bucket for password and MFA step: guessing either is the same attack.
     return [{ bucket: "login", limit: LIMITS.login, windowMs: MINUTE }];
   }
+  if (isAccountPage(p)) return [{ bucket: "acct-page", limit: ACCOUNT_LIMITS.page, windowMs: MINUTE }];
   if (!isApi(p) || isWebhook(p)) return rules;
 
+  const acct = ACCOUNT_API[p];
+  if (acct && isMutating(m)) rules.push(acct);
   if (p === "/api/feedback" || p === "/api/events") rules.push({ bucket: `fe:${p}`, limit: LIMITS.feedbackEvents, windowMs: MINUTE });
   if (isUpload(m, p)) rules.push({ bucket: "upload", limit: LIMITS.upload, windowMs: MINUTE });
   if (isMutating(m)) rules.push({ bucket: "api-mutating", limit: LIMITS.mutating, windowMs: MINUTE });

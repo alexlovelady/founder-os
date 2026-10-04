@@ -2,7 +2,7 @@
 
 Written from the code on 2026-10-03. It says what the repository can show. Anything about the live Railway project that the repository cannot show is marked **not verified**: check it in the dashboard. For the first-time setup of an empty project read docs/DEPLOYMENT.md; this file is for running the product afterwards. Security status is in docs/SECURITY.md.
 
-Contents: [Services](#services) · [Deploys](#deploys) · [Environment variables](#environment-variables) · [Migrations](#migrations) · [Scheduler](#scheduler) · [Backups and restore](#backups-and-restore) · [Request gate: rate limits and CSRF](#request-gate-rate-limits-and-same-site-check) · [Rotating secrets](#rotating-secrets) · [Resetting a stuck LegalAI job queue](#resetting-a-stuck-legalai-job-queue) · [Health checks](#health-checks) · [Demo data](#demo-data) · [Quick reference](#quick-reference)
+Contents: [Services](#services) · [Deploys](#deploys) · [Environment variables](#environment-variables) · [Migrations](#migrations) · [Scheduler](#scheduler) · [Backups and restore](#backups-and-restore) · [Monitoring](#monitoring-errors-and-logs) · [Request gate: rate limits and CSRF](#request-gate-rate-limits-and-same-site-check) · [Rotating secrets](#rotating-secrets) · [Resetting a stuck LegalAI job queue](#resetting-a-stuck-legalai-job-queue) · [Health checks](#health-checks) · [Demo data](#demo-data) · [Quick reference](#quick-reference)
 
 ## Services
 | Service | What | Health |
@@ -59,11 +59,21 @@ Every variable the code reads. "Needed" means the feature is off or the service 
 | `NEXT_RUNTIME`, `NEXT_PHASE` | set by Next.js | Used to keep migrations and the scheduler out of `next build`. Do not set them. |
 | `RAILWAY_DOCKERFILE_PATH` | yes on Railway | `shell/Dockerfile`. |
 
+### Operations (read by the running shell)
+| Variable | Default | What it does |
+|---|---|---|
+| `BACKUP_DIR` | unset = backups off | Folder for the scheduled verified dumps; on Railway `/data/backups` on a volume mounted at `/data`. docs/BACKUPS.md. |
+| `BACKUP_KEEP` | 7 | Dumps kept in `BACKUP_DIR`. |
+| `BACKUP_VERIFY_RESTORE` | off | `1` = also restore each dump into a scratch database and compare row counts. |
+| `BACKUP_PULL_TOKEN` | unset = pull endpoints 404 | 32+ characters; lets the owner's PC download the latest verified dump (`X-Internal-Token`). Separate from `INTERNAL_PROVISION_TOKEN`. |
+| `SENTRY_DSN` | unset | Optional: also forward sanitized server errors to Sentry (no SDK; one envelope POST). |
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn` or `error`. |
+
 ### Scripts and tests (not read by the running server)
 | Variable | Used by | What it does |
 |---|---|---|
-| `BACKUP_DIR` | `backup-shell.mjs`, `restore-check.mjs` | Default backup folder (`backups/shell`). |
-| `BACKUP_KEEP` | `backup-shell.mjs` | How many dumps to keep (default 14). |
+| `BACKUP_DIR` | `backup-shell.mjs`, `restore-check.mjs` | Default backup folder (`backups/shell`). (The server reads the same name for the scheduled job, see above.) |
+| `BACKUP_KEEP` | `backup-shell.mjs` | How many dumps to keep (default 14; the server's scheduled job defaults to 7). |
 | `BACKUP_DOCKER` | both | Container name to run `pg_dump` / `pg_restore` in (for a PC with Postgres in Docker and no client). |
 | `PG_DUMP`, `PG_RESTORE` | both | Full paths to the client tools when they are not on `PATH`. |
 | `TEST_DATABASE_URL` | vitest (`@founderos/sdk/testing`) | Defaults to `postgresql://legalai:legalai-dev@localhost:5442/founderos_test`. |
@@ -110,14 +120,14 @@ Two mechanisms, both automatic and forward-only (docs/DATABASE.md):
 Run by hand locally: `cd shell && DATABASE_URL=... node scripts/migrate.mjs`. A rollback of the code does not undo a migration; to undo data changes restore a verified backup into a **new** database and point `DATABASE_URL` at it. To see what has run: `SELECT * FROM schema_migrations ORDER BY name;` and `SELECT * FROM tool_migrations ORDER BY tool, name;`.
 
 ## Scheduler
-The shell starts a scheduler in-process (`startScheduler()` from `instrumentation.ts`). Every `SCHEDULER_TICK_MS` (10 minutes) it runs the due jobs under a Postgres advisory lock, so only one instance does the work, and records each run in `scheduled_runs(job, ran_at, ok, detail)`. Jobs: notification outbox, daily reminders, weekly brief, system automations (docs/NOTIFICATIONS.md).
+The shell starts a scheduler in-process (`startScheduler()` from `instrumentation.ts`). Every `SCHEDULER_TICK_MS` (10 minutes) it runs the due jobs under a Postgres advisory lock, so only one instance does the work, and records each run in `scheduled_runs(job, ran_at, ok, detail)`. Jobs: notification outbox, daily reminders, weekly brief, system automations (docs/NOTIFICATIONS.md), and two operations jobs registered from `instrumentation.ts`: `shell_backup` (daily, verified database dump, docs/BACKUPS.md) and `error_purge` (daily, deletes error groups not seen for 90 days).
 * Check it: `SELECT job, max(ran_at) AS last, bool_and(ok) FROM scheduled_runs GROUP BY job;` Each job should have a recent run.
 * Stop it: set `SCHEDULER_DISABLED=1` and restart. It never runs during `next build`.
 * With several shell instances only one runs a given job per tick (advisory lock), so it is safe; if you want one instance to carry no scheduler, set `SCHEDULER_DISABLED=1` on the others.
 * Email is off until `RESEND_API_KEY` and `EMAIL_FROM` exist; nothing is queued without a provider.
 
 ## Backups and restore
-Honest status: **the shell database has no automated backup in this repository other than the scripts below, and nothing runs them on a schedule yet.** Whether Railway backs up the `Postgres` service is **not verified**.
+Status: **the shell backs up its own database daily** to a volume once `BACKUP_DIR` is set, verifies each dump, and serves it to a token-gated pull script that runs on the owner's PC. The exact owner steps, what is and is not verified, the restore procedure and the restore drill are in **docs/BACKUPS.md**. Until the volume and `BACKUP_DIR` exist, **there is no backup**: /admin/backups shows a red banner saying so (and when the newest verified backup is older than 36 hours). Whether Railway also backs up the `Postgres` service is **not verified**.
 
 ### Railway
 In the Railway dashboard open the `Postgres` service and look for its **Backups** tab. Railway offers volume backups for database services on some plans and lets you set a schedule; confirm in your own dashboard that the tab exists for your plan, which schedule is on, how long copies are kept, and do one restore test into a new service. Do the same for the pgvector `postgres` service. Do not treat either as backed up until you have done that. Volume backups live inside Railway, so they do not protect you from losing the Railway account or project: keep an off-platform copy as well (next section).
@@ -136,7 +146,7 @@ What it does:
 
 `restore-check.mjs` takes a dump or a directory (newest dump) and repeats the proof later: sha256 against the manifest, `--list`, restore into a scratch database, row counts against the manifest, and failure if the newest backup is older than `--max-age-hours` (default 36), which is how you notice that the schedule stopped.
 
-**Needs `postgresql-client`** (`pg_dump` and `pg_restore`, version at least that of the server) on the machine that runs it, or `--docker <container>` / `BACKUP_DOCKER` to run them inside a Postgres container. **The shell Docker image does not include `postgresql-client`**, so the script cannot run inside the shell container today. Adding it to `shell/Dockerfile` is a lead decision: Debian's default package may be older than Railway's Postgres, in which case `pg_dump` refuses; the LegalAI image installs `postgresql-client-16` for this reason.
+**Needs `postgresql-client`** (`pg_dump` and `pg_restore`, version at least that of the server) on the machine that runs it, or `--docker <container>` / `BACKUP_DOCKER` to run them inside a Postgres container. The shell Docker image now installs PGDG `postgresql-client-16` (same recipe as the LegalAI image) for the scheduled job; **that image change has not been built or deployed yet**, and if the Railway Postgres is newer than 16 the major version in `shell/Dockerfile` must be raised to match.
 
 ### Running it
 * **From the owner's PC** (recommended: it puts a copy outside Railway). Install the PostgreSQL client tools, take the database's public connection string from the Railway `Postgres` service (the TCP proxy address; keep it out of git and shell history), and schedule a daily task:
@@ -158,6 +168,11 @@ Handled by LegalAI itself: `BACKUP_ENABLED=true` writes a daily verified dump (7
 2. `pg_restore --no-owner --no-privileges -d <new database url> shell-....dump`.
 3. Point `DATABASE_URL` at it and redeploy. Row counts per table are in the manifest if you want to check.
 4. Practice this once before you need it.
+
+## Monitoring: errors and logs
+* **Errors (spec 47).** The shell records its own server errors, with no third-party service: `onRequestError` in `shell/src/instrumentation.ts` (pages, route handlers, server actions) and the scheduler's job wrapper write to `error_events`, grouped by a fingerprint of route + message + first stack frame with a count, first and last seen. Message and stack are scrubbed of tokens, keys, cookies, emails and query strings; the route has no query string; no user, business, header or body data is stored. Look at **/admin/errors** (open/resolved filter, mark resolved; a resolved error that happens again reopens). Groups not seen for 90 days are purged by the `error_purge` job. **Not captured:** errors in the browser, errors the code catches and handles itself, process crashes and out-of-memory kills (Railway logs and restarts show those). There is no client-side beacon.
+* **Sentry (optional).** Set `SENTRY_DSN` on `shell` and each captured error is also POSTed, sanitized, to Sentry's envelope endpoint (no SDK; a failure to reach Sentry is ignored). Server side only. Without the DSN nothing leaves the system.
+* **Logs (spec 48).** The scheduler and the backup job write one JSON object per line to stdout (`ts`, `level`, `event`, then allow-listed fields such as `job`, `ok`, `detail`, `file`); fields outside the list are dropped, secret-looking keys are redacted and values are scrubbed (`shell/src/lib/ops/log.ts`). In Railway's log search filter on `@event:scheduled_job_failed` or `@level:error`. Older `console.log` lines elsewhere in the app are not yet structured.
 
 ## Request gate: rate limits and same-site check
 `shell/src/proxy.ts` (Next.js 16 `proxy`, formerly `middleware`) runs before routes and before the `/legal-ui` rewrites. It does two things for requests it matches (`/api/*` and the two LegalAI sign-in endpoints). Pages and static assets never pass through it. Allowed requests are handed on untouched (`NextResponse.next()`), so responses, including streamed ones, are not buffered; only the request body is (see the upload note below). The code is in `shell/src/lib/ratelimit/` (`limiter.ts`, `classify.ts`).
@@ -241,7 +256,8 @@ Run after every deploy and when something feels wrong.
 | Job queue | same endpoint, `queue.oldest_waiting_minutes` | small unless the GPU PC is off |
 | GPU PC | LegalAI Settings, or `checks.gpu` | online (optional check) |
 | Scheduler | `SELECT job, max(ran_at) FROM scheduled_runs GROUP BY job;` on the shell database | each job ran in the last day (weekly jobs excepted) |
-| Shell backup | `node shell/scripts/restore-check.mjs <folder> --max-age-hours 36` | `OK` |
+| Shell backup | /admin/backups: no red banner, newest row verified and under 36 hours; on the PC `pull.log` ends `OK:` (docs/BACKUPS.md) | fresh, verified |
+| Server errors | /admin/errors | no unexpected open groups |
 | LegalAI backup | admin health `checks.backup`, Settings page | fresh, "restore verified" |
 | Rate limiter not throttling real users | try a normal burst of requests; a 429 with `Retry-After` is the only symptom | none under normal use |
 | Database size | `SELECT pg_size_pretty(pg_database_size(current_database()));` | well under the Railway volume size |
@@ -257,7 +273,7 @@ Run after every deploy and when something feels wrong.
 | deploy | `railway up -s api -c` then `railway up -s shell -c` |
 | roll back | Railway, service, Deployments, redeploy the previous one; `api` and `shell` independently; migrations stay applied |
 | check everything is up | the [health checks](#health-checks) |
-| take a verified shell backup | `node shell/scripts/backup-shell.mjs --out <dir> --verify-restore` |
+| take a verified shell backup now | /admin/backups, Run backup now (or `node shell/scripts/backup-shell.mjs --out <dir> --verify-restore`) |
 | prove a backup restores | `node shell/scripts/restore-check.mjs <dir>` |
 | unblock a user hitting 429 | wait for `Retry-After`; restart the `shell` service to clear the in-memory counters |
 | turn the scheduler off | `SCHEDULER_DISABLED=1`, restart |

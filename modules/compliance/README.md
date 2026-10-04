@@ -34,7 +34,7 @@ Besides the code seed rules, platform admins can add global rules under `/admin/
 
 ## Seed rules and sources
 Federal: EIN, income tax return, estimated taxes, S corp election, payroll taxes, W-4, I-9, state employer taxes, 1099-NEC, worker classification, BOI status check, licenses, registered agent, DBA, insurance, sales tax, privacy, cybersecurity, PCI, industry licensing. Per state (50 + DC): registration with the state, annual or periodic report.
-Every source URL was loaded on 2026-10-03. Eight state portals (AK, IL, MA, MN, MS, NH, NY, OH; bot protection, timeouts or challenge redirects) could not be loaded automatically; they are flagged `verified: false` in `src/states.ts` and shown as "confirm at source".
+Every source URL was loaded on 2026-10-03, except the portals for AK, IL, MA, MN, MS, NH, NY and OH, which block scripted requests: those eight were verified in a real browser on 2026-10-04 (five had moved, and their URLs were corrected). Each entry carries its own verification date.
 
 ## Deliberately not built
 - No specific fees, thresholds or due dates in the seed rules (none were verified at source). Users set their own due dates.

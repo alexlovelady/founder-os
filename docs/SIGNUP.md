@@ -5,8 +5,8 @@ Written 2026-10-03. Accounts still live in LegalAI (the interim identity provide
 ## How it works
 1. Visitor opens `/signup` (public). The page depends on `SIGNUP_MODE`.
 2. The form posts to `POST /api/signup` (shell). The shell validates with zod, checks the mode, rate limits, takes one use of the invite code (when required), then calls LegalAI **server to server**: `POST {LEGAL_URL}/api/internal/users` with header `X-Internal-Token`.
-3. LegalAI creates a normal non-admin user (Argon2 hash, lower-cased unique email) and writes the audit event `auth.user_created_internal`. It returns only `{id}`. It never creates a session.
-4. The shell answers success and the page sends the visitor to `/login?created=1`. There is no automatic sign-in (keeps the token and the sign-in path separate).
+3. LegalAI creates a normal non-admin user (Argon2 hash, lower-cased unique email) and writes the audit event `auth.user_created_internal`. It returns only `{id}`. It never creates a session. In `open` mode the shell sends `active: false` (only honored on this token-gated endpoint) so the account cannot sign in until the emailed link is used.
+4. The shell answers success and the page sends the visitor to `/login?created=1` (in `open` mode to `/verify?sent=1`, "check your email"). There is no automatic sign-in (keeps the token and the sign-in path separate).
 5. If LegalAI does not create the account (any failure, duplicate email, timeout) the invite code use is given back.
 
 ## Environment variables
@@ -23,7 +23,7 @@ Set `TRUST_PROXY=true` on LegalAI behind a proxy as it already does for other li
 ## Modes
 * **closed**: the page says access is by invitation and signup returns 403.
 * **invite**: a valid code is required. Admins create codes at `/admin/signup`.
-* **open**: anyone can sign up, rate limited. **There is no email verification.** Anyone can register with an email address they do not own, and bots can create accounts (limited to 5 per IP per hour and 3 per email per hour, which a distributed attacker passes). Account creation costs LegalAI nothing but storage today, yet accounts get GPU/AI access, so **keep `open` off until email verification and a CAPTCHA or similar exist.** The admin page shows a warning when it is on.
+* **open**: anyone can sign up, rate limited, and **must confirm their email address** before the account works (see docs/ACCOUNTS.md): the account is created inactive and a `/verify/<token>` link is emailed. If email is not configured (`RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`) `open` refuses all signups ("Open signup needs email verification, which is not configured"), so it can never run unverified. Unconfirmed accounts are deleted after 7 days by the scheduled `purgeUnverified`. Remaining risk: verification proves control of an address, not that the person is real, and bots with throwaway mailboxes pass it (5 signups per IP and 3 per email per hour); accounts get GPU/AI access, so **a CAPTCHA or similar is still advisable before leaving `open` on.** The admin page shows a warning when it is on.
 
 ## Invite codes
 Table `signup_codes` (migration `0008_signup.sql`): hash only (SHA-256 of the upper-cased, punctuation-stripped code), label, max uses, use count, expiry, created by, revoked at. The raw code (`FOS-XXXXX-XXXXX-XXXXX-XXXXX`, about 98 bits) is shown once. Consumption is one conditional `UPDATE ... WHERE use_count < max_uses AND not revoked AND not expired`, so concurrent signups cannot both take the last use. Revoking is soft (the row stays). Admin create and revoke are audited (`admin.signup.code_created`, `admin.signup.code_revoked`); the raw code is never audited.
@@ -47,9 +47,8 @@ The shell proxies `/legal-ui/:path*` to LegalAI, which would expose `/legal-ui/a
 (a rewrite to a path that does not exist makes Next.js answer 404; it must come BEFORE the `/legal-ui/:path*` rule). Verify with `curl -i -X POST https://<shell>/legal-ui/api/internal/users` returning 404 from the shell. Also do not expose LegalAI's own public domain if the platform allows a private network, or block `/api/internal/` at its edge.
 
 ## What is not built
-* **Email verification.** Needs an email provider. Until then `open` mode is unsafe and addresses are unconfirmed.
-* **Password reset.** There is no reset path anywhere: LegalAI has no reset endpoint, an administrator cannot set another user's password (`POST /api/auth/users` only creates users), and the shell has none. A user who forgets a password needs an administrator to change it directly in the database today. A real flow needs an email provider plus a reset token table and a LegalAI internal "set password" endpoint (same token guard).
-* Auto sign-in after signup, CAPTCHA, account deletion, a business created at signup (the user creates their business after first sign in as before).
+* Email verification, password reset and account deletion are built: see docs/ACCOUNTS.md. Invite-mode addresses are not verified (the invite code is the gate).
+* Auto sign-in after signup, CAPTCHA, a business created at signup (the user creates their business after first sign in as before).
 * The draft Terms page still says "Accounts are created by an administrator" (owned by the site/SEO work; update when signup goes live).
 
 ## Security notes

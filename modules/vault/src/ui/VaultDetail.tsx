@@ -74,7 +74,7 @@ export default function VaultDetail({ initial, canWrite }: { initial: DetailDto;
       <a href="/app/t/vault" className="text-sm text-slate-400 underline">&larr; All documents</a>
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold">{doc.name}</h1>
+          <h2 className="truncate text-xl font-semibold">{doc.name}</h2>
           <p className="text-sm text-slate-400">{doc.originalFilename} · {formatSize(doc.size)} · version {doc.version}</p>
         </div>
         <div className="flex items-center gap-3">

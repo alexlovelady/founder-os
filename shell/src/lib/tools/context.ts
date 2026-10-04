@@ -7,6 +7,7 @@ import { recordAudit } from "../platform/audit";
 import { createNotification } from "../notify";
 import { planFor, quotaFor } from "./plan";
 import { makeAiClient } from "./ai";
+import { recordToolTokens } from "../metering/tokens";
 import { TOOLS } from "./registry";
 
 /** Build the tenant-scoped context a tool runs with. The business comes from the verified session membership, never from the request. */
@@ -40,7 +41,7 @@ export async function buildContext(session: Session): Promise<ToolContext | null
         operations: business.operations,
         goals: business.goals,
       },
-      ai: makeAiClient(session, workspaceId),
+      ai: makeAiClient(session, workspaceId, (u) => recordToolTokens(sql, { businessId: business.id, userId: session.user.id, ...u }).then(() => undefined)),
     },
     TOOLS,
     {

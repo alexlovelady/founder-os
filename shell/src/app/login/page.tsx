@@ -14,16 +14,25 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [canSignUp, setCanSignUp] = useState(false);
   const [created, setCreated] = useState(false);
+  const [notice, setNotice] = useState<string>();
 
   useEffect(() => {
-    const wasCreated = new URLSearchParams(window.location.search).get("created") === "1";
+    const q = new URLSearchParams(window.location.search);
+    const wasCreated = q.get("created") === "1";
+    const note = q.get("reset") === "1" ? "Password changed. Sign in with your new password."
+      : q.get("verified") === "1" ? "Email confirmed. Sign in to continue."
+      : q.get("deleted") === "1" ? "Your account has been deleted." : undefined;
     fetch("/api/signup/status", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d: { mode?: string; available?: boolean } | null) => {
         setCreated(wasCreated);
+        setNotice(note);
         setCanSignUp(Boolean(d && d.mode !== "closed" && d.available));
       })
-      .catch(() => setCreated(wasCreated));
+      .catch(() => {
+        setCreated(wasCreated);
+        setNotice(note);
+      });
   }, []);
 
   async function submit(e: FormEvent) {
@@ -83,6 +92,11 @@ export default function Login() {
             Account created. Sign in with your new email and password.
           </div>
         )}
+        {notice && !error && (
+          <div role="status" className="rounded-lg bg-emerald-950 px-3 py-2 text-sm text-emerald-200">
+            {notice}
+          </div>
+        )}
         {error && (
           <div role="alert" className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-200">
             {error}
@@ -91,7 +105,11 @@ export default function Login() {
         <button disabled={busy} className="w-full rounded-lg bg-slate-100 px-4 py-2 font-medium text-slate-900 disabled:opacity-60">
           {mfaToken ? "Verify" : "Sign in"}
         </button>
-        <p className="text-xs text-slate-500">Accounts are managed by the administrator for now.</p>
+        {!mfaToken && (
+          <p className="text-sm text-slate-400">
+            <Link href="/forgot" className="underline">Forgot password?</Link>
+          </p>
+        )}
         {canSignUp && !mfaToken && (
           <p className="text-sm text-slate-400">
             New here? <Link href="/signup" className="underline">Create an account</Link>

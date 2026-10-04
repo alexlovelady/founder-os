@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { costPercentOfRevenue } from "@/lib/admin/revenue";
 import { loadRevenue } from "@/lib/admin/revenue-data";
-import { costLast30Days, listUsageMetrics, parseUsageFilter, usageReport } from "@/lib/admin/usage";
+import { costLast30Days, listUsageMetrics, parseUsageFilter, toolTokensByModel, usageReport } from "@/lib/admin/usage";
 import { db } from "@/lib/db";
+import { fetchLegalUsageLast30Days } from "@/lib/metering/legal-usage";
 import { requireAdminPage } from "@/lib/platform/http";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,9 @@ export default async function AdminUsage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   const sql = db();
   const filter = parseUsageFilter(sp);
-  const [r, metrics, c30, rev] = await Promise.all([usageReport(sql, filter), listUsageMetrics(sql), costLast30Days(sql), loadRevenue(sql)]);
+  const [r, metrics, c30, rev, toolTokens, legal] = await Promise.all([
+    usageReport(sql, filter), listUsageMetrics(sql), costLast30Days(sql), loadRevenue(sql), toolTokensByModel(sql, filter), fetchLegalUsageLast30Days(),
+  ]);
   const pct = c30.reported ? costPercentOfRevenue(c30.costUsd, rev.summary.mrr) : null;
   const qs = (view: string) => new URLSearchParams({ view, from: r.from, to: r.to, ...(r.metric ? { metric: r.metric } : {}) }).toString();
   const days = r.byDay.slice(-62);
@@ -40,7 +43,7 @@ export default async function AdminUsage({ searchParams }: { searchParams: Promi
         {([
           ["Requests (non-token metrics)", r.requests.toLocaleString("en-US")],
           ["Tokens", r.tokens === null ? NOT_REPORTED : r.tokens.toLocaleString("en-US")],
-          ["Estimated cost", r.costReported ? usd(r.costUsd) : NOT_REPORTED],
+          ["Estimated cost (local GPU: no per-token cost)", r.costReported ? usd(r.costUsd) : NOT_REPORTED],
           ["Cost as % of estimated MRR (30 days)", pct === null ? <span key="p" className="text-sm text-slate-500">needs both cost and revenue</span> : `${pct}%`],
         ] as [string, React.ReactNode][]).map(([label, v]) => (
           <div key={label} className="rounded-xl border border-slate-800 bg-slate-900 p-4"><div className="text-2xl font-semibold">{v}</div><div className="text-xs text-slate-400">{label}</div></div>
@@ -64,6 +67,38 @@ export default async function AdminUsage({ searchParams }: { searchParams: Promi
         </table>
         {r.byMetric.length === 0 && <p className="py-2 text-sm text-slate-400">No usage in this range.</p>}
         {r.tokens === null && <p className="text-xs text-slate-500">No tool records token counts yet, so tokens show as not reported.</p>}
+      </section>
+
+      <section>
+        <h2 className="mb-2 font-medium">AI tokens and LegalAI-side usage</h2>
+        <p className="mb-2 text-xs text-slate-400">Local GPU: no per-token cost. Tokens are measured and cost is recorded as $0.00 unless a paid fallback model ran.</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 className="text-sm text-slate-300">Tool AI tokens (shell tools, selected range)</h3>
+            <table className="w-full text-left text-sm">
+              <thead className="text-slate-400"><tr><th className="py-1">Model</th><th className="text-right">Jobs</th><th className="text-right">Tokens</th></tr></thead>
+              <tbody>
+                {toolTokens.map((t) => <tr key={t.model} className="border-t border-slate-800"><td className="py-1 font-mono">{t.model}</td><td className="text-right">{t.events}</td><td className="text-right">{t.tokens.toLocaleString("en-US")}</td></tr>)}
+              </tbody>
+            </table>
+            {toolTokens.length === 0 && <p className="py-2 text-sm text-slate-400">No tool AI tokens recorded in this range.</p>}
+          </div>
+          <div>
+            <h3 className="text-sm text-slate-300">LegalAI pages, all users, last 30 days (not filtered by the range above)</h3>
+            {legal ? (
+              <table className="w-full text-left text-sm">
+                <tbody>
+                  <tr className="border-t border-slate-800"><td className="py-1">AI requests</td><td className="text-right">{legal.requests.toLocaleString("en-US")}</td></tr>
+                  <tr className="border-t border-slate-800"><td className="py-1">Tokens (prompt + completion)</td><td className="text-right">{legal.tokens.toLocaleString("en-US")}</td></tr>
+                  <tr className="border-t border-slate-800"><td className="py-1">Cost</td><td className="text-right">{usd(legal.costUsd)}</td></tr>
+                </tbody>
+              </table>
+            ) : (
+              <p className="py-2 text-sm text-slate-400">Not available: LegalAI did not answer (needs INTERNAL_PROVISION_TOKEN on both services and a current LegalAI).</p>
+            )}
+            <p className="text-xs text-slate-500">Includes work by users who have no FounderOS business. Requests started by shell tools are included here too because they run as LegalAI jobs.</p>
+          </div>
+        </div>
       </section>
 
       <section>

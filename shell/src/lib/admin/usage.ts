@@ -155,3 +155,14 @@ export function usageCsv(r: UsageReport, view: CsvView): string {
   }
   return rows.map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
+
+export interface ModelTokens { model: string; events: number; tokens: number }
+
+/** Tool-AI tokens (usage_events metric ai_tokens) in the range, per model. Cost is recorded as 0: the local GPU has no per-token cost. */
+export async function toolTokensByModel(sql: Sql, f: UsageFilter): Promise<ModelTokens[]> {
+  const rows = await sql<{ model: string | null; events: string; tokens: string }[]>`
+    SELECT model, count(*) AS events, COALESCE(sum(quantity), 0) AS tokens FROM usage_events
+    WHERE metric = 'ai_tokens' AND created_at >= ${f.from} AND created_at < ${f.to}
+    GROUP BY model ORDER BY tokens DESC LIMIT 50`;
+  return rows.map((r) => ({ model: r.model ?? "unknown", events: Number(r.events), tokens: Number(r.tokens) }));
+}

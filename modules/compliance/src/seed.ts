@@ -200,7 +200,7 @@ const FEDERAL: Rule[] = [
 function stateRules(): Rule[] {
   const out: Rule[] = [];
   for (const s of STATE_PORTALS) {
-    const source = { title: `${s.office} (official business filing portal)`, url: s.url, lastVerified: s.verified ? VERIFIED_ON : null };
+    const source = { title: `${s.office} (official business filing portal)`, url: s.url, lastVerified: s.verified ? (s.verifiedOn ?? VERIFIED_ON) : null };
     const check = s.verified ? "" : " We could not load this page automatically when we last checked, so confirm the address at source.";
     const base = { version: 1, priority: "normal" as const, source, alwaysCautious: true };
     out.push(

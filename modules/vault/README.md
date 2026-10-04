@@ -12,7 +12,7 @@ files and tells other tools what exists. It reads the plain text of files so the
 * `vault_text`: extracted plain text of the current version (`document_id, version, business_id, text` capped at 2 MB, `page_count`, `status`
   `pending|ready|failed|unsupported`, `error`, `extracted_at`, generated `tsv` tsvector, english config, GIN indexed). Older versions' text is removed.
 * `vault_documents.ai_summary*`: the latest AI summary (text, time, whether input was truncated, version, and the pending job id).
-* `vault_legal_links`: `document_id, version, legal_document_id, legal_review_id, perspective, created_at`: each hand-off to LegalAI.
+* `vault_legal_links`: `document_id, version, legal_document_id, legal_review_id, legal_workspace_id, perspective, created_at`: each hand-off to LegalAI.
 * Categories: Formation, Legal, Contracts, Taxes, Finance, Insurance, Employees, Contractors, Customers, Vendors, Policies, SOPs, Marketing, Other.
 
 ## Plan limits
@@ -26,6 +26,28 @@ files and tells other tools what exists. It reads the plain text of files so the
   Text types must not contain NUL bytes. Anything starting like an executable or script (`MZ`, ELF, `#!`, Java/Mach-O) is refused whatever its extension.
 * Downloads: `Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, a content type chosen from our own allow-list (never the
   browser-supplied one), `Content-Security-Policy: sandbox`, `Cache-Control: no-store`. Every query is scoped by `ctx.businessId`.
+
+## Upload scanning (`src/scan.ts`)
+`scanUpload(filename, bytes, type)` runs after the file rules above and before anything is stored (new documents and new versions). A "blocked"
+verdict is a 422 with a plain message, nothing is stored, and `vault.upload_blocked` is audited with the filename and the reason (never contents).
+Same ideas as LegalAI's `scanning.py`, in TypeScript. **Detected (blocked):**
+* Office (docx/xlsx): VBA projects, macro-enabled content types, Excel 4 macro sheets, ActiveX, embedded OLE objects/packages, embedded executables or
+  scripts, unsafe archive paths, DDE fields (docx field codes, xlsx `ddeLink`), and external relationships (`TargetMode="External"`) that are not https
+  (hyperlinks may be http, https, mailto, tel) or that point at executable/script files or `javascript:`/`file:` style addresses. Ordinary hyperlinks pass.
+* Legacy `.doc`: VBA streams, embedded OLE objects; RTF `\objdata`/`\objemb` objects.
+* PDF: `/JavaScript`, `/JS` (including `OpenAction`/`AA` actions), `/Launch`, `/EmbeddedFile`, `/RichMedia`; `#XX`-obfuscated names are decoded first.
+* HTML/SVG markup at the start of any file, binary or archive content or a `#!` script in txt/csv/md, the EICAR test string.
+* Images: a zip/RAR/7-Zip/ELF/Windows executable after the end of a JPEG (last `FFD9`), PNG (real `IEND` chunk) or WebP (RIFF length), or an embedded DOS executable.
+**Optional ClamAV:** set `CLAMD_HOST` (and `CLAMD_PORT`, default 3310) and files that pass the checks are also streamed to clamd (INSTREAM over TCP,
+10 s timeout). A detection blocks. If clamd is unreachable, slow or answers oddly it fails open: a warning is logged and the built-in verdict stands.
+**Not detected:** these are heuristics, not antivirus. Malware without those markers, PDF objects hidden inside compressed object streams or encrypted
+files, password-protected zips, exploits for bugs in a viewer, phishing links in plain text, and macros in formats we do not accept. Without ClamAV
+there is no signature scanning at all. Downloads are still served as attachments with a fixed content type.
+
+## LegalAI deep link
+`legalReviewUrl(workspaceId, reviewId)` (`src/legallink.ts`) gives `/legal-ui/matters/<workspaceId>/contracts?review=<reviewId>`: the Contracts tab of the
+company workspace in the LegalAI UI, which expands that review. The bridge stores the workspace id with each hand-off (`legal_workspace_id`); older links
+without one open the LegalAI home.
 
 ## Text extraction, search, classification, summary
 * **Extraction** runs after the upload is stored (and on every new version), in the request, best effort: a failure only sets the status, the upload
@@ -81,7 +103,7 @@ plain messages; document contents are never logged. The page then shows "Reviewe
 ## Known limits
 * OCR for scans and images is LegalAI's job (send the file through "Review in LegalAI"); the vault only reports that a file has no text layer.
   Old `.doc` files and encrypted PDFs are not read. Extraction is in-request, so a very large PDF adds up to 20 s to its upload response.
-* No virus scanning (types are restricted and content is checked, but files are not scanned), no per-business storage quota yet.
+* Virus scanning is heuristic unless ClamAV is configured (see Upload scanning).
 * The classifier is a keyword heuristic; it can be wrong and never changes a document by itself. The AI summary can be wrong too.
 * Files live in Postgres; very large vaults will eventually want object storage.
 * Multipart uploads are buffered in memory (up to the 15 MB cap).

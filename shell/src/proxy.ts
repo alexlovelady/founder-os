@@ -48,5 +48,5 @@ export function proxy(req: NextRequest) {
 
 // Pages and static assets never reach the proxy. The LegalAI login endpoints are matched explicitly because they live behind the /legal-ui rewrite.
 export const config = {
-  matcher: ["/api/:path*", "/legal-ui/api/auth/login", "/legal-ui/api/auth/login/mfa"],
+  matcher: ["/api/:path*", "/legal-ui/api/auth/login", "/legal-ui/api/auth/login/mfa", "/forgot", "/verify", "/verify/:path*", "/reset/:path*"],
 };

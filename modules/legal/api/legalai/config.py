@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     session_ttl_hours: int = 24 * 7
     trust_proxy: bool = False  # honour X-Forwarded-For (set true behind Railway's proxy)
     internal_provision_token: str = ""  # shell-to-LegalAI signup token (32+ chars); empty disables /api/internal/*
+    plan_quota_url: str = ""  # shell's POST /api/internal/quota/consume (private URL); empty = LegalAI AI work is not metered against plans
 
     run_worker: bool = True  # embed the job worker in the API process
     storage_dir: str = "./data/storage"

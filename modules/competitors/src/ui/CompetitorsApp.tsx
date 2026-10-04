@@ -104,7 +104,6 @@ function Home({ initialList, initialReport, canWrite, aiAvailable, searchEnabled
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 text-slate-100">
       <header>
-        <h1 className="text-2xl font-semibold">Competitor Research</h1>
         <p className="mt-1 text-sm text-slate-400">Add competitors and FounderOS reads their public pages (home page plus pricing, product and about pages, at most 6). It identifies itself as FounderOS-Research, obeys robots.txt and never visits private addresses. Every extracted claim keeps its source page and date.</p>
       </header>
       {canWrite && (
@@ -201,7 +200,7 @@ function Detail({ id, initial, canWrite, aiAvailable }: { id: string; initial: D
     <div className="mx-auto max-w-4xl space-y-5 p-4 text-slate-100">
       <a href="/app/t/competitors" className="text-sm text-slate-400 underline">All competitors</a>
       <header>
-        <h1 className="text-2xl font-semibold">{comp.name}</h1>
+        <h2 className="text-2xl font-semibold">{comp.name}</h2>
         <p className="text-sm text-slate-400"><a className="underline" href={comp.url} rel="noreferrer noopener">{comp.url}</a> · {STATUS_LABEL[comp.status] ?? comp.status} · last checked {comp.lastFetchedAt ? new Date(comp.lastFetchedAt).toLocaleString() : "never"}</p>
         {comp.source === "ai_suggestion" && <p className="mt-1 text-xs text-amber-200">This name began as an unverified AI suggestion. Check the website is the right company.</p>}
       </header>

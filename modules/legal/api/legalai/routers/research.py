@@ -11,6 +11,7 @@ from ..audit import audit
 from ..db import get_db
 from ..jobs.queue import enqueue
 from ..models import Job, ResearchRun, User
+from ..quota import consume_ai_quota
 from ..security import current_user, get_matter_access
 
 router = APIRouter(prefix="/api", tags=["research"])
@@ -47,6 +48,7 @@ def run_out(r: ResearchRun, job: Job | None, full: bool = True) -> dict:
 @router.post("/research", status_code=202)
 def start_research(body: ResearchRequest, user: User = Depends(current_user), db: DbSession = Depends(get_db)):
     matter, _ = get_matter_access(db, user, body.matter_id, "editor")
+    consume_ai_quota(user.id)  # one plan unit per question
     run = ResearchRun(matter_id=matter.id, created_by=user.id, question=body.question.strip(),
                       jurisdiction=body.jurisdiction.strip(), as_of=body.as_of or matter.relevant_date,
                       depth=body.depth, privacy_mode=matter.privacy_mode,

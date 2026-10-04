@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, type FormEvent } from 'react'
 import { api, downloadPost, fmtTime, useQuery, type Doc, type Matter, type Version } from '../api'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Empty, Err, Loading } from '../ui'
 
 export function DiffView({ ops }: { ops: { op: string; text: string }[] }) {
@@ -102,7 +102,8 @@ function Reviews({ m }: { m: Matter }) {
   const [pb, setPb] = useState('')
   const [persp, setPersp] = useState('neutral')
   const [critic, setCritic] = useState(false)
-  const [open, setOpen] = useState<string>()
+  const [params] = useSearchParams()
+  const [open, setOpen] = useState<string | undefined>(params.get('review') ?? undefined) // ?review=<id> opens that review (deep link from the vault)
   const [err, setErr] = useState<string>()
   const ready = (docs.data ?? []).filter(d => d.current_version?.parse_status === 'parsed')
   async function start(e: FormEvent) {

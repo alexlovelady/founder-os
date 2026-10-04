@@ -80,7 +80,6 @@ function List({ initial, canWrite, tokenStorage, scanIncluded }: { initial: Repo
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 text-slate-100">
       <header>
-        <h1 className="text-2xl font-semibold">Product Scan</h1>
         <p className="mt-1 text-sm text-slate-400">Link a GitHub or GitLab repository. FounderOS reads a small, capped set of files (README, dependency lists, config names) through the host&apos;s public API to understand what you built. It does not copy or store your source code.</p>
       </header>
       {!scanIncluded && <p role="status" className="text-sm text-amber-200">Repository scanning is not included in your plan. <a className="underline" href="/app/billing">See plans and usage</a></p>}
@@ -163,7 +162,7 @@ function Detail({ repoId, initial, canWrite, aiAvailable, tokenStorage }: { repo
     <div className="mx-auto max-w-4xl space-y-5 p-4 text-slate-100">
       <a href="/app/t/product" className="text-sm text-slate-400 underline">All repositories</a>
       <header>
-        <h1 className="text-2xl font-semibold">{repo.owner}/{repo.name}</h1>
+        <h2 className="text-2xl font-semibold">{repo.owner}/{repo.name}</h2>
         <p className="text-sm text-slate-400"><a className="underline" href={repo.url} rel="noreferrer noopener">{repo.url}</a> · last scanned {repo.lastScannedAt ? new Date(repo.lastScannedAt).toLocaleString() : "never"}{repo.lastError ? ` · last error: ${repo.lastError}` : ""}</p>
       </header>
       {msg && <p role="status" className="text-sm text-amber-200">{msg}<PlanLink msg={msg} /></p>}

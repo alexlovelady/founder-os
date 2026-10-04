@@ -11,6 +11,7 @@ from ..audit import audit
 from ..db import get_db
 from ..drafting.prompts import MODES
 from ..jobs.queue import enqueue
+from ..quota import consume_ai_quota
 from ..startup.catalog import build_instructions, doc_type as catalog_doc_type
 from .. import storage
 from ..scanning import scan_upload
@@ -72,6 +73,7 @@ def start_draft(body: DraftRequest, user: User = Depends(current_user), db: DbSe
         c = db.get(DocumentChunk, body.chunk_id)
         if not c or c.matter_id != matter.id:
             raise HTTPException(404, "Clause not found")
+    consume_ai_quota(user.id)  # one plan unit per draft
     d = Draft(matter_id=matter.id, created_by=user.id, mode=body.mode, doc_type=body.doc_type, instructions=body.instructions,
               inputs={"facts": body.facts, "jurisdiction": body.jurisdiction, "perspective": body.perspective,
                       "source_text": body.source_text, "chunk_id": str(body.chunk_id) if body.chunk_id else None, "critic": body.critic,
@@ -127,6 +129,7 @@ def create_redline(body: RedlineRequest, user: User = Depends(current_user), db:
     if not c:
         raise HTTPException(404, "Clause not found")
     get_matter_access(db, user, c.matter_id, "editor")
+    consume_ai_quota(user.id)  # one plan unit per redline suggestion
     doc = db.get(Document, c.document_id)
     r = Redline(matter_id=c.matter_id, document_id=c.document_id, version_id=c.version_id, chunk_id=c.id,
                 clause_label=" > ".join(c.heading_path) or c.section_number, original=c.text, created_by=user.id,

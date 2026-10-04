@@ -12,7 +12,6 @@ export default function SopsHome({ initial, canWrite, aiAvailable }: { initial: 
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-4">
       <header>
-        <h1 className="text-xl font-semibold">SOPs and business documents</h1>
         <p className="text-sm text-slate-400">Write down how your business runs. Forms and templates work without AI; AI drafting is optional and always needs your review.</p>
       </header>
       <div role="tablist" className="flex flex-wrap gap-2">

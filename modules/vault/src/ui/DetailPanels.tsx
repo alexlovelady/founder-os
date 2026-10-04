@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { legalReviewUrl } from "../legallink";
 import { BASE, PlanLink, readError, type DetailDto, type ExtractionDto, type LegalLinkDto, type SuggestionDto, type SummaryDto } from "./shared";
 
 const card = "space-y-2 rounded-xl border border-slate-800 bg-slate-900 p-4";
@@ -194,7 +195,7 @@ export function LegalPanel({ docId, docName, canWrite, initial }: { docId: strin
       setNotice(d.message ?? "LegalAI is still reading the file. Try again in a minute.");
       return;
     }
-    setLink({ legalDocumentId: d.legalDocumentId, legalReviewId: d.reviewId, perspective, version: 0, createdAt: new Date().toISOString() });
+    setLink({ legalDocumentId: d.legalDocumentId, legalReviewId: d.reviewId, legalWorkspaceId: d.workspaceId ?? null, perspective, version: 0, createdAt: new Date().toISOString() });
     setNotice("Sent to LegalAI. The review is running and can take a few minutes.");
     dialog.current?.close();
   }
@@ -203,7 +204,7 @@ export function LegalPanel({ docId, docName, canWrite, initial }: { docId: strin
     <section aria-label="Legal review" className={card}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-medium">Legal review</h2>
-        {link?.legalReviewId && <a href="/legal-ui/" className="text-sm text-sky-300 underline">Reviewed in LegalAI, open</a>}
+        {link?.legalReviewId && <a href={legalReviewUrl(link.legalWorkspaceId, link.legalReviewId)} className="text-sm text-sky-300 underline">Reviewed in LegalAI, open</a>}
       </div>
       <p className="text-xs text-slate-400">LegalAI reads the contract, flags risky terms and suggests changes. It is a tool to prepare for a conversation with a lawyer, not a substitute for one.</p>
       {canWrite ? (

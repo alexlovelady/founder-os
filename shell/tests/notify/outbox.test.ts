@@ -5,7 +5,8 @@ import { backoffMs, disabledProvider, enqueueEmail, getEmailProvider, processOut
 let env: TestEnv;
 beforeAll(async () => { env = await makeTestEnv([]); });
 afterAll(async () => { await env.cleanup(); });
-beforeEach(async () => { await env.sql`DELETE FROM email_outbox WHERE business_id = ${env.ctx.businessId}`; });
+// processOutbox works on the whole shared queue (including lifecycle mail with no business), so start every test from an empty queue.
+beforeEach(async () => { await env.sql`DELETE FROM email_outbox`; });
 
 const fake = (results: SendResult[]) => {
   const sent: EmailMessage[] = [];

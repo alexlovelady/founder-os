@@ -1,3 +1,4 @@
+import AdminResetLinkButton from "@/components/account/AdminResetLinkButton";
 import SuspendButton from "@/components/admin/SuspendButton";
 import { listUsers } from "@/lib/admin/suspensions";
 import { db } from "@/lib/db";
@@ -14,7 +15,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
       <h1 className="text-2xl font-semibold">Users</h1>
       <p className="text-sm text-slate-400">
         Users the shell knows: anyone with a business membership. Email and name come from team profiles when the person has opened the team page.
-        Accounts live in LegalAI. Suspension blocks use of the shell; every suspend and lift needs a reason and is audited. You cannot suspend yourself, and
+        Accounts live in LegalAI. &quot;Create reset link&quot; makes a one-time password reset link (valid 24 hours, shown once, audited) that you give to the person yourself. Suspension blocks use of the shell; every suspend and lift needs a reason and is audited. You cannot suspend yourself, and
         the shell cannot tell whether another user is an admin, so check before suspending a colleague.
       </p>
       <form className="flex gap-2"><input name="q" defaultValue={q} placeholder="Search id, email or name" aria-label="Search users" className="rounded border border-slate-700 bg-slate-900 p-2 text-sm" /><button className="rounded bg-slate-800 px-3 text-sm">Search</button></form>
@@ -27,7 +28,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
                 <td className="py-2"><div>{u.displayName ?? "-"}</div><div className="font-mono text-xs text-slate-500">{u.userId}</div></td>
                 <td>{u.email ?? "-"}</td><td>{u.businesses}</td><td>{u.lastSeenAt ? u.lastSeenAt.slice(0, 16).replace("T", " ") : "-"}</td>
                 <td>{u.suspended ? <span className="text-amber-400">Suspended{u.suspendedReason ? `: ${u.suspendedReason}` : ""}</span> : <span className="text-emerald-400">Active</span>}</td>
-                <td><SuspendButton userId={u.userId} suspended={u.suspended} self={u.userId === session.user.id} /></td>
+                <td><SuspendButton userId={u.userId} suspended={u.suspended} self={u.userId === session.user.id} /><AdminResetLinkButton userId={u.userId} self={u.userId === session.user.id} /></td>
               </tr>
             ))}
           </tbody>

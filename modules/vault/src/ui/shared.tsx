@@ -46,6 +46,7 @@ export interface SummaryDto {
 export interface LegalLinkDto {
   legalDocumentId: string;
   legalReviewId: string | null;
+  legalWorkspaceId?: string | null;
   perspective: string;
   version: number;
   createdAt: string;

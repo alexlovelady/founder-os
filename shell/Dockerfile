@@ -40,6 +40,13 @@ ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL NEXT_PUBLIC_CONTACT_EMAIL=$NEXT_PUB
 RUN npm run build --workspace shell
 
 FROM node:22-slim
+# postgresql-client-16 from PGDG: scheduled database backups run pg_dump / pg_restore inside this container (pg_dump must be at least the server's major version).
+# Same recipe as modules/legal/api/Dockerfile. The base image has no curl or gnupg, so they are installed for the key download and kept (small).
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+ && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg \
+ && echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo $VERSION_CODENAME)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+ && apt-get update && apt-get install -y --no-install-recommends postgresql-client-16 \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production HOSTNAME=0.0.0.0
 # With the repository root as the tracing root, the standalone server lives at shell/server.js.

@@ -51,7 +51,6 @@ export default function HealthDashboard({ initial, canWrite }: { initial: Data; 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 text-slate-100">
       <header>
-        <h1 className="text-2xl font-semibold">Business health</h1>
         <p className="mt-1 text-sm text-slate-400">
           What you may be forgetting, based on your business profile and what your other tools know. There is no score: each item is either handled, needs a look, missing, or not tracked yet. These are prompts to check, not legal or financial advice.
         </p>

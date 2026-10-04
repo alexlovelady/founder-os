@@ -50,6 +50,6 @@ All tests use a locally computed signature (`signStripePayload`) and an injected
 
 ## Not built
 * Annual billing, tax (Stripe Tax), invoices list in-app (use the portal), seat-based pricing.
-* Metering of tokens and cost per model: `recordUsage` accepts `model` and `estimatedCostUsd`, but no tool reports them yet.
+* Per-token cost: tool AI now records tokens per model (docs/METERING.md), but the local GPU has no per-token price, so cost is recorded as 0.
 * A per-plan admin editor for limits (limits live in `plans.ts`; per-business exceptions use `plan_overrides`).
 * Emails for payment failures (the page shows a banner; notifications can be added when the email provider exists).

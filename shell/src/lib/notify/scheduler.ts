@@ -3,6 +3,9 @@ import { runReminderSweep } from "./automations";
 import { generateBriefForBusiness, weekStartOf } from "./brief";
 import { processOutbox, type EmailProvider } from "./email";
 import { buildSystemContext } from "./system-context";
+import { captureError } from "../ops/errors";
+import { log } from "../ops/log";
+import type { RunBackupOpts } from "../ops/backup";
 
 /**
  * Background jobs (spec 71). One interval timer per server process; every tick takes a Postgres advisory lock, so with several instances
@@ -15,6 +18,8 @@ export interface JobDeps {
   tools?: ToolDef[];
   /** Override "is email configured". Defaults to the provider's own flag. */
   emailEnabled?: boolean;
+  /** Injection point for the shell_backup job (tests): environment, runner, database url. */
+  backup?: RunBackupOpts;
 }
 
 export interface JobDef {
@@ -25,6 +30,12 @@ export interface JobDef {
 
 const RETRY_AFTER_FAILURE_MS = 30 * 60_000;
 const businessIds = async (sql: Sql) => (await sql<{ id: string }[]>`SELECT id FROM businesses ORDER BY created_at`).map((r) => r.id);
+
+/** Jobs registered by other modules at startup (e.g. the operations jobs from instrumentation.ts). Kept apart from JOBS so JOBS stays the notification set. */
+export const EXTRA_JOBS: JobDef[] = [];
+export function registerJobs(jobs: JobDef[]): void {
+  for (const j of jobs) if (!EXTRA_JOBS.some((e) => e.name === j.name)) EXTRA_JOBS.push(j);
+}
 
 export const JOBS: JobDef[] = [
   {
@@ -50,7 +61,7 @@ export const JOBS: JobDef[] = [
           reminders += r.reminders;
         } catch {
           errors++;
-          console.error("reminder sweep failed for business", id);
+          log("error", "reminder_sweep_failed", { job: "reminder_sweep", businessId: id });
         }
       }
       return { ok: errors === 0, detail: JSON.stringify({ automations, reminders, errors }) };
@@ -66,7 +77,7 @@ export const JOBS: JobDef[] = [
           if (await generateBriefForBusiness(sql, id, { now: deps.now, tools: deps.tools, emailEnabled: deps.emailEnabled ?? deps.provider?.enabled })) created++;
         } catch {
           errors++;
-          console.error("weekly brief failed for business", id);
+          log("error", "weekly_brief_failed", { job: "weekly_brief", businessId: id });
         }
       }
       return { ok: errors === 0, detail: JSON.stringify({ created, errors }) };
@@ -75,7 +86,7 @@ export const JOBS: JobDef[] = [
 ];
 
 /** Run whatever is due, if no other instance is already doing so. Returns the names of the jobs that ran (empty if locked or nothing due). */
-export async function runDueJobs(sql: Sql, deps: JobDeps = {}, jobs: JobDef[] = JOBS): Promise<{ locked: boolean; ran: string[] }> {
+export async function runDueJobs(sql: Sql, deps: JobDeps = {}, jobs: JobDef[] = [...JOBS, ...EXTRA_JOBS]): Promise<{ locked: boolean; ran: string[] }> {
   const now = deps.now ?? new Date();
   const ran: string[] = [];
   let locked = false;
@@ -95,9 +106,11 @@ export async function runDueJobs(sql: Sql, deps: JobDeps = {}, jobs: JobDef[] = 
         r = await job.run(sql, deps);
       } catch (e) {
         r = { ok: false, detail: `error: ${(e as Error).message}`.slice(0, 300) };
-        console.error("scheduled job failed:", job.name);
+        log("error", "scheduled_job_failed", { job: job.name, errorName: (e as Error).name });
+        await captureError(e, { route: `job:${job.name}`, method: "JOB" }, { sql });
       }
       await sql`INSERT INTO scheduled_runs (job, ran_at, ok, detail) VALUES (${job.name}, ${now}, ${r.ok}, ${r.detail})`;
+      log(r.ok ? "info" : "warn", "scheduled_job_ran", { job: job.name, ok: r.ok, detail: r.detail });
       ran.push(job.name);
     }
   });
@@ -123,7 +136,7 @@ export function startScheduler(): boolean {
       const { getEmailProvider } = await import("./email");
       await runDueJobs(db(), { provider: getEmailProvider() });
     } catch {
-      console.error("scheduler tick failed");
+      log("error", "scheduler_tick_failed");
     } finally {
       busy = false;
     }

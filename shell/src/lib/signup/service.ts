@@ -5,6 +5,8 @@ import { consumeCode, restoreCode } from "./codes";
 import { legalUrl, provisionToken, signupMode, type SignupMode } from "./config";
 import { checkAndRecordAttempt, hashId, setOutcome, type Outcome } from "./limits";
 import { MIN_PASSWORD, passwordProblem } from "./password";
+import { emailConfigured } from "@/lib/lifecycle/mail";
+import { startVerification } from "@/lib/lifecycle/verify";
 
 export const SignupInput = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address.").max(320, "That email address is too long.")),
@@ -26,15 +28,18 @@ export interface SignupDeps {
   env?: Record<string, string | undefined>;
   /** Raw client IP (see clientIp). Hashed before it is stored. */
   ip: string;
+  /** Injectable for tests: sends what the verification email put in the outbox. Default: run the outbox with the configured provider. */
+  flush?: () => Promise<unknown>;
 }
 
 const fail = (status: Extract<SignupResult, { ok: false }>["status"], message: string): SignupResult => ({ ok: false, status, message });
 const UNAVAILABLE = "Signup is not available right now. Please try again later.";
+export const OPEN_NEEDS_EMAIL = "Open signup needs email verification, which is not configured. Ask the administrator.";
 
 type Provision = { kind: "created"; id: string } | { kind: "duplicate" } | { kind: "invalid" } | { kind: "unavailable" };
 
 /** Server-to-server call to LegalAI's private endpoint. The token is sent only here, only server side; nothing is logged. */
-async function provision(input: SignupInput, deps: SignupDeps): Promise<Provision> {
+async function provision(input: SignupInput, deps: SignupDeps, unverified: boolean): Promise<Provision> {
   const env = deps.env ?? process.env;
   const doFetch = deps.fetch ?? fetch;
   let r: Response;
@@ -42,7 +47,8 @@ async function provision(input: SignupInput, deps: SignupDeps): Promise<Provisio
     r = await doFetch(`${legalUrl(env)}/api/internal/users`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-internal-token": provisionToken(env) },
-      body: JSON.stringify({ email: input.email, password: input.password, display_name: input.displayName }),
+      // `active: false` is only sent for open signup (the account is created inactive until the email is confirmed); other modes keep the old body.
+      body: JSON.stringify({ email: input.email, password: input.password, display_name: input.displayName, ...(unverified ? { active: false } : {}) }),
       cache: "no-store",
       redirect: "error",
       signal: AbortSignal.timeout(15000),
@@ -68,6 +74,8 @@ export async function signup(raw: unknown, deps: SignupDeps): Promise<SignupResu
   const mode: SignupMode = signupMode(env);
   if (mode === "closed") return fail(403, "Sign-up is by invitation only. Ask the FounderOS administrator for access.");
   if (provisionToken(env).length < 32) return fail(503, "Signup is not available.");
+  // Open signup must never run unverified: without a working email setup it refuses to accept anyone.
+  if (mode === "open" && !emailConfigured(env)) return fail(503, OPEN_NEEDS_EMAIL);
 
   const parsed = SignupInput.safeParse(raw);
   if (!parsed.success) return fail(400, parsed.error.issues[0]?.message ?? "Check the form and try again.");
@@ -103,14 +111,19 @@ export async function signup(raw: unknown, deps: SignupDeps): Promise<SignupResu
 
   let p: Provision;
   try {
-    p = await provision(input, deps);
+    p = await provision(input, deps, mode === "open");
   } catch {
     p = { kind: "unavailable" };
   }
   if (p.kind === "created") {
     await done("created");
     // Never put the email, name, password or code in the audit metadata.
-    await recordAudit(sql, { businessId: null, userId: p.id, action: "signup.created", resource: { tool: "platform", id: p.id }, meta: { mode, withInviteCode: Boolean(codeId) } });
+    await recordAudit(sql, { businessId: null, userId: p.id, action: "signup.created", resource: { tool: "platform", id: p.id }, meta: { mode, withInviteCode: Boolean(codeId), verificationRequired: mode === "open" } });
+    if (mode === "open") {
+      // The account exists but is inactive. The link goes out by email; the address is not kept with the token. If queuing fails the person can use "resend".
+      await startVerification(sql, p.id, input.email, { env, flush: deps.flush });
+      return { ok: true, next: "/verify?sent=1" };
+    }
     return { ok: true, next: "/login?created=1" };
   }
   await giveBack();

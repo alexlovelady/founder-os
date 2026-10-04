@@ -93,7 +93,6 @@ export default function TasksBoard({ initial, today: serverToday, canWrite, user
     <div className="mx-auto max-w-4xl space-y-6 p-4 text-slate-100">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">Tasks &amp; reminders</h1>
           <p className="text-sm text-slate-400">Your tasks, plus the ones other tools raise for you.</p>
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-300">

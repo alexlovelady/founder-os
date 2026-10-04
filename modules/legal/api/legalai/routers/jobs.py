@@ -1,7 +1,7 @@
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
@@ -10,6 +10,7 @@ from ..audit import audit
 from ..db import get_db
 from ..jobs.queue import InvalidTransition, cancel, enqueue
 from ..models import Job, MatterMember, User
+from ..quota import consume_ai_quota, is_shell_metered
 from ..security import current_user, get_matter_access
 
 router = APIRouter(prefix="/api", tags=["jobs"])
@@ -51,9 +52,12 @@ def _load(db: DbSession, user: User, job_id: uuid.UUID, role: str = "viewer") ->
 
 
 @router.post("/inference", status_code=202)
-def submit_inference(body: InferenceRequest, user: User = Depends(current_user), db: DbSession = Depends(get_db)):
+def submit_inference(body: InferenceRequest, user: User = Depends(current_user), db: DbSession = Depends(get_db),
+                     x_internal_token: str | None = Header(default=None)):
     """Queue a generic LLM call. Substantive workflows (research, review) will build on the same path."""
     get_matter_access(db, user, body.matter_id, "editor")
+    if not is_shell_metered(x_internal_token):  # the shell counts its own tool AI via ctx.useQuota
+        consume_ai_quota(user.id)
     job = enqueue(db, "llm_complete", matter_id=body.matter_id, user_id=user.id, requires_gpu=True,
                   payload={"messages": [m.model_dump() for m in body.messages], "role": body.role,
                            "task": body.task, "params": body.params})

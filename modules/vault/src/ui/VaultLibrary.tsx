@@ -67,7 +67,6 @@ export default function VaultLibrary({ initial, canWrite }: { initial: DocDto[];
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4 text-slate-100">
       <header>
-        <h1 className="text-xl font-semibold">Document vault</h1>
         <p className="text-sm text-slate-400">{NOTE}</p>
       </header>
 

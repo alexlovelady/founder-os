@@ -16,6 +16,18 @@ export const PERSPECTIVES = ["neutral", "customer", "vendor", "employer", "emplo
 export type Perspective = (typeof PERSPECTIVES)[number];
 
 export const LEGAL_UI_URL = "/legal-ui/";
+const UUID_LOOSE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Where a contract review lives in the LegalAI UI (served by the shell under /legal-ui): the Contracts tab of the company workspace
+ * (route /matters/:id/contracts in modules/legal/web/src/App.tsx + MatterPage.tsx), with `?review=<id>` opening that review.
+ * Falls back to the LegalAI home when the workspace id is unknown. Ids are validated so nothing odd lands in the URL.
+ */
+export function legalReviewUrl(workspaceId: string | null | undefined, reviewId?: string | null): string {
+  if (!workspaceId || !UUID_LOOSE.test(workspaceId)) return LEGAL_UI_URL;
+  const base = `${LEGAL_UI_URL}matters/${workspaceId.toLowerCase()}/contracts`;
+  return reviewId && UUID_LOOSE.test(reviewId) ? `${base}?review=${reviewId.toLowerCase()}` : base;
+}
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface BridgeInput {
@@ -162,14 +174,14 @@ export async function reviewInLegal(input: BridgeInput, deps: BridgeDeps = {}): 
     }
 
     const saveLink = async (reviewId: string | null) => {
-      const r = await vault("POST", `documents/${documentId}/legal-link`, { legalDocumentId, legalReviewId: reviewId, perspective, version });
+      const r = await vault("POST", `documents/${documentId}/legal-link`, { legalDocumentId, legalReviewId: reviewId, legalWorkspaceId: UUID_RE.test(workspaceId) ? workspaceId : null, perspective, version });
       return r.ok;
     };
 
     // LegalAI is still reading it: remember the upload so the next try goes straight to the review.
     if (state !== "parsed") {
       await saveLink(null);
-      return { status: 202, body: { state: "processing", legalDocumentId, openUrl: LEGAL_UI_URL, message: "LegalAI is still reading the file. Try the review again in a minute." } };
+      return { status: 202, body: { state: "processing", legalDocumentId, workspaceId, openUrl: legalReviewUrl(workspaceId), message: "LegalAI is still reading the file. Try the review again in a minute." } };
     }
 
     // 4. Start the review. This is the costly AI step, so it is counted against the plan first.
@@ -182,7 +194,7 @@ export async function reviewInLegal(input: BridgeInput, deps: BridgeDeps = {}): 
     const rv = await legal("/api/contracts/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ document_id: legalDocumentId, perspective }) });
     if (rv.status === 409) {
       await saveLink(null);
-      return { status: 202, body: { state: "processing", legalDocumentId, openUrl: LEGAL_UI_URL, message: "LegalAI is still reading the file. Try the review again in a minute." } };
+      return { status: 202, body: { state: "processing", legalDocumentId, workspaceId, openUrl: legalReviewUrl(workspaceId), message: "LegalAI is still reading the file. Try the review again in a minute." } };
     }
     if (!rv.ok) return mapLegalError(rv.status, await detailOf(rv), "review");
     const review = (await rv.json()) as { id?: string };
@@ -190,7 +202,7 @@ export async function reviewInLegal(input: BridgeInput, deps: BridgeDeps = {}): 
 
     const linkSaved = await saveLink(review.id);
     await ctx.audit("vault.legal_review_started", { perspective }, { tool: "vault", id: documentId }).catch(() => undefined);
-    return { status: 201, body: { state: "started", legalDocumentId, reviewId: review.id, perspective, openUrl: LEGAL_UI_URL, linkSaved } };
+    return { status: 201, body: { state: "started", legalDocumentId, reviewId: review.id, workspaceId, perspective, openUrl: legalReviewUrl(workspaceId, review.id), linkSaved } };
   } catch (e) {
     if (e instanceof Stop) return e.result;
     return fail(500, "Something went wrong sending the document to LegalAI.");

@@ -20,7 +20,7 @@ export default async function PrivacyPage() {
         <h1 className="text-2xl font-semibold">Privacy and data</h1>
         <p className="mt-1 text-slate-400">Your data belongs to {business.name}. Download it, control how it is used, or delete it. <Link href="/app/settings" className="underline">Back to settings</Link></p>
       </div>
-      <PrivacyPanel role={business.role} businessName={business.name} initialAnalytics={settings.allowProductAnalytics} initialNotes={settings.aiDataUseNotes} />
+      <PrivacyPanel role={business.role} businessName={business.name} initialAnalytics={settings.allowProductAnalytics} initialNotes={settings.aiDataUseNotes} accountEmail={session.user.email} />
     </div>
   );
 }

@@ -82,7 +82,7 @@ export default function SignupForm({ needsCode }: { needsCode: boolean }) {
         {busy ? "Creating..." : "Create account"}
       </button>
       <p className="text-xs text-slate-500">
-        We do not verify email addresses yet, and there is no automatic password reset: if you forget your password, contact the administrator. Already have an account?{" "}
+        {needsCode ? "" : "We will email you a link to confirm your address before you can sign in. "}Already have an account?{" "}
         <Link href="/login" className="underline">Sign in</Link>
       </p>
     </form>

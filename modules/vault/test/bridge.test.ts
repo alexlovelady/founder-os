@@ -60,7 +60,7 @@ describe("vault to LegalAI bridge", () => {
     const legal = fakeLegal({ "POST /api/documents": j({ id: LEGAL_DOC }, 201), "GET /api/documents/:id": parsed(), "POST /api/contracts/review": j({ id: REVIEW, status: "queued" }, 202) });
     const r = await run(env.ctx, deps(legal.fetchImpl));
     expect(r.status).toBe(201);
-    expect(r.body).toMatchObject({ state: "started", legalDocumentId: LEGAL_DOC, reviewId: REVIEW, perspective: "vendor", openUrl: "/legal-ui/", linkSaved: true });
+    expect(r.body).toMatchObject({ state: "started", legalDocumentId: LEGAL_DOC, reviewId: REVIEW, perspective: "vendor", workspaceId: WORKSPACE, openUrl: `/legal-ui/matters/${WORKSPACE}/contracts?review=${REVIEW}`, linkSaved: true });
 
     const [up, check, review] = legal.seen;
     expect(up).toMatchObject({ method: "POST", path: "/api/documents" });
@@ -82,7 +82,7 @@ describe("vault to LegalAI bridge", () => {
     expect(quota).toHaveBeenCalledWith("ai_request");
 
     const detail = (await call(tool, env.ctx, "GET", `documents/${docId}`)).data;
-    expect(detail.legalLink).toMatchObject({ legalDocumentId: LEGAL_DOC, legalReviewId: REVIEW, perspective: "vendor", version: 1 });
+    expect(detail.legalLink).toMatchObject({ legalDocumentId: LEGAL_DOC, legalReviewId: REVIEW, legalWorkspaceId: WORKSPACE, perspective: "vendor", version: 1 });
     const [{ n }] = await env.sql<{ n: number }[]>`SELECT count(*)::int AS n FROM vault_legal_links WHERE document_id = ${docId}`;
     expect(n).toBe(1);
     // Document contents and cookies never reach the logs.

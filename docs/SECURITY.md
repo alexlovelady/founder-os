@@ -8,8 +8,8 @@ Written from the code on 2026-10-03. If a control is not listed as "exists", ass
   Login attempts are rate limited in LegalAI (10 per 5 minutes).
 * The shell checks the session on the server for every page and API route (`getSession()` in `shell/src/lib/auth/server.ts` calls LegalAI `/api/auth/me`).
   Nothing relies on hiding things in the browser.
-* **Gaps.** Accounts are created by the LegalAI administrator, or by invite-code / open signup when `SIGNUP_MODE` is enabled (default `closed`; see docs/SIGNUP.md). There is no email verification and no password reset anywhere yet, so keep `open` signup off. The target is a shell-owned
-  identity (see docs/ARCHITECTURE.md). Account deletion is not possible from the shell (`POST /api/privacy/delete-account` returns 501).
+* **Gaps.** Accounts are created by the LegalAI administrator, or by invite-code / open signup when `SIGNUP_MODE` is enabled (default `closed`; see docs/SIGNUP.md). `open` signup requires email verification and refuses to run without a configured email provider; password reset (self-serve by email, or an administrator-created one-time link) and account deletion exist (docs/ACCOUNTS.md). Not built: CAPTCHA, changing email or password while signed in. The target is a shell-owned
+  identity (see docs/ARCHITECTURE.md).
 
 ## Tenant isolation and roles
 * **Exists.** `buildContext` (`shell/src/lib/tools/context.ts`) derives the business and role from the verified session membership
@@ -68,7 +68,7 @@ Written from the code on 2026-10-03. If a control is not listed as "exists", ass
 * **Exists.** `GET /api/privacy/export` (owner/admin) returns JSON of the business profile, members, privacy settings, links, every `<toolid>_*` table (rows for that business),
   and platform tables, leaving out binary columns (document bytes) and columns named like token/secret/password/encrypted. `POST /api/privacy/delete-business` (owner, must type the business name)
   deletes the business and cascades to all tool rows. `GET/PUT /api/privacy/settings` stores the AI data-use note and product analytics opt-out (honored by `trackEvent`).
-* **Gaps.** Deleting the business does not delete LegalAI workspace data, the LegalAI account, or Railway database backups. Account deletion is not implemented. Retention settings are not built.
+* **Gaps.** Deleting the business does not delete LegalAI workspace data, the LegalAI account, or Railway database backups. Account deletion (`POST /api/account/delete`, typed email plus current password) removes the account, solely owned LegalAI matters with their files, and businesses with no other member; audit entries remain with an anonymized actor and backups keep data until they rotate (docs/ACCOUNTS.md). Retention settings are not built.
   There is no UI page for these yet.
 
 ## Secrets and logging

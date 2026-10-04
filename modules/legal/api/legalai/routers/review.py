@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session as DbSession
 from ..audit import audit
 from ..db import get_db
 from ..jobs.queue import enqueue
+from ..quota import consume_ai_quota
 from ..models import (Comparison, ContractReview, Document, DocumentChunk, DocumentVersion, Job, Obligation, Playbook, User)
 from ..review.diff import compare_clauses
 from ..review.pipeline import BUILTIN_PLAYBOOKS
@@ -121,6 +122,7 @@ def start_review(body: ReviewRequest, user: User = Depends(current_user), db: Db
             if not pb or pb.owner_id != user.id:
                 raise HTTPException(404, "Playbook not found")
             pb_id = pb.id
+    consume_ai_quota(user.id)  # one plan unit per review (the pipeline's own sub-steps are not counted again)
     rv = ContractReview(matter_id=matter.id, document_id=doc.id, version_id=ver.id, created_by=user.id, playbook_id=pb_id,
                         perspective=body.perspective, result={"builtin_playbook": builtin, "critic": body.critic})
     db.add(rv)
@@ -218,6 +220,8 @@ def create_comparison(body: CompareRequest, user: User = Depends(current_user), 
     for v in (va, vb):
         if v.parse_status != "parsed":
             raise HTTPException(409, f"A selected version is not parsed yet (status: {v.parse_status})")
+    if body.summarize:
+        consume_ai_quota(user.id)  # only the AI summary counts; the clause diff itself is not AI
     result = compare_clauses(_clauses(db, va.id), _clauses(db, vb.id))
     cmp = Comparison(matter_id=da.matter_id, version_a=va.id, version_b=vb.id, created_by=user.id, result=result)
     db.add(cmp)

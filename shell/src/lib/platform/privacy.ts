@@ -120,8 +120,16 @@ export async function deleteBusiness(sql: Sql, o: { businessId: string; userId: 
   if (o.confirmName.trim() !== b.name.trim()) return { ok: false, status: 400, error: "The name you typed does not match the business name" };
   await recordAudit(sql, { businessId: null, userId: o.userId, action: "privacy.business.delete", meta: { deletedBusinessId: o.businessId } });
   await sql.begin(async (tx) => {
-    await tx`DELETE FROM audit_events WHERE business_id = ${o.businessId}`;
-    await tx`DELETE FROM businesses WHERE id = ${o.businessId}`;
+    await purgeBusinessRows(tx as unknown as Sql, o.businessId);
   });
   return { ok: true };
+}
+
+/**
+ * The deletion itself, shared with account deletion (src/lib/lifecycle/deletion.ts): the business's audit rows, then the business row, whose
+ * ON DELETE CASCADE removes members and every tool table. Call inside a transaction. No permission check here: the caller must have done it.
+ */
+export async function purgeBusinessRows(sql: Sql, businessId: string): Promise<void> {
+  await sql`DELETE FROM audit_events WHERE business_id = ${businessId}`;
+  await sql`DELETE FROM businesses WHERE id = ${businessId}`;
 }

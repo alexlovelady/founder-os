@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import DeleteAccountPanel from "@/components/account/DeleteAccountPanel";
 
 const card = "rounded-xl border border-slate-800 bg-slate-900 p-5";
 const field = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-slate-400";
@@ -10,6 +11,8 @@ interface Props {
   businessName: string;
   initialAnalytics: boolean;
   initialNotes: string;
+  /** The signed-in account's email, for the typed confirmation of account deletion. */
+  accountEmail: string;
 }
 
 async function call(path: string, method: string, body?: unknown) {
@@ -18,7 +21,7 @@ async function call(path: string, method: string, body?: unknown) {
   return { ok: r.ok, status: r.status, data: d };
 }
 
-export default function PrivacyPanel({ role, businessName, initialAnalytics, initialNotes }: Props) {
+export default function PrivacyPanel({ role, businessName, initialAnalytics, initialNotes, accountEmail }: Props) {
   const router = useRouter();
   const isOwner = role === "owner";
   const canManage = role === "owner" || role === "admin";
@@ -31,9 +34,6 @@ export default function PrivacyPanel({ role, businessName, initialAnalytics, ini
   const [confirm, setConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [delErr, setDelErr] = useState<string>();
-
-  const [acctMsg, setAcctMsg] = useState<string>();
-  const [acctBusy, setAcctBusy] = useState(false);
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -58,16 +58,6 @@ export default function PrivacyPanel({ role, businessName, initialAnalytics, ini
     }
     setDeleting(false);
     setDelErr((r?.data.error as string | undefined) ?? "Could not delete. Try again.");
-  }
-
-  async function requestAccountDeletion() {
-    setAcctBusy(true);
-    setAcctMsg(undefined);
-    const r = await call("/api/privacy/delete-account", "POST").catch(() => null);
-    setAcctBusy(false);
-    if (!r) return setAcctMsg("Could not reach the server.");
-    const detail = [r.data.error, r.data.detail].filter((x) => typeof x === "string").join(" ");
-    setAcctMsg(detail || (r.ok ? "Request received." : "Could not process this request."));
   }
 
   return (
@@ -115,8 +105,8 @@ export default function PrivacyPanel({ role, businessName, initialAnalytics, ini
           <div>
             <h3 className="font-medium text-slate-200">What is not deleted</h3>
             <ul className="mt-1 list-disc space-y-1 pl-5 text-slate-400">
-              <li>Your sign-in account (it lives in LegalAI)</li>
-              <li>Data in LegalAI workspaces; remove that inside LegalAI</li>
+              <li>Your sign-in account (deleting the business does not delete it; use &quot;Delete your account&quot; below)</li>
+              <li>Data in LegalAI workspaces (deleted with your account)</li>
               <li>Database backups, which age out on the hosting provider&apos;s schedule</li>
               <li>A record that a deletion happened (no business name)</li>
             </ul>
@@ -138,14 +128,7 @@ export default function PrivacyPanel({ role, businessName, initialAnalytics, ini
         )}
       </section>
 
-      <section className={card} aria-labelledby="acct-title">
-        <h2 id="acct-title" className="font-medium">Delete your account</h2>
-        <p className="mt-1 text-sm text-slate-400">Your sign-in account lives in LegalAI, so it cannot be removed from here yet.</p>
-        <button type="button" onClick={() => void requestAccountDeletion()} disabled={acctBusy} className="mt-3 rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800 disabled:opacity-60">
-          How do I delete my account?
-        </button>
-        <p aria-live="polite" className="mt-3 text-sm text-slate-300">{acctMsg}</p>
-      </section>
+      <DeleteAccountPanel email={accountEmail} />
     </div>
   );
 }
