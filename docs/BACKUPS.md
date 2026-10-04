@@ -16,7 +16,7 @@ What the code does, what you must do, and how to restore. Written from the code 
    | `BACKUP_KEEP` | optional, default `7` |
    | `BACKUP_VERIFY_RESTORE` | optional, `1` to also prove a restore each day. Needs a database user that may `CREATE DATABASE`; if the job's detail says permission denied, leave it off and do the drill below instead |
    | `BACKUP_PULL_TOKEN` | 32+ random characters, for example `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. A **separate** secret from `INTERNAL_PROVISION_TOKEN`. Unset (or shorter than 32) and the pull endpoints answer 404 |
-3. Redeploy `shell`. The image now contains `pg_dump` (PGDG `postgresql-client-16`, same recipe as the LegalAI image). **Not verified here: the image was not built.** If Railway's Postgres is a newer major version than 16, `pg_dump` refuses ("server version mismatch"); the job records that error and the page shows it. Change `postgresql-client-16` in `shell/Dockerfile` to the server's major version. Check with `SHOW server_version;`.
+3. Redeploy `shell`. The image contains `pg_dump` (PGDG `postgresql-client-18`, matching the Railway shell database, Postgres 18.6; verified in production on 2026-10-04 that a 16 client is refused with "server version mismatch"). If the database major version changes, raise the version in `shell/Dockerfile` to match. Check with `SHOW server_version;`.
 4. Open /admin/backups and press **Run backup now**. A row with "list" (or "list + restore") verified means it works.
 5. On your PC create `shell\scripts\.env.shell-backup` (ignored by git) containing:
    ```
